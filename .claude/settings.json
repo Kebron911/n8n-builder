@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "n8n-mcp": {
+      "command": "npx",
+      "args": ["-y", "n8n-mcp"],
+      "env": {
+        "MCP_MODE": "stdio",
+        "N8N_API_URL": "https://n8n.cdeprosperity.com",
+        "N8N_API_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhMDZlMjYxOC04YmIyLTQ4N2MtYTA5Ny0wMjA4NDBmOGI3MDEiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiOWRiNmIwNzAtMmJmZC00YzJlLThmNDMtYjQzN2MxYjA2N2E2IiwiaWF0IjoxNzcxMDc3NzczfQ.M5Vw48gNCRQYULhx2HNAN7vwBtEEXP7M7BQwEjmuCAI"
+      }
+    }
+  }
+}
