@@ -1,0 +1,18 @@
+{
+  "eval_id": 3,
+  "configuration": "without_skill",
+  "assertions": [
+    {
+      "text": "Does not report errors on a clean workflow",
+      "passed": true,
+      "evidence": "States 'No issues found' and 'Issues found: None'"
+    },
+    {
+      "text": "Explicitly confirms the workflow looks good or is ready to activate",
+      "passed": true,
+      "evidence": "States 'clean and ready to activate in n8n'"
+    }
+  ],
+  "pass_rate": 1.0,
+  "notes": "Clean pass. Correct result but less structured than with_skill — no section-by-section breakdown."
+}

@@ -1,0 +1,52 @@
+{
+  "eval_id": 3,
+  "config": "with_skill",
+  "expectations": [
+    {
+      "text": "The output does NOT list any Errors for this workflow",
+      "passed": true,
+      "evidence": "Output: '\u00e2\u0153\u201c No issues found. Workflow looks good to activate.'"
+    },
+    {
+      "text": "The output does NOT falsely flag the httpRequest authentication:none as an error",
+      "passed": true,
+      "evidence": "HTTP Request authentication listed as correct in check details"
+    },
+    {
+      "text": "The output does NOT falsely flag the Code node's jsCode as an error",
+      "passed": true,
+      "evidence": "jsCode returns correct array format, no flag"
+    },
+    {
+      "text": "The output uses the '## n8n Workflow Check' heading",
+      "passed": true,
+      "evidence": "Output starts with '## n8n Workflow Check'"
+    },
+    {
+      "text": "The output either says the workflow is clean/looks good or lists only informational warnings",
+      "passed": true,
+      "evidence": "'\u00e2\u0153\u201c No issues found. Workflow looks good to activate.'"
+    },
+    {
+      "text": "The output does NOT flag correct typeVersions (1.2, 4.2, 2) as problems",
+      "passed": true,
+      "evidence": "typeVersions scheduleTrigger 1.2, httpRequest 4.2, code 2 all listed as correct"
+    },
+    {
+      "text": "The output explicitly states the workflow passed or has no errors \u00e2\u20ac\u201d not just omits errors by silence",
+      "passed": true,
+      "evidence": "Explicit 'No issues found. Workflow looks good to activate.'"
+    },
+    {
+      "text": "The output does NOT suggest adding respondToWebhook (no webhook node in this workflow)",
+      "passed": true,
+      "evidence": "'Webhook checks \u00e2\u20ac\u201d no webhook nodes' \u00e2\u20ac\u201d no false suggestion"
+    }
+  ],
+  "summary": {
+    "pass_rate": 1.0,
+    "passed": 8,
+    "failed": 0,
+    "total": 8
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "skill_name": "n8n-validation-expert",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I validated my Slack node and got this error:\n\n```json\n{\n  \"type\": \"missing_required\",\n  \"property\": \"channel\",\n  \"message\": \"Channel name is required\",\n  \"fix\": \"Provide a channel name (lowercase, no spaces, 1-80 characters)\"\n}\n```\n\nMy current config is:\n```json\n{\n  \"resource\": \"message\",\n  \"operation\": \"post\",\n  \"text\": \"Hello team!\"\n}\n```\n\nHow do I fix this?",
+      "expected_output": "Add the channel field to the config. The channel is required for post operation. Show the fixed config with channel: '#general' or similar. Explain missing_required type.",
+      "files": [],
+      "expectations": [
+        "The output explains that missing_required means a required field was not provided",
+        "The output shows how to add the channel property to the node config",
+        "The output shows an example channel value (like '#general' or a descriptive name)",
+        "The output shows the complete fixed config including resource, operation, channel, and text",
+        "The output does NOT suggest this is a false positive",
+        "The output does NOT suggest changing the operation as the fix",
+        "The output explains the validation loop pattern (validate → fix → validate again)",
+        "The output recommends re-running n8n_validate_workflow after applying the fix",
+        "The output does NOT suggest the channel value itself needs to use __rl format (that is a separate node config concern)"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "What validation profile should I use when preparing a workflow for production deployment? I want maximum safety but also some warnings about best practices.",
+      "expected_output": "Use 'runtime' for pre-deployment — it's the recommended balanced profile. Use 'strict' only for production-critical workflows but be aware of false positives. Never use 'strict' during development.",
+      "files": [],
+      "expectations": [
+        "The output recommends 'runtime' as the standard pre-deployment validation profile",
+        "The output explains that runtime validates required fields, value types, and allowed values",
+        "The output explains that 'strict' is for production-critical workflows but has more warnings and false positives",
+        "The output advises against using 'strict' during development (too noisy)",
+        "The output mentions that 'minimal' is too permissive for pre-deployment checks",
+        "The output does NOT recommend ai-friendly for production deployment",
+        "The output names all three main profiles (minimal, runtime, strict) when explaining the options",
+        "The output does NOT recommend 'development' as a named profile option"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I keep getting this validation warning: 'No error handling configured — add retry logic for production'. My workflow is a simple one-time manual trigger that fetches internal company data. Should I fix this?",
+      "expected_output": "This is likely a false positive for this use case. Manual, low-criticality, internal workflows can safely ignore this. Only important for public APIs, flaky services, and production automation. Use ai-friendly profile to reduce such noise.",
+      "files": [],
+      "expectations": [
+        "The output classifies this as a false positive or acceptable warning for the described scenario",
+        "The output explains that retry logic is most important for flaky external services and production automation",
+        "The output confirms that manual triggers for internal workflows can safely skip retry logic",
+        "The output does NOT insist the user must add retry logic",
+        "The output mentions the 'ai-friendly' profile as an option to reduce false positive warnings",
+        "The output distinguishes between cases where this warning matters vs. where it doesn't",
+        "The output does NOT say all warnings should always be fixed",
+        "The output says it is SAFE to skip or ignore this warning for the described scenario",
+        "The output does NOT say warnings should all be fixed regardless of context"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "My IF node keeps having validation issues with operator structure. I added singleValue: true to ALL my conditions (both equals and isEmpty conditions) because I thought that would fix it. But I'm still getting errors. What's the right approach?",
+      "expected_output": "Auto-sanitization handles this automatically. Binary operators (equals, contains, etc.) must NOT have singleValue — it will be removed automatically. Unary operators (isEmpty, isNotEmpty) DO need singleValue:true — it will be added automatically. Don't manually manage singleValue.",
+      "files": [],
+      "expectations": [
+        "The output explains that auto-sanitization runs automatically on any workflow save or update",
+        "The output states that binary operators (equals, contains, greaterThan, etc.) should NOT have singleValue",
+        "The output states that unary operators (isEmpty, isNotEmpty, true, false) DO need singleValue: true",
+        "The output identifies that manually adding singleValue: true to equals conditions is CAUSING the problem",
+        "The output recommends NOT manually managing the singleValue property",
+        "The output explains the system will auto-fix operator structures on the next save",
+        "The output does NOT suggest manually editing every condition one by one",
+        "The output names at least one concrete binary operator example (equals, contains, greaterThan)",
+        "The output names at least one concrete unary operator example (isEmpty, isNotEmpty)"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "When I validate my workflow I get this error: 'Connection from Transform to NonExistent — target node not found'. But I don't see a node called NonExistent anywhere. What happened and how do I fix it?",
+      "expected_output": "This is a stale connection — likely from a node that was deleted but its connection entry remains in the connections object. Fix: use cleanStaleConnections operation via n8n_update_partial_workflow.",
+      "files": [],
+      "expectations": [
+        "The output explains this is a stale/broken connection from a deleted node",
+        "The output recommends using the cleanStaleConnections operation",
+        "The output shows or describes using n8n_update_partial_workflow with type: 'cleanStaleConnections'",
+        "The output does NOT say to manually edit the workflow JSON connections object",
+        "The output explains WHY this happens (node was deleted but connection reference remained)",
+        "The output correctly categorizes this as a broken connection error (not an operator structure issue)",
+        "The output does NOT say to delete and recreate the node as the fix",
+        "The output correctly says the 'Transform' node name appears in the connections object but not the nodes array"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(SKILL_CREATOR=\"C:/Users/Kebron/.claude/plugins/marketplaces/claude-plugins-official/plugins/skill-creator/skills/skill-creator\")",
+      "Bash(WORKSPACE=\"c:/Users/Kebron/Documents/GitHub/n8n-builder/.claude/skills/n8n-json-checker/evals/n8n-json-checker-workspace/iteration-2\")",
+      "Read(//c/Users/Kebron/Documents/GitHub/n8n-builder/**)",
+      "Bash(python -m scripts.aggregate_benchmark \"$WORKSPACE\" --skill-name \"n8n-json-checker\")",
+      "Bash(WORKSPACE=\"c:/Users/Kebron/Documents/GitHub/n8n-builder/.claude/skills/n8n-json-checker/evals/n8n-json-checker-workspace\")",
+      "Bash(ITER2=\"$WORKSPACE/iteration-2\")",
+      "Bash(ITER1=\"$WORKSPACE/iteration-1\")",
+      "Bash(BENCHMARK=\"$ITER2/benchmark.json\")",
+      "Bash(__NEW_LINE_7380853a286cb02f__ cd:*)",
+      "Bash(start \"c:/Users/Kebron/Documents/GitHub/n8n-builder/.claude/skills/n8n-json-checker/evals/n8n-json-checker-workspace/iteration-2/review.html\")"
+    ]
+  }
+}

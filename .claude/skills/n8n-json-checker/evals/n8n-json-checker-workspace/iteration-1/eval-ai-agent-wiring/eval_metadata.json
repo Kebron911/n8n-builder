@@ -1,0 +1,22 @@
+{
+  "eval_id": 2,
+  "eval_name": "eval-ai-agent-wiring",
+  "prompt": "Any issues with this n8n workflow?\n\n```json\n{\n  \"name\": \"AI Support Agent\",\n  \"nodes\": [\n    {\n      \"name\": \"Webhook\",\n      \"type\": \"n8n-nodes-base.webhook\",\n      \"typeVersion\": 2,\n      \"position\": [250, 300],\n      \"parameters\": {\n        \"httpMethod\": \"POST\",\n        \"path\": \"support\",\n        \"responseMode\": \"responseNode\"\n      }\n    },\n    {\n      \"name\": \"AI Agent\",\n      \"type\": \"@n8n/n8n-nodes-langchain.agent\",\n      \"typeVersion\": 1.7,\n      \"position\": [500, 300],\n      \"parameters\": {\n        \"text\": \"={{ $json.body.message }}\",\n        \"options\": {}\n      }\n    },\n    {\n      \"name\": \"OpenAI Chat Model\",\n      \"type\": \"@n8n/n8n-nodes-langchain.lmChatOpenAi\",\n      \"typeVersion\": 1,\n      \"position\": [500, 500],\n      \"parameters\": {\n        \"model\": \"gpt-4o\"\n      },\n      \"credentials\": {\n        \"openAiApi\": { \"id\": \"2\", \"name\": \"OpenAI\" }\n      }\n    }\n  ],\n  \"connections\": {\n    \"Webhook\": {\n      \"main\": [[{ \"node\": \"AI Agent\", \"type\": \"main\", \"index\": 0 }]]\n    },\n    \"OpenAI Chat Model\": {\n      \"main\": [[{ \"node\": \"AI Agent\", \"type\": \"main\", \"index\": 0 }]]\n    }\n  }\n}\n```",
+  "assertions": [
+    {
+      "id": "catches_wrong_connection_type",
+      "text": "Identifies OpenAI Chat Model uses 'main' connection instead of 'ai_languageModel'",
+      "passing_criteria": "Response mentions ai_languageModel connection type or that the LLM sub-node is wired incorrectly"
+    },
+    {
+      "id": "catches_missing_respond_node",
+      "text": "Identifies webhook uses responseMode:responseNode but no respondToWebhook node exists",
+      "passing_criteria": "Response mentions missing respondToWebhook node or that the webhook response won't work"
+    },
+    {
+      "id": "clear_report_format",
+      "text": "Output has a clear errors vs warnings structure",
+      "passing_criteria": "Response has distinct errors section and/or warnings section, not just a wall of text"
+    }
+  ]
+}

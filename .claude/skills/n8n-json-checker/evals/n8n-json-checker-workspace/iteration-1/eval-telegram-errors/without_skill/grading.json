@@ -1,0 +1,33 @@
+{
+  "eval_id": 1,
+  "configuration": "without_skill",
+  "assertions": [
+    {
+      "text": "Identifies that both nodes use 'nodes-base.' prefix instead of 'n8n-nodes-base.'",
+      "passed": true,
+      "evidence": "Issue 1 identifies wrong nodes-base.* prefix on both nodes"
+    },
+    {
+      "text": "Identifies that chatId is a plain string instead of __rl object",
+      "passed": true,
+      "evidence": "Issue 2 identifies chatId missing __rl format with correct fix"
+    },
+    {
+      "text": "Identifies Telegram Trigger has typeVersion 1.1 instead of 1.2",
+      "passed": true,
+      "evidence": "Issue 4 flags typeVersion 1.1 as outdated"
+    },
+    {
+      "text": "Identifies wrong credential key 'telegramAPI' (should be 'telegramApi')",
+      "passed": true,
+      "evidence": "Issue 3 identifies telegramAPI vs telegramApi case mismatch"
+    },
+    {
+      "text": "Output has a clear errors vs warnings structure",
+      "passed": false,
+      "evidence": "Uses 'CRITICAL / ERROR / WARNING' inline labels rather than a structured sections — functional but less organized than with_skill output"
+    }
+  ],
+  "pass_rate": 0.8,
+  "notes": "Found all issues but output structure is less organized — no clear Errors/Warnings sections."
+}

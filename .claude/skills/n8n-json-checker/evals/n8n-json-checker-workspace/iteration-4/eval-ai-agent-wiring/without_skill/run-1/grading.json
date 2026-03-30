@@ -1,0 +1,67 @@
+{
+  "eval_id": 2,
+  "config": "without_skill",
+  "expectations": [
+    {
+      "text": "The output identifies that OpenAI Chat Model is wired via 'main' instead of 'ai_languageModel'",
+      "passed": true,
+      "evidence": "Issue 3: 'OpenAI Chat Model uses main instead of ai_languageModel connection type'"
+    },
+    {
+      "text": "The output classifies the wrong AI sub-node connection type as an Error",
+      "passed": true,
+      "evidence": "Listed as Critical Error"
+    },
+    {
+      "text": "The output states the correct connection type should be 'ai_languageModel'",
+      "passed": true,
+      "evidence": "Correct connection shown in fix example"
+    },
+    {
+      "text": "The output warns that there is no respondToWebhook node despite responseMode being 'responseNode'",
+      "passed": true,
+      "evidence": "Issue 4: 'Missing Respond to Webhook node'"
+    },
+    {
+      "text": "The output does NOT flag the Webhook node's typeVersion or path as issues",
+      "passed": true,
+      "evidence": "No mention of Webhook typeVersion or path as issues"
+    },
+    {
+      "text": "The output does NOT flag the AI Agent node's configuration as problematic",
+      "passed": true,
+      "evidence": "AI Agent configuration not flagged"
+    },
+    {
+      "text": "The output correctly identifies the OpenAI Chat Model node by name in the finding",
+      "passed": true,
+      "evidence": "OpenAI Chat Model explicitly named in issues 1-3"
+    },
+    {
+      "text": "The output does not report any false errors on the @n8n/n8n-nodes-langchain node types",
+      "passed": false,
+      "evidence": "Issue 1 flags lmChatOpenAi as wrong type: 'The correct type is @n8n/n8n-nodes-langchain.lmOpenAi' \u00e2\u20ac\u201d this is a false positive"
+    },
+    {
+      "text": "The output does NOT flag the OpenAI Chat Model node type '@n8n/n8n-nodes-langchain.lmChatOpenAi' as a wrong prefix",
+      "passed": false,
+      "evidence": "Explicitly states lmChatOpenAi 'does not exist' and flags it as an error"
+    },
+    {
+      "text": "The output does NOT suggest the AI Agent node's text parameter is misconfigured",
+      "passed": true,
+      "evidence": "No mention of text parameter issues"
+    },
+    {
+      "text": "The output identifies both issues (wrong connection type AND missing respondToWebhook) not just one",
+      "passed": true,
+      "evidence": "Issues 3 and 4 cover both required findings"
+    }
+  ],
+  "summary": {
+    "pass_rate": 0.8182,
+    "passed": 9,
+    "failed": 2,
+    "total": 11
+  }
+}

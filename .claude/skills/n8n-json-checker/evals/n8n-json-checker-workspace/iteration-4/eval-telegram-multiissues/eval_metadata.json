@@ -1,0 +1,20 @@
+{
+  "eval_id": 1,
+  "eval_name": "eval-telegram-multiissues",
+  "prompt": "Check this n8n workflow JSON for issues: [Telegram Echo Bot with wrong prefix x2, chatId plain string, typeVersion 1.1, telegramAPI credential key]",
+  "assertions": [
+    "The output contains the heading '## n8n Workflow Check'",
+    "The output identifies both nodes as having the wrong 'nodes-base.' prefix (should be 'n8n-nodes-base.')",
+    "The output classifies the incorrect nodeType prefix as an Error, not a Warning",
+    "The output identifies chatId on 'Send Reply' as a plain string instead of an __rl object",
+    "The output classifies the plain-string chatId as an Error",
+    "The output describes or shows the correct __rl format with __rl:true, value, and mode fields",
+    "The output reports the typeVersion 1.1 mismatch on Telegram Trigger (expected 1.2)",
+    "The output classifies the typeVersion mismatch as a Warning (not an Error)",
+    "The output reports the misspelled credential key 'telegramAPI' (should be 'telegramApi')",
+    "The output offers to apply fixes after presenting the report",
+    "The output identifies exactly 4 issues (not more, not fewer)",
+    "The output does NOT flag the connections object as having any issues",
+    "The output does NOT flag the 'updates: [message]' parameter as wrong"
+  ]
+}

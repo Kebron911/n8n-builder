@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eval Review</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&family=Lora:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" integrity="sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT" crossorigin="anonymous"></script>
+  <style>
+    :root {
+      --bg: #faf9f5;
+      --surface: #ffffff;
+      --border: #e8e6dc;
+      --text: #141413;
+      --text-muted: #b0aea5;
+      --accent: #d97757;
+      --accent-hover: #c4613f;
+      --green: #788c5d;
+      --green-bg: #eef2e8;
+      --red: #c44;
+      --red-bg: #fceaea;
+      --header-bg: #141413;
+      --header-text: #faf9f5;
+      --radius: 6px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Lora', Georgia, serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ---- Header ---- */
+    .header {
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .header h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    .header .instructions {
+      font-size: 0.8rem;
+      opacity: 0.7;
+      margin-top: 0.25rem;
+    }
+    .header .progress {
+      font-size: 0.875rem;
+      opacity: 0.8;
+      text-align: right;
+    }
+
+    /* ---- Main content ---- */
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* ---- Sections ---- */
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      flex-shrink: 0;
+    }
+    .section-header {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.75rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .section-body {
+      padding: 1rem;
+    }
+
+    /* ---- Config badge ---- */
+    .config-badge {
+      display: inline-block;
+      padding: 0.2rem 0.625rem;
+      border-radius: 9999px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-left: 0.75rem;
+      vertical-align: middle;
+    }
+    .config-badge.config-primary {
+      background: rgba(33, 150, 243, 0.12);
+      color: #1976d2;
+    }
+    .config-badge.config-baseline {
+      background: rgba(255, 193, 7, 0.15);
+      color: #f57f17;
+    }
+
+    /* ---- Prompt ---- */
+    .prompt-text {
+      white-space: pre-wrap;
+      font-size: 0.9375rem;
+      line-height: 1.6;
+    }
+
+    /* ---- Outputs ---- */
+    .output-file {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .output-file + .output-file {
+      margin-top: 1rem;
+    }
+    .output-file-header {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .output-file-header .dl-btn {
+      font-size: 0.7rem;
+      color: var(--accent);
+      text-decoration: none;
+      cursor: pointer;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-weight: 500;
+      opacity: 0.8;
+    }
+    .output-file-header .dl-btn:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+    .output-file-content {
+      padding: 0.75rem;
+      overflow-x: auto;
+    }
+    .output-file-content pre {
+      font-size: 0.8125rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+    }
+    .output-file-content img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+    }
+    .output-file-content iframe {
+      width: 100%;
+      height: 600px;
+      border: none;
+    }
+    .output-file-content table {
+      border-collapse: collapse;
+      font-size: 0.8125rem;
+      width: 100%;
+    }
+    .output-file-content table td,
+    .output-file-content table th {
+      border: 1px solid var(--border);
+      padding: 0.375rem 0.5rem;
+      text-align: left;
+    }
+    .output-file-content table th {
+      background: var(--bg);
+      font-weight: 600;
+    }
+    .output-file-content .download-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+    .output-file-content .download-link:hover {
+      background: var(--border);
+    }
+    .empty-state {
+      color: var(--text-muted);
+      font-style: italic;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    /* ---- Feedback ---- */
+    .prev-feedback {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.625rem 0.75rem;
+      margin-top: 0.75rem;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .prev-feedback-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.25rem;
+      color: var(--text-muted);
+    }
+    .feedback-textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.9375rem;
+      line-height: 1.5;
+      resize: vertical;
+      color: var(--text);
+    }
+    .feedback-textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    .feedback-status {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      min-height: 1.1em;
+    }
+
+    /* ---- Grades (collapsible) ---- */
+    .grades-toggle {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .grades-toggle:hover {
+      color: var(--accent);
+    }
+    .grades-toggle .arrow {
+      margin-right: 0.5rem;
+      transition: transform 0.15s;
+      font-size: 0.75rem;
+    }
+    .grades-toggle .arrow.open {
+      transform: rotate(90deg);
+    }
+    .grades-content {
+      display: none;
+      margin-top: 0.75rem;
+    }
+    .grades-content.open {
+      display: block;
+    }
+    .grades-summary {
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .grade-badge {
+      display: inline-block;
+      padding: 0.125rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .grade-pass { background: var(--green-bg); color: var(--green); }
+    .grade-fail { background: var(--red-bg); color: var(--red); }
+    .assertion-list {
+      list-style: none;
+    }
+    .assertion-item {
+      padding: 0.625rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8125rem;
+    }
+    .assertion-item:last-child { border-bottom: none; }
+    .assertion-status {
+      font-weight: 600;
+      margin-right: 0.5rem;
+    }
+    .assertion-status.pass { color: var(--green); }
+    .assertion-status.fail { color: var(--red); }
+    .assertion-evidence {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+      padding-left: 1.5rem;
+    }
+
+    /* ---- View tabs ---- */
+    .view-tabs {
+      display: flex;
+      gap: 0;
+      padding: 0 2rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .view-tab {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.625rem 1.25rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    .view-tab:hover { color: var(--text); }
+    .view-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .view-panel { display: none; }
+    .view-panel.active { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+
+    /* ---- Benchmark view ---- */
+    .benchmark-view {
+      padding: 1.5rem 2rem;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .benchmark-table {
+      border-collapse: collapse;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.8125rem;
+      width: 100%;
+      margin-bottom: 1.5rem;
+    }
+    .benchmark-table th, .benchmark-table td {
+      padding: 0.625rem 0.75rem;
+      text-align: left;
+      border: 1px solid var(--border);
+    }
+    .benchmark-table th {
+      font-family: 'Poppins', sans-serif;
+      background: var(--header-bg);
+      color: var(--header-text);
+      font-weight: 500;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .benchmark-table tr:hover { background: var(--bg); }
+    .benchmark-table tr.benchmark-row-with { background: rgba(33, 150, 243, 0.06); }
+    .benchmark-table tr.benchmark-row-without { background: rgba(255, 193, 7, 0.06); }
+    .benchmark-table tr.benchmark-row-with:hover { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-without:hover { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-table tr.benchmark-row-avg { font-weight: 600; border-top: 2px solid var(--border); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-with { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-without { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-delta-positive { color: var(--green); font-weight: 600; }
+    .benchmark-delta-negative { color: var(--red); font-weight: 600; }
+    .benchmark-notes {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+    }
+    .benchmark-notes h3 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+    }
+    .benchmark-notes ul {
+      list-style: disc;
+      padding-left: 1.25rem;
+    }
+    .benchmark-notes li {
+      font-size: 0.8125rem;
+      line-height: 1.6;
+      margin-bottom: 0.375rem;
+    }
+    .benchmark-empty {
+      color: var(--text-muted);
+      font-style: italic;
+      text-align: center;
+      padding: 3rem;
+    }
+
+    /* ---- Navigation ---- */
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+    .nav-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text);
+      transition: all 0.15s;
+    }
+    .nav-btn:hover:not(:disabled) {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .done-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .done-btn:hover {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .done-btn.ready {
+      border: none;
+      background: var(--accent);
+      color: white;
+      font-weight: 600;
+    }
+    .done-btn.ready:hover {
+      background: var(--accent-hover);
+    }
+    /* ---- Done overlay ---- */
+    .done-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+    .done-overlay.visible {
+      display: flex;
+    }
+    .done-card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 2rem 3rem;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 500px;
+    }
+    .done-card h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .done-card p {
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+    .done-card .btn-row {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    .done-card button {
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+    .done-card button:hover {
+      background: var(--bg);
+    }
+    /* ---- Toast ---- */
+    .toast {
+      position: fixed;
+      bottom: 5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 0.625rem 1.25rem;
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      z-index: 200;
+    }
+    .toast.visible {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" style="height:100vh; display:flex; flex-direction:column;">
+    <div class="header">
+      <div>
+        <h1>Eval Review: <span id="skill-name"></span></h1>
+        <div class="instructions">Review each output and leave feedback below. Navigate with arrow keys or buttons. When done, copy feedback and paste into Claude Code.</div>
+      </div>
+      <div class="progress" id="progress"></div>
+    </div>
+
+    <!-- View tabs (only shown when benchmark data exists) -->
+    <div class="view-tabs" id="view-tabs" style="display:none;">
+      <button class="view-tab active" onclick="switchView('outputs')">Outputs</button>
+      <button class="view-tab" onclick="switchView('benchmark')">Benchmark</button>
+    </div>
+
+    <!-- Outputs panel (qualitative review) -->
+    <div class="view-panel active" id="panel-outputs">
+    <div class="main">
+      <!-- Prompt -->
+      <div class="section">
+        <div class="section-header">Prompt <span class="config-badge" id="config-badge" style="display:none;"></span></div>
+        <div class="section-body">
+          <div class="prompt-text" id="prompt-text"></div>
+        </div>
+      </div>
+
+      <!-- Outputs -->
+      <div class="section">
+        <div class="section-header">Output</div>
+        <div class="section-body" id="outputs-body">
+          <div class="empty-state">No output files found</div>
+        </div>
+      </div>
+
+      <!-- Previous Output (collapsible) -->
+      <div class="section" id="prev-outputs-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="togglePrevOutputs()">
+            <span class="arrow" id="prev-outputs-arrow">&#9654;</span>
+            Previous Output
+          </div>
+        </div>
+        <div class="grades-content" id="prev-outputs-content"></div>
+      </div>
+
+      <!-- Grades (collapsible) -->
+      <div class="section" id="grades-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="toggleGrades()">
+            <span class="arrow" id="grades-arrow">&#9654;</span>
+            Formal Grades
+          </div>
+        </div>
+        <div class="grades-content" id="grades-content"></div>
+      </div>
+
+      <!-- Feedback -->
+      <div class="section">
+        <div class="section-header">Your Feedback</div>
+        <div class="section-body">
+          <textarea
+            class="feedback-textarea"
+            id="feedback"
+            placeholder="What do you think of this output? Any issues, suggestions, or things that look great?"
+          ></textarea>
+          <div class="feedback-status" id="feedback-status"></div>
+          <div class="prev-feedback" id="prev-feedback" style="display:none;">
+            <div class="prev-feedback-label">Previous feedback</div>
+            <div id="prev-feedback-text"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav" id="outputs-nav">
+      <button class="nav-btn" id="prev-btn" onclick="navigate(-1)">&#8592; Previous</button>
+      <button class="done-btn" id="done-btn" onclick="showDoneDialog()">Submit All Reviews</button>
+      <button class="nav-btn" id="next-btn" onclick="navigate(1)">Next &#8594;</button>
+    </div>
+    </div><!-- end panel-outputs -->
+
+    <!-- Benchmark panel (quantitative stats) -->
+    <div class="view-panel" id="panel-benchmark">
+      <div class="benchmark-view" id="benchmark-content">
+        <div class="benchmark-empty">No benchmark data available. Run a benchmark to see quantitative results here.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Done overlay -->
+  <div class="done-overlay" id="done-overlay">
+    <div class="done-card">
+      <h2>Review Complete</h2>
+      <p>Your feedback has been saved. Go back to your Claude Code session and tell Claude you're done reviewing.</p>
+      <div class="btn-row">
+        <button onclick="closeDoneDialog()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ---- Embedded data (injected by generate_review.py) ----
+    const EMBEDDED_DATA = {"skill_name": "n8n-json-checker", "runs": [{"id": "eval-telegram-multiissues-with_skill", "prompt": "Check this n8n workflow JSON for issues: [Telegram Echo Bot with wrong prefix x2, chatId plain string, typeVersion 1.1, telegramAPI credential key]", "eval_id": 1, "outputs": [{"name": "result.md", "type": "text", "content": "## n8n Workflow Check\n\n### Errors (must fix before activating)\n\n1. **Telegram Trigger, Send Reply** \u00e2\u20ac\u201d Wrong `type` prefix: both nodes use `nodes-base.` instead of `n8n-nodes-base.` \u00e2\u20ac\u201d Change `\"nodes-base.telegramTrigger\"` \u00e2\u2020\u2019 `\"n8n-nodes-base.telegramTrigger\"` and `\"nodes-base.telegram\"` \u00e2\u2020\u2019 `\"n8n-nodes-base.telegram\"`.\n\n2. **Send Reply** \u00e2\u20ac\u201d `chatId` must use `__rl` object format, not a plain string \u00e2\u20ac\u201d Change:\n   ```json\n   \"chatId\": \"={{ $json.message.chat.id }}\"\n   ```\n   to:\n   ```json\n   \"chatId\": { \"__rl\": true, \"value\": \"={{ $json.message.chat.id }}\", \"mode\": \"expression\" }\n   ```\n\n### Warnings (review, may be acceptable)\n\n1. **Telegram Trigger** \u00e2\u20ac\u201d `typeVersion` is `1.1`, expected `1.2` \u00e2\u20ac\u201d Update to `1.2` to get the latest features and fixes.\n\n2. **Telegram Trigger** \u00e2\u20ac\u201d Credential key `\"telegramAPI\"` is incorrectly capitalized \u00e2\u20ac\u201d should be `\"telegramApi\"` (lowercase `pi`). This may prevent credential resolution at runtime.\n\n### Clean \u00e2\u0153\u201c\n- Required fields \u00e2\u20ac\u201d all present\n- Expression syntax \u00e2\u20ac\u201d no unbalanced braces or broken references\n- Connection structure \u00e2\u20ac\u201d linear chain wired correctly\n- Webhook checks \u00e2\u20ac\u201d not applicable\n- Community nodes \u00e2\u20ac\u201d none present\n- Error handling \u00e2\u20ac\u201d not applicable (workflow has fewer than 5 nodes)\n\n---\n\n> **MCP validation note:** The `n8n_validate_workflow` tool was not available in this environment. The above findings are from static analysis only. Runtime validation could not be performed.\n\n---\n\nWant me to apply these fixes directly to the workflow?\n"}], "grading": null}, {"id": "eval-telegram-multiissues-without_skill", "prompt": "Check this n8n workflow JSON for issues: [Telegram Echo Bot with wrong prefix x2, chatId plain string, typeVersion 1.1, telegramAPI credential key]", "eval_id": 1, "outputs": [{"name": "result.md", "type": "text", "content": "# n8n Workflow JSON Check \u00e2\u20ac\u201d Telegram Echo Bot\n\n## Issues Found: 4\n\n---\n\n### Issue 1: Wrong `type` prefix \u00e2\u20ac\u201d Telegram Trigger node\n**Severity:** Error (will cause silent failure or node not found)\n\n- **Found:** `\"type\": \"nodes-base.telegramTrigger\"`\n- **Expected:** `\"type\": \"n8n-nodes-base.telegramTrigger\"`\n\nIn workflow JSON (used with `n8n_create_workflow` / `n8n_update_partial_workflow`), all core node types must use the `n8n-nodes-base.` prefix. The `nodes-base.` prefix (without `n8n-`) is only valid when calling `search_nodes`, `get_node`, or `validate_node`.\n\n---\n\n### Issue 2: Wrong `type` prefix \u00e2\u20ac\u201d Send Reply node\n**Severity:** Error (will cause silent failure or node not found)\n\n- **Found:** `\"type\": \"nodes-base.telegram\"`\n- **Expected:** `\"type\": \"n8n-nodes-base.telegram\"`\n\nSame issue as above \u00e2\u20ac\u201d the `n8n-` prefix is missing.\n\n---\n\n### Issue 3: Wrong `typeVersion` for Telegram Trigger\n**Severity:** Warning/Bug (misses fixes and features in newer version)\n\n- **Found:** `\"typeVersion\": 1.1`\n- **Expected:** `\"typeVersion\": 1.2`\n\nThe current recommended version for `n8n-nodes-base.telegramTrigger` is `1.2`. Using `1.1` may work but misses fixes and features available in the latest version.\n\n---\n\n### Issue 4: Wrong credential key for Telegram Trigger\n**Severity:** Error (credential will not resolve)\n\n- **Found:** `\"telegramAPI\": { \"id\": \"1\", \"name\": \"Telegram account\" }`\n- **Expected:** `\"telegramApi\": { \"id\": \"1\", \"name\": \"Telegram account\" }`\n\nThe credential type key is case-sensitive. `telegramAPI` (uppercase \"API\") does not match the required key `telegramApi` (camelCase). The Send Reply node has this correct; the Telegram Trigger node does not.\n\n---\n\n### Issue 5: `chatId` missing `__rl` resource locator format\n**Severity:** Error (validation warning / runtime failure)\n\n- **Found:** `\"chatId\": \"={{ $json.message.chat.id }}\"`\n- **Expected:**\n```json\n\"chatId\": { \"__rl\": true, \"value\": \"={{ $json.message.chat.id }}\", \"mode\": \"expression\" }\n```\n\nThe `chatId` field in `n8n-nodes-base.telegram` is a resource locator field and requires the `__rl` object format. Passing a plain string expression bypasses the resource locator mechanism and will cause a validation warning or runtime failure.\n\n---\n\n## Corrected Workflow JSON\n\n```json\n{\n  \"name\": \"Telegram Echo Bot\",\n  \"nodes\": [\n    {\n      \"name\": \"Telegram Trigger\",\n      \"type\": \"n8n-nodes-base.telegramTrigger\",\n      \"typeVersion\": 1.2,\n      \"position\": [250, 300],\n      \"parameters\": {\n        \"updates\": [\"message\"],\n        \"additionalFields\": {}\n      },\n      \"credentials\": {\n        \"telegramApi\": { \"id\": \"1\", \"name\": \"Telegram account\" }\n      }\n    },\n    {\n      \"name\": \"Send Reply\",\n      \"type\": \"n8n-nodes-base.telegram\",\n      \"typeVersion\": 1.2,\n      \"position\": [500, 300],\n      \"parameters\": {\n        \"resource\": \"message\",\n        \"operation\": \"sendMessage\",\n        \"chatId\": { \"__rl\": true, \"value\": \"={{ $json.message.chat.id }}\", \"mode\": \"expression\" },\n        \"text\": \"={{ $json.message.text }}\",\n        \"additionalFields\": {}\n      },\n      \"credentials\": {\n        \"telegramApi\": { \"id\": \"1\", \"name\": \"Telegram account\" }\n      }\n    }\n  ],\n  \"connections\": {\n    \"Telegram Trigger\": {\n      \"main\": [[{ \"node\": \"Send Reply\", \"type\": \"main\", \"index\": 0 }]]\n    }\n  }\n}\n```\n\n---\n\n## Summary\n\n| # | Location | Issue | Severity |\n|---|----------|-------|----------|\n| 1 | Telegram Trigger \u00e2\u20ac\u201d `type` | Missing `n8n-` prefix (`nodes-base.` \u00e2\u2020\u2019 `n8n-nodes-base.`) | Error |\n| 2 | Send Reply \u00e2\u20ac\u201d `type` | Missing `n8n-` prefix (`nodes-base.` \u00e2\u2020\u2019 `n8n-nodes-base.`) | Error |\n| 3 | Telegram Trigger \u00e2\u20ac\u201d `typeVersion` | Should be `1.2`, not `1.1` | Warning |\n| 4 | Telegram Trigger \u00e2\u20ac\u201d `credentials` key | `telegramAPI` \u00e2\u2020\u2019 `telegramApi` (case mismatch) | Error |\n| 5 | Send Reply \u00e2\u20ac\u201d `chatId` | Plain string instead of `__rl` resource locator object | Error |\n"}], "grading": null}, {"id": "eval-ai-agent-wiring-with_skill", "prompt": "Any issues with this n8n workflow? [AI Support Agent with OpenAI Chat Model wired via main instead of ai_languageModel, missing respondToWebhook]", "eval_id": 2, "outputs": [{"name": "result.md", "type": "text", "content": "## n8n Workflow Check\n\n### Errors (must fix before activating)\n\n1. **OpenAI Chat Model** \u00e2\u20ac\u201d Wrong connection type used. The node connects via `\"main\"` to the AI Agent, but LangChain sub-nodes must connect via `ai_languageModel`. A `main` connection will be silently ignored and the AI Agent will have no language model attached, causing it to fail at runtime.\n\n   **Fix:** Change the connection entry from:\n   ```json\n   \"OpenAI Chat Model\": {\n     \"main\": [[{ \"node\": \"AI Agent\", \"type\": \"main\", \"index\": 0 }]]\n   }\n   ```\n   To:\n   ```json\n   \"OpenAI Chat Model\": {\n     \"ai_languageModel\": [[{ \"node\": \"AI Agent\", \"type\": \"ai_languageModel\", \"index\": 0 }]]\n   }\n   ```\n\n### Warnings (review, may be acceptable)\n\n1. **Webhook** \u00e2\u20ac\u201d `responseMode` is `\"responseNode\"` but no `respondToWebhook` node exists in the workflow. The webhook will never send a response back to the caller, leaving the HTTP connection hanging until it times out.\n\n   **Fix:** Add a `respondToWebhook` node downstream of the AI Agent and wire it as the final step.\n\n2. **Webhook + AI Agent** \u00e2\u20ac\u201d This workflow uses `responseMode: \"responseNode\"` with an AI Agent, which is a long-running operation. n8n Cloud enforces a 100-second timeout on webhook responses \u00e2\u20ac\u201d requests exceeding this will receive a Cloudflare 524 error. For long-running AI workflows, consider a two-webhook pattern: one webhook to accept the job and return immediately, and a second webhook or polling mechanism to return results when ready.\n\n### Clean \u00e2\u0153\u201c\n- nodeType format \u00e2\u20ac\u201d no issues found\n- Resource locator fields (`__rl`) \u00e2\u20ac\u201d no issues found\n- Required fields per node \u00e2\u20ac\u201d no issues found\n- typeVersion \u00e2\u20ac\u201d no issues found\n- Credential key names \u00e2\u20ac\u201d no issues found\n- Expression syntax \u00e2\u20ac\u201d no issues found\n\n---\n\nWant me to apply these fixes directly to the workflow?\n"}], "grading": null}, {"id": "eval-ai-agent-wiring-without_skill", "prompt": "Any issues with this n8n workflow? [AI Support Agent with OpenAI Chat Model wired via main instead of ai_languageModel, missing respondToWebhook]", "eval_id": 2, "outputs": [{"name": "result.md", "type": "text", "content": "# Workflow Review: AI Support Agent\n\n## Issues Found\n\n### 1. Wrong node type for OpenAI Chat Model (ERROR)\n- **Current:** `\"type\": \"@n8n/n8n-nodes-langchain.lmChatOpenAi\"`\n- **Correct:** `\"type\": \"@n8n/n8n-nodes-langchain.lmOpenAi\"`\n- The node type identifier is incorrect and will cause the node to fail to load or be unrecognized.\n\n### 2. Wrong typeVersion for OpenAI Chat Model (ERROR)\n- **Current:** `\"typeVersion\": 1`\n- **Correct:** `\"typeVersion\": 1.2`\n- Using an outdated typeVersion may cause missing features or unexpected behavior.\n\n### 3. Wrong connection type for OpenAI Chat Model (CRITICAL ERROR)\n- **Current:**\n  ```json\n  \"OpenAI Chat Model\": {\n    \"main\": [[{ \"node\": \"AI Agent\", \"type\": \"main\", \"index\": 0 }]]\n  }\n  ```\n- **Correct:**\n  ```json\n  \"OpenAI Chat Model\": {\n    \"ai_languageModel\": [[{ \"node\": \"AI Agent\", \"type\": \"ai_languageModel\", \"index\": 0 }]]\n  }\n  ```\n- LangChain sub-nodes must connect via their designated connection type (`ai_languageModel`), not `main`. Using `main` means the AI Agent receives no language model, causing a runtime failure. The agent cannot function without a connected LLM.\n\n### 4. Missing Respond to Webhook node (ERROR)\n- The Webhook trigger sets `\"responseMode\": \"responseNode\"`, which requires a `n8n-nodes-base.respondToWebhook` node at the end of the flow to send the HTTP response back to the caller.\n- Without it, the webhook request will hang indefinitely and never return a response.\n- **Fix:** Add a `respondToWebhook` node after the AI Agent and connect it.\n\n## Summary\n\n| # | Issue | Severity |\n|---|-------|----------|\n| 1 | Wrong node type (`lmChatOpenAi` \u00e2\u2020\u2019 `lmOpenAi`) | Error |\n| 2 | Wrong typeVersion (1 \u00e2\u2020\u2019 1.2) | Warning |\n| 3 | OpenAI Chat Model uses `main` instead of `ai_languageModel` connection | Critical Error |\n| 4 | Missing `respondToWebhook` node despite `responseMode: responseNode` | Error |\n\nThe workflow will not function at runtime. The AI Agent has no language model wired to it (wrong connection type), and the webhook will never respond to callers.\n"}], "grading": null}, {"id": "eval-clean-workflow-with_skill", "prompt": "Check this workflow JSON for me: [Hourly Data Fetch \u00e2\u20ac\u201d clean workflow, no bugs]", "eval_id": 3, "outputs": [{"name": "result.md", "type": "text", "content": "## n8n Workflow Check\n\n\u00e2\u0153\u201c No issues found. Workflow looks good to activate.\n\n---\n\n**Checks performed (static analysis):**\n\n- **nodeType format** \u00e2\u20ac\u201d all nodes use correct `n8n-nodes-base.*` prefix\n- **Resource locator fields** \u00e2\u20ac\u201d no nodes requiring `__rl` format present\n- **Required fields** \u00e2\u20ac\u201d HTTP Request has `url`; Code node has `jsCode`\n- **Code node content** \u00e2\u20ac\u201d `jsCode` returns correct `[{ json: {...} }]` array format; no ES6 imports, forbidden variables, or expression-only methods\n- **typeVersion** \u00e2\u20ac\u201d scheduleTrigger `1.2` \u00e2\u0153\u201c, httpRequest `4.2` \u00e2\u0153\u201c, code `2` \u00e2\u0153\u201c\n- **Credentials** \u00e2\u20ac\u201d HTTP Request uses `authentication: \"none\"`, no credential block needed\n- **Expression syntax** \u00e2\u20ac\u201d no expressions present\n- **Connection structure** \u00e2\u20ac\u201d clean linear chain: Schedule Trigger \u00e2\u2020\u2019 HTTP Request \u00e2\u2020\u2019 Process Data\n- **Community nodes** \u00e2\u20ac\u201d none\n- **Webhook checks** \u00e2\u20ac\u201d no webhook nodes\n- **Error handling** \u00e2\u20ac\u201d workflow has 3 nodes (below 5-node threshold, no error trigger required)\n\n**MCP validation:** `n8n_validate_workflow` tool was not available in this environment; static analysis only.\n"}], "grading": null}, {"id": "eval-clean-workflow-without_skill", "prompt": "Check this workflow JSON for me: [Hourly Data Fetch \u00e2\u20ac\u201d clean workflow, no bugs]", "eval_id": 3, "outputs": [{"name": "result.md", "type": "text", "content": "# Workflow JSON Analysis: \"Hourly Data Fetch\"\n\n## Summary\n\nThe workflow JSON is **valid and well-formed**. No errors or issues were detected.\n\n---\n\n## Node-by-Node Review\n\n### 1. Schedule Trigger\n- **Type:** `n8n-nodes-base.scheduleTrigger` \u00e2\u20ac\u201d correct format for workflow JSON\n- **typeVersion:** `1.2` \u00e2\u20ac\u201d matches the recommended version\n- **Parameters:** `rule.interval` with `field: \"hours\"` and `hoursInterval: 1` \u00e2\u20ac\u201d correct structure for an hourly schedule\n- **Status:** PASS\n\n### 2. HTTP Request\n- **Type:** `n8n-nodes-base.httpRequest` \u00e2\u20ac\u201d correct\n- **typeVersion:** `4.2` \u00e2\u20ac\u201d matches the recommended version\n- **Parameters:** `method`, `url`, and `authentication` are all present and correctly structured\n- **Status:** PASS\n\n### 3. Process Data (Code Node)\n- **Type:** `n8n-nodes-base.code` \u00e2\u20ac\u201d correct\n- **typeVersion:** `2` \u00e2\u20ac\u201d matches the recommended version\n- **Parameters:** `jsCode` contains valid JavaScript that maps over `items` and adds a `processed: true` field \u00e2\u20ac\u201d correct pattern\n- **Status:** PASS\n\n---\n\n## Connections Review\n\n- `Schedule Trigger` \u00e2\u2020\u2019 `HTTP Request`: correctly wired (`main[0]`, index 0)\n- `HTTP Request` \u00e2\u2020\u2019 `Process Data`: correctly wired (`main[0]`, index 0)\n- Linear chain structure is properly formed\n- **Status:** PASS\n\n---\n\n## Additional Observations\n\n- No credentials are required for any of these nodes (Schedule Trigger has none, HTTP Request uses `authentication: \"none\"`, Code node needs none) \u00e2\u20ac\u201d consistent and correct.\n- No resource locator (`__rl`) fields are needed for these node types.\n- No LangChain sub-nodes are present, so no `ai_*` connection types are needed.\n- The workflow has no `settings` block, which is fine \u00e2\u20ac\u201d defaults will apply.\n\n---\n\n## Verdict\n\n**No issues found.** This workflow is clean and ready to use as-is.\n"}], "grading": null}, {"id": "eval-sheets-rl-fields-with_skill", "prompt": "Will this work? I'm building a Google Sheets integration: [Sheets Logger with plain-string documentId and sheetName]", "eval_id": 4, "outputs": [{"name": "result.md", "type": "text", "content": "## n8n Workflow Check\n\n### Errors (must fix before activating)\n\n1. **Google Sheets** \u00e2\u20ac\u201d `documentId` is a plain string (`\"1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms\"`) but requires the `__rl` object format \u00e2\u20ac\u201d change to:\n   ```json\n   \"documentId\": { \"__rl\": true, \"value\": \"1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms\", \"mode\": \"id\" }\n   ```\n\n2. **Google Sheets** \u00e2\u20ac\u201d `sheetName` is a plain string (`\"Sheet1\"`) but requires the `__rl` object format \u00e2\u20ac\u201d change to:\n   ```json\n   \"sheetName\": { \"__rl\": true, \"value\": \"gid=0\", \"mode\": \"list\", \"cachedResultName\": \"Sheet1\" }\n   ```\n\n### Clean \u00e2\u0153\u201c\n\n- nodeType format \u00e2\u20ac\u201d no issues found\n- typeVersions \u00e2\u20ac\u201d `webhook` v2, `googleSheets` v4.5 both correct\n- Credential key \u00e2\u20ac\u201d `googleSheetsOAuth2Api` is correct\n- Expression syntax \u00e2\u20ac\u201d no expressions used\n- Connection structure \u00e2\u20ac\u201d linear chain wired correctly\n- Webhook responseMode \u00e2\u20ac\u201d `onReceived` (no respondToWebhook node required)\n\n---\n\n**Note:** MCP runtime validation was unavailable in this session; results are based on static analysis only.\n\n---\n\nWant me to apply these fixes directly to the workflow?\n"}], "grading": null}, {"id": "eval-sheets-rl-fields-without_skill", "prompt": "Will this work? I'm building a Google Sheets integration: [Sheets Logger with plain-string documentId and sheetName]", "eval_id": 4, "outputs": [{"name": "result.md", "type": "text", "content": "# Eval Result: eval-sheets-rl-fields (Without Skill)\n\n## Verdict: No, this workflow will NOT work as written.\n\n---\n\n## Issues Found\n\n### Issue 1 \u00e2\u20ac\u201d CRITICAL: `documentId` missing `__rl` resource locator format\n\n**Current:**\n```json\n\"documentId\": \"1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms\"\n```\n\n**Required:**\n```json\n\"documentId\": { \"__rl\": true, \"value\": \"1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms\", \"mode\": \"id\" }\n```\n\nThe `documentId` field on `n8n-nodes-base.googleSheets` requires the `__rl` object format. A plain string will cause a validation warning or runtime failure.\n\n---\n\n### Issue 2 \u00e2\u20ac\u201d CRITICAL: `sheetName` missing `__rl` resource locator format\n\n**Current:**\n```json\n\"sheetName\": \"Sheet1\"\n```\n\n**Required:**\n```json\n\"sheetName\": { \"__rl\": true, \"value\": \"gid=0\", \"mode\": \"list\", \"cachedResultName\": \"Sheet1\" }\n```\n\nSame as above \u00e2\u20ac\u201d `sheetName` is a known resource locator field and must use the `__rl` format.\n\n---\n\n### Issue 3 \u00e2\u20ac\u201d ERROR: Invalid `operation` value `\"appendOrUpdate\"`\n\n**Current:**\n```json\n\"operation\": \"appendOrUpdate\"\n```\n\n`\"appendOrUpdate\"` is not a valid operation for the Google Sheets node. Valid operations are:\n- `\"append\"` \u00e2\u20ac\u201d add new rows\n- `\"read\"` \u00e2\u20ac\u201d read rows\n- `\"update\"` \u00e2\u20ac\u201d update existing rows (requires matching column)\n- `\"upsert\"` \u00e2\u20ac\u201d update if exists, insert if not\n- `\"delete\"` \u00e2\u20ac\u201d delete rows\n- `\"clear\"` \u00e2\u20ac\u201d clear a range\n\nFor a logging use case, the correct value is likely `\"append\"`.\n\n---\n\n### Issue 4 \u00e2\u20ac\u201d WARNING: Missing `columns` mapping for append operation\n\nWhen using `operation: \"append\"`, a `columns` field is required to specify how input data maps to sheet columns. Without it, the node does not know what data to write. The correct structure is:\n\n```json\n\"columns\": {\n  \"mappingMode\": \"autoMapInputData\",\n  \"value\": {},\n  \"matchingColumns\": [],\n  \"schema\": []\n}\n```\n\n---\n\n## Corrected Google Sheets Node\n\n```json\n{\n  \"name\": \"Google Sheets\",\n  \"type\": \"n8n-nodes-base.googleSheets\",\n  \"typeVersion\": 4.5,\n  \"position\": [500, 300],\n  \"parameters\": {\n    \"resource\": \"sheet\",\n    \"operation\": \"append\",\n    \"documentId\": { \"__rl\": true, \"value\": \"1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms\", \"mode\": \"id\" },\n    \"sheetName\": { \"__rl\": true, \"value\": \"gid=0\", \"mode\": \"list\", \"cachedResultName\": \"Sheet1\" },\n    \"columns\": {\n      \"mappingMode\": \"autoMapInputData\",\n      \"value\": {},\n      \"matchingColumns\": [],\n      \"schema\": []\n    },\n    \"options\": {}\n  },\n  \"credentials\": {\n    \"googleSheetsOAuth2Api\": { \"id\": \"3\", \"name\": \"Google Sheets\" }\n  }\n}\n```\n\n---\n\n## Notes on Webhook Node\n\nThe Webhook node uses `\"responseMode\": \"onReceived\"` which is valid \u00e2\u20ac\u201d it responds immediately upon receiving the request without waiting for downstream nodes. This is appropriate for a logging workflow where no response body is needed from the sheet operation.\n\n---\n\n## Summary\n\n| # | Severity | Field | Issue |\n|---|----------|-------|-------|\n| 1 | Critical | `documentId` | Plain string instead of `__rl` object |\n| 2 | Critical | `sheetName` | Plain string instead of `__rl` object |\n| 3 | Error | `operation` | `\"appendOrUpdate\"` is not a valid value |\n| 4 | Warning | `columns` | Missing columns mapping for append |\n"}], "grading": null}], "previous_feedback": {}, "previous_outputs": {"eval-telegram-multiissues-with_skill": [{"name": "result.md", "type": "text", "content": "## n8n Workflow Check\n\n### Errors (must fix before activating)\n\n1. **Telegram Trigger, Send Reply** \u00e2\u20ac\u201d Wrong `type` prefix: both nodes use `nodes-base.` instead of `n8n-nodes-base.` \u00e2\u20ac\u201d Change `\"nodes-base.telegramTrigger\"` to `\"n8n-nodes-base.telegramTrigger\"` and `\"nodes-base.telegram\"` to `\"n8n-nodes-base.telegram\"`.\n\n2. **Send Reply** \u00e2\u20ac\u201d `chatId` is a plain string instead of a resource locator object \u00e2\u20ac\u201d Change:\n   ```json\n   \"chatId\": \"={{ $json.message.chat.id }}\"\n   ```\n   to:\n   ```json\n   \"chatId\": { \"__rl\": true, \"value\": \"={{ $json.message.chat.id }}\", \"mode\": \"expression\" }\n   ```\n\n3. **Telegram Trigger** \u00e2\u20ac\u201d Wrong credential key `\"telegramAPI\"` (capital API) \u00e2\u20ac\u201d should be `\"telegramApi\"` (lowercase `a`). The node expects `telegramApi`; the wrong key means no credential will be resolved at runtime.\n\n### Warnings (review, may be acceptable)\n\n1. **Telegram Trigger** \u00e2\u20ac\u201d `typeVersion` is `1.1`, expected `1.2` \u00e2\u20ac\u201d Update to `1.2` to get the latest fixes and features.\n\n### Clean \u00e2\u0153\u201c\n- Expression syntax \u00e2\u20ac\u201d no unbalanced braces or invalid node references\n- Connection structure \u00e2\u20ac\u201d linear chain is correctly wired\n- Required fields \u00e2\u20ac\u201d `text` is present on the Send Reply node\n- No community nodes\n\n---\n\nWant me to apply these fixes directly to the workflow?\n"}], "eval-telegram-multiissues-without_skill": [{"name": "result.md", "type": "text", "content": "# Workflow Analysis: Telegram Echo Bot\n\n## Summary\n\nThe workflow contains **4 issues** \u00e2\u20ac\u201d 3 errors and 1 error \u00e2\u20ac\u201d that will prevent correct creation or runtime execution.\n\n---\n\n## Issues Found\n\n### Issue 1 \u00e2\u20ac\u201d ERROR: Wrong node type format (both nodes)\n\n**Affected nodes:** `Telegram Trigger`, `Send Reply`\n\n**Problem:** Both nodes use the wrong prefix format for the `type` field:\n- `\"nodes-base.telegramTrigger\"` \u00e2\u20ac\u201d incorrect\n- `\"nodes-base.telegram\"` \u00e2\u20ac\u201d incorrect\n\nIn `n8n_create_workflow` and `n8n_update_partial_workflow` contexts, node types must use the `n8n-nodes-base.` prefix (with `n8n-` prepended).\n\n**Fix:**\n```json\n\"type\": \"n8n-nodes-base.telegramTrigger\"\n\"type\": \"n8n-nodes-base.telegram\"\n```\n\n---\n\n### Issue 2 \u00e2\u20ac\u201d ERROR: Wrong typeVersion for Telegram Trigger\n\n**Affected node:** `Telegram Trigger`\n\n**Problem:** `typeVersion` is set to `1.1` but the correct recommended version is `1.2`.\n\n**Fix:**\n```json\n\"typeVersion\": 1.2\n```\n\n---\n\n### Issue 3 \u00e2\u20ac\u201d ERROR: Wrong credential key for Telegram Trigger\n\n**Affected node:** `Telegram Trigger`\n\n**Problem:** The credential block uses `\"telegramAPI\"` (all-caps \"API\") which does not match the expected credential type key.\n\n```json\n\"credentials\": {\n  \"telegramAPI\": { \"id\": \"1\", \"name\": \"Telegram account\" }\n}\n```\n\nThe correct credential key is `\"telegramApi\"` (camelCase, lowercase \"pi\"). The Send Reply node correctly uses `telegramApi` \u00e2\u20ac\u201d the Telegram Trigger does not.\n\n**Fix:**\n```json\n\"credentials\": {\n  \"telegramApi\": { \"id\": \"1\", \"name\": \"Telegram account\" }\n}\n```\n\n---\n\n### Issue 4 \u00e2\u20ac\u201d ERROR: `chatId` missing resource locator (`__rl`) format\n\n**Affected node:** `Send Reply`\n\n**Problem:** The `chatId` parameter is set as a plain expression string:\n```json\n\"chatId\": \"={{ $json.message.chat.id }}\"\n```\n\nThe `chatId` field on `n8n-nodes-base.telegram` requires the `__rl` resource locator object format. Using a plain string will cause a validation warning or runtime failure.\n\n**Fix:**\n```json\n\"chatId\": { \"__rl\": true, \"value\": \"={{ $json.message.chat.id }}\", \"mode\": \"expression\" }\n```\n\n---\n\n## Corrected Workflow JSON\n\n```json\n{\n  \"name\": \"Telegram Echo Bot\",\n  \"nodes\": [\n    {\n      \"name\": \"Telegram Trigger\",\n      \"type\": \"n8n-nodes-base.telegramTrigger\",\n      \"typeVersion\": 1.2,\n      \"position\": [250, 300],\n      \"parameters\": {\n        \"updates\": [\"message\"],\n        \"additionalFields\": {}\n      },\n      \"credentials\": {\n        \"telegramApi\": { \"id\": \"1\", \"name\": \"Telegram account\" }\n      }\n    },\n    {\n      \"name\": \"Send Reply\",\n      \"type\": \"n8n-nodes-base.telegram\",\n      \"typeVersion\": 1.2,\n      \"position\": [500, 300],\n      \"parameters\": {\n        \"resource\": \"message\",\n        \"operation\": \"sendMessage\",\n        \"chatId\": { \"__rl\": true, \"value\": \"={{ $json.message.chat.id }}\", \"mode\": \"expression\" },\n        \"text\": \"={{ $json.message.text }}\",\n        \"additionalFields\": {}\n      },\n      \"credentials\": {\n        \"telegramApi\": { \"id\": \"1\", \"name\": \"Telegram account\" }\n      }\n    }\n  ],\n  \"connections\": {\n    \"Telegram Trigger\": {\n      \"main\": [[{ \"node\": \"Send Reply\", \"type\": \"main\", \"index\": 0 }]]\n    }\n  }\n}\n```\n\n---\n\n## Issues Table\n\n| # | Severity | Node | Field | Problem | Fix |\n|---|----------|------|-------|---------|-----|\n| 1 | ERROR | Both nodes | `type` | Missing `n8n-` prefix in node type | Use `n8n-nodes-base.*` format |\n| 2 | ERROR | Telegram Trigger | `typeVersion` | Version `1.1` is outdated | Use `1.2` |\n| 3 | ERROR | Telegram Trigger | `credentials` | Key `telegramAPI` is wrong casing | Use `telegramApi` |\n| 4 | ERROR | Send Reply | `chatId` | Plain string instead of `__rl` object | Wrap in `{ \"__rl\": true, \"value\": ..., \"mode\": \"expression\" }` |\n"}], "eval-ai-agent-wiring-with_skill": [{"name": "result.md", "type": "text", "content": "## n8n Workflow Check\n\n### Errors (must fix before activating)\n\n1. **OpenAI Chat Model** \u00e2\u20ac\u201d Wrong node type: `@n8n/n8n-nodes-langchain.lmChatOpenAi` does not exist. The correct type is `@n8n/n8n-nodes-langchain.lmOpenAi`. Using the wrong type will cause the node to fail to load. \u00e2\u20ac\u201d Change `\"type\"` to `\"@n8n/n8n-nodes-langchain.lmOpenAi\"`.\n\n2. **OpenAI Chat Model** \u00e2\u20ac\u201d Wrong connection type: the node connects to AI Agent via `\"main\"`, but LangChain sub-nodes must use `ai_languageModel` as the connection key and type. Using `main` means the language model is never actually wired to the agent \u00e2\u20ac\u201d the agent will have no LLM and will fail at runtime. \u00e2\u20ac\u201d Replace the connection entry:\n   ```json\n   \"OpenAI Chat Model\": {\n     \"ai_languageModel\": [[{ \"node\": \"AI Agent\", \"type\": \"ai_languageModel\", \"index\": 0 }]]\n   }\n   ```\n\n### Warnings (review, may be acceptable)\n\n1. **OpenAI Chat Model** \u00e2\u20ac\u201d `typeVersion` is `1`, but the recommended version is `1.2`. Older versions may be missing features or fixes. \u00e2\u20ac\u201d Update to `\"typeVersion\": 1.2`.\n\n2. **Webhook** \u00e2\u20ac\u201d `responseMode` is set to `\"responseNode\"` but there is no `respondToWebhook` node in the workflow. The webhook will never send a response back to the caller. \u00e2\u20ac\u201d Add a `respondToWebhook` node downstream (after the AI Agent) and wire it as the final step.\n\n3. **Webhook + AI Agent** \u00e2\u20ac\u201d The workflow uses `responseMode: \"responseNode\"` with an AI Agent. AI completions can exceed 100 seconds. On n8n Cloud, requests exceeding this limit receive a Cloudflare 524 timeout error. \u00e2\u20ac\u201d For long-running AI operations, consider a two-webhook pattern: one webhook to receive and queue the request, and a second to poll for the result. On self-hosted n8n this is less critical but still worth noting.\n\n### Clean \u00e2\u0153\u201c\n- nodeType prefix format \u00e2\u20ac\u201d no issues found (all built-in and LangChain types use correct prefixes)\n- Resource locator fields (`__rl`) \u00e2\u20ac\u201d no fields requiring `__rl` format present\n- Required fields per node \u00e2\u20ac\u201d webhook and agent nodes have required fields present\n- Expression syntax \u00e2\u20ac\u201d no unbalanced braces or invalid node references\n- Credential key names \u00e2\u20ac\u201d `openAiApi` is correct for the OpenAI LangChain node\n- Duplicate webhook paths \u00e2\u20ac\u201d only one webhook node present\n- Error handling \u00e2\u20ac\u201d workflow has fewer than 5 nodes, no error trigger required\n\n---\n\n**MCP validation note:** The `n8n_validate_workflow` MCP tool was not available in this environment. The above findings are from static analysis only. Runtime validation (which catches schema-level issues inside node parameters) was skipped.\n\n---\n\nWant me to apply these fixes directly to the workflow?\n"}], "eval-ai-agent-wiring-without_skill": [{"name": "result.md", "type": "text", "content": "# Workflow Analysis: AI Support Agent\n\n## Issues Found\n\n### 1. Wrong Node Type for OpenAI Chat Model (Critical)\n- **Found:** `\"type\": \"@n8n/n8n-nodes-langchain.lmChatOpenAi\"`\n- **Expected:** `\"type\": \"@n8n/n8n-nodes-langchain.lmOpenAi\"`\n- The node type identifier is incorrect and will cause a node-not-found error at runtime.\n\n### 2. Wrong typeVersion for OpenAI Chat Model (Minor)\n- **Found:** `\"typeVersion\": 1`\n- **Expected:** `\"typeVersion\": 1.2`\n- Should use the current recommended version to avoid missing features or fixes.\n\n### 3. Wrong Connection Type for OpenAI Chat Model (Critical)\n- **Found:**\n  ```json\n  \"OpenAI Chat Model\": {\n    \"main\": [[{ \"node\": \"AI Agent\", \"type\": \"main\", \"index\": 0 }]]\n  }\n  ```\n- **Expected:**\n  ```json\n  \"OpenAI Chat Model\": {\n    \"ai_languageModel\": [[{ \"node\": \"AI Agent\", \"type\": \"ai_languageModel\", \"index\": 0 }]]\n  }\n  ```\n- LangChain sub-nodes must use their specialized connection type (`ai_languageModel`), not `\"main\"`. Using `\"main\"` means the LLM is never actually wired to the agent \u00e2\u20ac\u201d the AI Agent will have no language model and will fail at runtime.\n\n### 4. Missing `respondToWebhook` Node (Critical)\n- The Webhook trigger has `\"responseMode\": \"responseNode\"`, which requires a **Respond to Webhook** node (`n8n-nodes-base.respondToWebhook`) at the end of the flow.\n- No such node is present. The webhook will never return a response to the caller, causing the caller to hang until timeout.\n\n### 5. Missing Connection from AI Agent to Respond to Webhook (Critical)\n- There is no connection from the AI Agent's output to any downstream node, and specifically not to a Respond to Webhook node.\n- Even if a Respond to Webhook node were added, it would need to be wired: `\"AI Agent\" \u00e2\u2020\u2019 \"Respond to Webhook\"`.\n\n## Summary of Required Fixes\n\n| # | Issue | Severity |\n|---|-------|----------|\n| 1 | Node type `lmChatOpenAi` \u00e2\u2020\u2019 `lmOpenAi` | Critical |\n| 2 | typeVersion `1` \u00e2\u2020\u2019 `1.2` | Minor |\n| 3 | OpenAI connection type `main` \u00e2\u2020\u2019 `ai_languageModel` | Critical |\n| 4 | Add `respondToWebhook` node | Critical |\n| 5 | Wire AI Agent output to Respond to Webhook | Critical |\n\n## Corrected Connections Block\n\n```json\n\"connections\": {\n  \"Webhook\": {\n    \"main\": [[{ \"node\": \"AI Agent\", \"type\": \"main\", \"index\": 0 }]]\n  },\n  \"OpenAI Chat Model\": {\n    \"ai_languageModel\": [[{ \"node\": \"AI Agent\", \"type\": \"ai_languageModel\", \"index\": 0 }]]\n  },\n  \"AI Agent\": {\n    \"main\": [[{ \"node\": \"Respond to Webhook\", \"type\": \"main\", \"index\": 0 }]]\n  }\n}\n```\n"}], "eval-clean-workflow-with_skill": [{"name": "result.md", "type": "text", "content": "## n8n Workflow Check\n\n\u00e2\u0153\u201c No issues found. Workflow looks good to activate.\n\n---\n\n**Checks performed:**\n\n- nodeType format \u00e2\u20ac\u201d all nodes use correct `n8n-nodes-base.*` prefix\n- Resource locator fields (`__rl`) \u00e2\u20ac\u201d not applicable to nodes in this workflow\n- Required fields \u00e2\u20ac\u201d Schedule Trigger has `rule`, HTTP Request has `url`, Code node has `jsCode`\n- Code node content \u00e2\u20ac\u201d `jsCode` returns correct `[{ json: {...} }]` array format; no ES6 imports, no unavailable variables\n- typeVersion \u00e2\u20ac\u201d all three nodes match expected versions (scheduleTrigger: 1.2, httpRequest: 4.2, code: 2)\n- Credential keys \u00e2\u20ac\u201d HTTP Request uses `\"authentication\": \"none\"`, no credentials block required\n- Expression syntax \u00e2\u20ac\u201d no expressions present\n- Connection structure \u00e2\u20ac\u201d clean linear chain: Schedule Trigger \u00e2\u2020\u2019 HTTP Request \u00e2\u2020\u2019 Process Data\n- Webhook checks \u00e2\u20ac\u201d no webhook nodes present\n- Community nodes \u00e2\u20ac\u201d all built-in nodes, no community node risks\n- Error handling \u00e2\u20ac\u201d workflow has only 3 nodes (threshold for warning is 5+), no error trigger required\n- MCP runtime validation \u00e2\u20ac\u201d `n8n_validate_workflow` tool not available in this environment; static analysis completed successfully with no issues found\n"}], "eval-clean-workflow-without_skill": [{"name": "result.md", "type": "text", "content": "# Workflow JSON Analysis: \"Hourly Data Fetch\"\n\n## Summary\n\nThe workflow JSON is **valid and well-formed**. No errors or issues were found.\n\n---\n\n## Node Review\n\n### 1. Schedule Trigger\n- **Type:** `n8n-nodes-base.scheduleTrigger` \u00e2\u20ac\u201d correct format for workflow JSON\n- **typeVersion:** `1.2` \u00e2\u20ac\u201d matches recommended version\n- **Parameters:** `rule.interval` with `field: \"hours\"` and `hoursInterval: 1` \u00e2\u20ac\u201d correct structure for an hourly schedule\n- **Status:** PASS\n\n### 2. HTTP Request\n- **Type:** `n8n-nodes-base.httpRequest` \u00e2\u20ac\u201d correct\n- **typeVersion:** `4.2` \u00e2\u20ac\u201d matches recommended version\n- **Parameters:** `method`, `url`, and `authentication` all present and valid\n- **Status:** PASS\n\n### 3. Process Data (Code Node)\n- **Type:** `n8n-nodes-base.code` \u00e2\u20ac\u201d correct\n- **typeVersion:** `2` \u00e2\u20ac\u201d matches recommended version\n- **Parameters:** `jsCode` contains valid JavaScript that maps over items and adds `processed: true`\n- **Status:** PASS\n\n---\n\n## Connections Review\n\n- `Schedule Trigger` \u00e2\u2020\u2019 `HTTP Request` (main[0][0]) \u00e2\u20ac\u201d correct linear chain wiring\n- `HTTP Request` \u00e2\u2020\u2019 `Process Data` (main[0][0]) \u00e2\u20ac\u201d correct linear chain wiring\n- All connections use proper format: `{ \"node\": \"...\", \"type\": \"main\", \"index\": 0 }`\n- **Status:** PASS\n\n---\n\n## Checklist\n\n| Check | Result |\n|-------|--------|\n| nodeType format uses `n8n-nodes-base.*` prefix | PASS |\n| typeVersions match recommended values | PASS |\n| No resource locator fields missing `__rl` format | PASS (no RL fields used) |\n| Connections reference valid node names | PASS |\n| Connection structure is correct | PASS |\n| No missing required parameters | PASS |\n| No credential fields needed (no auth nodes) | PASS |\n\n---\n\n## Verdict\n\n**No issues found.** This workflow is correctly structured and ready to create/deploy in n8n. The Schedule Trigger \u00e2\u2020\u2019 HTTP Request \u00e2\u2020\u2019 Code Node linear pipeline follows correct conventions throughout.\n"}], "eval-sheets-rl-fields-with_skill": [{"name": "result.md", "type": "text", "content": "## n8n Workflow Check\n\n### Errors (must fix before activating)\n\n1. **Google Sheets** \u00e2\u20ac\u201d `documentId` is a plain string `\"1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms\"` \u00e2\u20ac\u201d must use `__rl` object format. Change to:\n   ```json\n   \"documentId\": { \"__rl\": true, \"value\": \"1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms\", \"mode\": \"id\" }\n   ```\n\n2. **Google Sheets** \u00e2\u20ac\u201d `sheetName` is a plain string `\"Sheet1\"` \u00e2\u20ac\u201d must use `__rl` object format. Change to:\n   ```json\n   \"sheetName\": { \"__rl\": true, \"value\": \"gid=0\", \"mode\": \"list\", \"cachedResultName\": \"Sheet1\" }\n   ```\n\n### Clean \u00e2\u0153\u201c\n- nodeType format \u00e2\u20ac\u201d no issues found\n- typeVersion \u00e2\u20ac\u201d no issues found\n- credential keys \u00e2\u20ac\u201d `googleSheetsOAuth2Api` is correct\n- expression syntax \u00e2\u20ac\u201d no issues found\n- connection structure \u00e2\u20ac\u201d Webhook \u00e2\u2020\u2019 Google Sheets wiring is correct\n- webhook responseMode \u00e2\u20ac\u201d `\"onReceived\"` does not require a respondToWebhook node\n\n---\n\n**Note:** MCP runtime validation was not available in this environment. The two errors above are blocking \u00e2\u20ac\u201d the `documentId` and `sheetName` fields on `n8n-nodes-base.googleSheets` require the `__rl` resource locator format. Passing a plain string causes a validation error and the node will not function correctly at runtime.\n\nWant me to apply these fixes directly to the workflow?\n"}], "eval-sheets-rl-fields-without_skill": [{"name": "result.md", "type": "text", "content": "# Eval: eval-sheets-rl-fields \u00e2\u20ac\u201d Without Skill (Baseline)\n\n## Verdict: NO \u00e2\u20ac\u201d This workflow will NOT work as written.\n\n---\n\n## Issues Found\n\n### Issue 1 (CRITICAL): `documentId` missing `__rl` format\n\n**Current:**\n```json\n\"documentId\": \"1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms\"\n```\n\n**Required:**\n```json\n\"documentId\": { \"__rl\": true, \"value\": \"1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms\", \"mode\": \"id\" }\n```\n\nThe `documentId` field on `n8n-nodes-base.googleSheets` is a Resource Locator field and **must** use the `__rl` object format. A plain string will cause a validation warning and runtime failure \u00e2\u20ac\u201d the node will not be able to resolve the spreadsheet.\n\n---\n\n### Issue 2 (CRITICAL): `sheetName` missing `__rl` format\n\n**Current:**\n```json\n\"sheetName\": \"Sheet1\"\n```\n\n**Required:**\n```json\n\"sheetName\": { \"__rl\": true, \"value\": \"gid=0\", \"mode\": \"list\", \"cachedResultName\": \"Sheet1\" }\n```\n\nThe `sheetName` field is also a Resource Locator field. It must use `__rl` format. The `mode` should be `\"list\"` with `value` set to the sheet's gid (e.g., `\"gid=0\"` for the first sheet) and `cachedResultName` set to the display name.\n\n---\n\n### Issue 3 (POSSIBLE): `operation: \"appendOrUpdate\"` may not be valid\n\n**Current:**\n```json\n\"operation\": \"appendOrUpdate\"\n```\n\nThe standard operations for `n8n-nodes-base.googleSheets` at `typeVersion: 4.5` are:\n- `append`\n- `read`\n- `update`\n- `clear`\n- `delete`\n\n`appendOrUpdate` (upsert) may not exist as a named operation in this node version. For logging incoming webhook data as new rows, the correct operation is `append`. Verify this operation exists before using it; otherwise switch to `append`.\n\n---\n\n### No Issue: Webhook `responseMode`\n\n`\"responseMode\": \"onReceived\"` is valid \u00e2\u20ac\u201d the webhook will respond immediately with a default acknowledgment. This is fine for a fire-and-forget logger pattern.\n\n---\n\n## Corrected Google Sheets Node\n\n```json\n{\n  \"name\": \"Google Sheets\",\n  \"type\": \"n8n-nodes-base.googleSheets\",\n  \"typeVersion\": 4.5,\n  \"position\": [500, 300],\n  \"parameters\": {\n    \"resource\": \"sheet\",\n    \"operation\": \"append\",\n    \"documentId\": { \"__rl\": true, \"value\": \"1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms\", \"mode\": \"id\" },\n    \"sheetName\": { \"__rl\": true, \"value\": \"gid=0\", \"mode\": \"list\", \"cachedResultName\": \"Sheet1\" },\n    \"columns\": {\n      \"mappingMode\": \"autoMapInputData\",\n      \"value\": {},\n      \"matchingColumns\": [],\n      \"schema\": []\n    },\n    \"options\": {}\n  },\n  \"credentials\": {\n    \"googleSheetsOAuth2Api\": { \"id\": \"3\", \"name\": \"Google Sheets\" }\n  }\n}\n```\n\n---\n\n## Summary\n\n| # | Field | Severity | Problem |\n|---|-------|----------|---------|\n| 1 | `documentId` | Critical | Plain string \u00e2\u20ac\u201d must use `__rl` object format |\n| 2 | `sheetName` | Critical | Plain string \u00e2\u20ac\u201d must use `__rl` object format |\n| 3 | `operation` | Possible | `appendOrUpdate` may not be a valid operation; use `append` for logging |\n"}]}, "benchmark": {"metadata": {"skill_name": "n8n-json-checker", "skill_path": "<path/to/skill>", "executor_model": "<model-name>", "analyzer_model": "<model-name>", "timestamp": "2026-03-29T15:50:00Z", "evals_run": [1, 2, 3, 4], "runs_per_configuration": 3}, "runs": [{"eval_id": 2, "configuration": "with_skill", "run_number": 1, "result": {"pass_rate": 1.0, "passed": 11, "failed": 0, "total": 11, "time_seconds": 48.3, "tokens": 29482, "tool_calls": 0, "errors": 0}, "expectations": [{"text": "The output identifies that OpenAI Chat Model is wired via 'main' instead of 'ai_languageModel'", "passed": true, "evidence": "Error 1: 'OpenAI Chat Model \u00e2\u20ac\u201d Wrong connection type used. The node connects via main to the AI Agent, but LangChain sub-nodes must connect via ai_languageModel'"}, {"text": "The output classifies the wrong AI sub-node connection type as an Error", "passed": true, "evidence": "Listed under 'Errors (must fix before activating)'"}, {"text": "The output states the correct connection type should be 'ai_languageModel'", "passed": true, "evidence": "Fix shown: change key from 'main' to 'ai_languageModel' with type 'ai_languageModel'"}, {"text": "The output warns that there is no respondToWebhook node despite responseMode being 'responseNode'", "passed": true, "evidence": "Warning 1: 'Webhook \u00e2\u20ac\u201d responseMode is responseNode but no respondToWebhook node exists'"}, {"text": "The output does NOT flag the Webhook node's typeVersion or path as issues", "passed": true, "evidence": "Webhook typeVersion and path not mentioned as issues; typeVersion listed as Clean"}, {"text": "The output does NOT flag the AI Agent node's configuration as problematic", "passed": true, "evidence": "'Required fields per node \u00e2\u20ac\u201d no issues found' in Clean section"}, {"text": "The output correctly identifies the OpenAI Chat Model node by name in the finding", "passed": true, "evidence": "Finding starts with '**OpenAI Chat Model**'"}, {"text": "The output does not report any false errors on the @n8n/n8n-nodes-langchain node types", "passed": true, "evidence": "'nodeType format \u00e2\u20ac\u201d no issues found' in Clean section; no false prefix errors"}, {"text": "The output does NOT flag the OpenAI Chat Model node type '@n8n/n8n-nodes-langchain.lmChatOpenAi' as a wrong prefix", "passed": true, "evidence": "lmChatOpenAi prefix not flagged; nodeType format listed as clean"}, {"text": "The output does NOT suggest the AI Agent node's text parameter is misconfigured", "passed": true, "evidence": "No mention of text parameter issues"}, {"text": "The output identifies both issues (wrong connection type AND missing respondToWebhook) not just one", "passed": true, "evidence": "1 Error (wrong connection) + 1 Warning (missing respondToWebhook) both present"}], "notes": []}, {"eval_id": 3, "configuration": "with_skill", "run_number": 1, "result": {"pass_rate": 1.0, "passed": 8, "failed": 0, "total": 8, "time_seconds": 38.4, "tokens": 29705, "tool_calls": 0, "errors": 0}, "expectations": [{"text": "The output does NOT list any Errors for this workflow", "passed": true, "evidence": "Output: '\u00e2\u0153\u201c No issues found. Workflow looks good to activate.'"}, {"text": "The output does NOT falsely flag the httpRequest authentication:none as an error", "passed": true, "evidence": "HTTP Request authentication listed as correct in check details"}, {"text": "The output does NOT falsely flag the Code node's jsCode as an error", "passed": true, "evidence": "jsCode returns correct array format, no flag"}, {"text": "The output uses the '## n8n Workflow Check' heading", "passed": true, "evidence": "Output starts with '## n8n Workflow Check'"}, {"text": "The output either says the workflow is clean/looks good or lists only informational warnings", "passed": true, "evidence": "'\u00e2\u0153\u201c No issues found. Workflow looks good to activate.'"}, {"text": "The output does NOT flag correct typeVersions (1.2, 4.2, 2) as problems", "passed": true, "evidence": "typeVersions scheduleTrigger 1.2, httpRequest 4.2, code 2 all listed as correct"}, {"text": "The output explicitly states the workflow passed or has no errors \u00e2\u20ac\u201d not just omits errors by silence", "passed": true, "evidence": "Explicit 'No issues found. Workflow looks good to activate.'"}, {"text": "The output does NOT suggest adding respondToWebhook (no webhook node in this workflow)", "passed": true, "evidence": "'Webhook checks \u00e2\u20ac\u201d no webhook nodes' \u00e2\u20ac\u201d no false suggestion"}], "notes": []}, {"eval_id": 4, "configuration": "with_skill", "run_number": 1, "result": {"pass_rate": 1.0, "passed": 11, "failed": 0, "total": 11, "time_seconds": 39.4, "tokens": 29729, "tool_calls": 0, "errors": 0}, "expectations": [{"text": "The output identifies documentId as a plain string that should use the __rl format", "passed": true, "evidence": "Error 1: 'Google Sheets \u00e2\u20ac\u201d documentId is a plain string but requires the __rl object format'"}, {"text": "The output identifies sheetName as a plain string that should use the __rl format", "passed": true, "evidence": "Error 2: 'Google Sheets \u00e2\u20ac\u201d sheetName is a plain string but requires the __rl object format'"}, {"text": "Both documentId and sheetName issues are classified as Errors", "passed": true, "evidence": "Both listed under 'Errors (must fix before activating)'"}, {"text": "The output shows or describes the correct __rl format for documentId", "passed": true, "evidence": "Shows: { \"__rl\": true, \"value\": \"1BxiMVs0XRA5...\", \"mode\": \"id\" }"}, {"text": "The output shows or describes the correct __rl format for sheetName", "passed": true, "evidence": "Shows: { \"__rl\": true, \"value\": \"gid=0\", \"mode\": \"list\", \"cachedResultName\": \"Sheet1\" }"}, {"text": "The output does NOT flag the googleSheetsOAuth2Api credential key as incorrect", "passed": true, "evidence": "Credential key listed under Clean section with no issues"}, {"text": "The output does NOT flag typeVersion 4.5 for googleSheets as incorrect", "passed": true, "evidence": "'typeVersions \u00e2\u20ac\u201d webhook v2, googleSheets v4.5 both correct' in Clean section"}, {"text": "The output correctly identifies the 'Google Sheets' node by name in the findings", "passed": true, "evidence": "Both errors start with '**Google Sheets**'"}, {"text": "The output offers to apply fixes after listing the errors", "passed": true, "evidence": "Ends with 'Want me to apply these fixes directly to the workflow?'"}, {"text": "The output does NOT flag the 'appendOrUpdate' operation name as invalid", "passed": true, "evidence": "operation not mentioned as an issue; no flag on appendOrUpdate"}, {"text": "The output does NOT flag the missing 'columns' parameter as a critical error (it's optional)", "passed": true, "evidence": "columns parameter not mentioned at all"}], "notes": []}, {"eval_id": 1, "configuration": "with_skill", "run_number": 1, "result": {"pass_rate": 1.0, "passed": 13, "failed": 0, "total": 13, "time_seconds": 41.1, "tokens": 29796, "tool_calls": 0, "errors": 0}, "expectations": [{"text": "The output contains the heading '## n8n Workflow Check'", "passed": true, "evidence": "Output starts with '## n8n Workflow Check'"}, {"text": "The output identifies both nodes as having the wrong 'nodes-base.' prefix (should be 'n8n-nodes-base.')", "passed": true, "evidence": "Error 1 grouped: 'Telegram Trigger, Send Reply \u00e2\u20ac\u201d Wrong type prefix: both nodes use nodes-base. instead of n8n-nodes-base.'"}, {"text": "The output classifies the incorrect nodeType prefix as an Error, not a Warning", "passed": true, "evidence": "Listed under 'Errors (must fix before activating)'"}, {"text": "The output identifies chatId on 'Send Reply' as a plain string instead of an __rl object", "passed": true, "evidence": "Error 2: 'Send Reply \u00e2\u20ac\u201d chatId must use __rl object format, not a plain string'"}, {"text": "The output classifies the plain-string chatId as an Error", "passed": true, "evidence": "Listed under Errors section"}, {"text": "The output describes or shows the correct __rl format with __rl:true, value, and mode fields", "passed": true, "evidence": "Shows corrected JSON: { \"__rl\": true, \"value\": \"...\", \"mode\": \"expression\" }"}, {"text": "The output reports the typeVersion 1.1 mismatch on Telegram Trigger (expected 1.2)", "passed": true, "evidence": "Warning 1: 'Telegram Trigger \u00e2\u20ac\u201d typeVersion is 1.1, expected 1.2'"}, {"text": "The output classifies the typeVersion mismatch as a Warning (not an Error)", "passed": true, "evidence": "Listed under 'Warnings (review, may be acceptable)'"}, {"text": "The output reports the misspelled credential key 'telegramAPI' (should be 'telegramApi')", "passed": true, "evidence": "Warning 2: 'Telegram Trigger \u00e2\u20ac\u201d Credential key \"telegramAPI\" is incorrectly capitalized'"}, {"text": "The output offers to apply fixes after presenting the report", "passed": true, "evidence": "Ends with 'Want me to apply these fixes directly to the workflow?'"}, {"text": "The output identifies exactly 4 issues (not more, not fewer)", "passed": true, "evidence": "2 Errors + 2 Warnings = 4 total issues"}, {"text": "The output does NOT flag the connections object as having any issues", "passed": true, "evidence": "'Connection structure \u00e2\u20ac\u201d linear chain wired correctly' listed under Clean"}, {"text": "The output does NOT flag the 'updates: [message]' parameter as wrong", "passed": true, "evidence": "No mention of the updates parameter as an issue"}], "notes": []}, {"eval_id": 2, "configuration": "without_skill", "run_number": 1, "result": {"pass_rate": 0.8182, "passed": 9, "failed": 2, "total": 11, "time_seconds": 35.0, "tokens": 22223, "tool_calls": 0, "errors": 0}, "expectations": [{"text": "The output identifies that OpenAI Chat Model is wired via 'main' instead of 'ai_languageModel'", "passed": true, "evidence": "Issue 3: 'OpenAI Chat Model uses main instead of ai_languageModel connection type'"}, {"text": "The output classifies the wrong AI sub-node connection type as an Error", "passed": true, "evidence": "Listed as Critical Error"}, {"text": "The output states the correct connection type should be 'ai_languageModel'", "passed": true, "evidence": "Correct connection shown in fix example"}, {"text": "The output warns that there is no respondToWebhook node despite responseMode being 'responseNode'", "passed": true, "evidence": "Issue 4: 'Missing Respond to Webhook node'"}, {"text": "The output does NOT flag the Webhook node's typeVersion or path as issues", "passed": true, "evidence": "No mention of Webhook typeVersion or path as issues"}, {"text": "The output does NOT flag the AI Agent node's configuration as problematic", "passed": true, "evidence": "AI Agent configuration not flagged"}, {"text": "The output correctly identifies the OpenAI Chat Model node by name in the finding", "passed": true, "evidence": "OpenAI Chat Model explicitly named in issues 1-3"}, {"text": "The output does not report any false errors on the @n8n/n8n-nodes-langchain node types", "passed": false, "evidence": "Issue 1 flags lmChatOpenAi as wrong type: 'The correct type is @n8n/n8n-nodes-langchain.lmOpenAi' \u00e2\u20ac\u201d this is a false positive"}, {"text": "The output does NOT flag the OpenAI Chat Model node type '@n8n/n8n-nodes-langchain.lmChatOpenAi' as a wrong prefix", "passed": false, "evidence": "Explicitly states lmChatOpenAi 'does not exist' and flags it as an error"}, {"text": "The output does NOT suggest the AI Agent node's text parameter is misconfigured", "passed": true, "evidence": "No mention of text parameter issues"}, {"text": "The output identifies both issues (wrong connection type AND missing respondToWebhook) not just one", "passed": true, "evidence": "Issues 3 and 4 cover both required findings"}], "notes": []}, {"eval_id": 3, "configuration": "without_skill", "run_number": 1, "result": {"pass_rate": 0.875, "passed": 7, "failed": 1, "total": 8, "time_seconds": 26.9, "tokens": 21718, "tool_calls": 0, "errors": 0}, "expectations": [{"text": "The output does NOT list any Errors for this workflow", "passed": true, "evidence": "Output verdict: 'No issues found. This workflow is clean and ready to use as-is.'"}, {"text": "The output does NOT falsely flag the httpRequest authentication:none as an error", "passed": true, "evidence": "authentication:none listed as consistent and correct"}, {"text": "The output does NOT falsely flag the Code node's jsCode as an error", "passed": true, "evidence": "jsCode described as valid JavaScript with correct pattern"}, {"text": "The output uses the '## n8n Workflow Check' heading", "passed": false, "evidence": "Output uses '# Workflow JSON Analysis: \"Hourly Data Fetch\"' not '## n8n Workflow Check'"}, {"text": "The output either says the workflow is clean/looks good or lists only informational warnings", "passed": true, "evidence": "'Verdict: No issues found. This workflow is clean and ready to use as-is.'"}, {"text": "The output does NOT flag correct typeVersions (1.2, 4.2, 2) as problems", "passed": true, "evidence": "All typeVersions listed as PASS in review"}, {"text": "The output explicitly states the workflow passed or has no errors \u00e2\u20ac\u201d not just omits errors by silence", "passed": true, "evidence": "Explicit Verdict section states no issues found"}, {"text": "The output does NOT suggest adding respondToWebhook (no webhook node in this workflow)", "passed": true, "evidence": "No webhook-related suggestions made"}], "notes": []}, {"eval_id": 4, "configuration": "without_skill", "run_number": 1, "result": {"pass_rate": 0.8182, "passed": 9, "failed": 2, "total": 11, "time_seconds": 38.5, "tokens": 22755, "tool_calls": 0, "errors": 0}, "expectations": [{"text": "The output identifies documentId as a plain string that should use the __rl format", "passed": true, "evidence": "Issue 1: 'documentId missing __rl resource locator format'"}, {"text": "The output identifies sheetName as a plain string that should use the __rl format", "passed": true, "evidence": "Issue 2: 'sheetName missing __rl resource locator format'"}, {"text": "Both documentId and sheetName issues are classified as Errors", "passed": true, "evidence": "Both listed as Critical severity"}, {"text": "The output shows or describes the correct __rl format for documentId", "passed": true, "evidence": "Shows { \"__rl\": true, \"value\": \"...\", \"mode\": \"id\" }"}, {"text": "The output shows or describes the correct __rl format for sheetName", "passed": true, "evidence": "Shows { \"__rl\": true, \"value\": \"gid=0\", \"mode\": \"list\", \"cachedResultName\": \"Sheet1\" }"}, {"text": "The output does NOT flag the googleSheetsOAuth2Api credential key as incorrect", "passed": true, "evidence": "Credential key not mentioned as an issue"}, {"text": "The output does NOT flag typeVersion 4.5 for googleSheets as incorrect", "passed": true, "evidence": "typeVersion not mentioned as an issue"}, {"text": "The output correctly identifies the 'Google Sheets' node by name in the findings", "passed": true, "evidence": "Issues reference the Google Sheets node explicitly"}, {"text": "The output offers to apply fixes after listing the errors", "passed": false, "evidence": "No offer to apply fixes; output ends with summary table"}, {"text": "The output does NOT flag the 'appendOrUpdate' operation name as invalid", "passed": false, "evidence": "Issue 3 explicitly flags 'appendOrUpdate is not a valid operation'"}, {"text": "The output does NOT flag the missing 'columns' parameter as a critical error (it's optional)", "passed": true, "evidence": "columns flagged as Warning, not critical error"}], "notes": []}, {"eval_id": 1, "configuration": "without_skill", "run_number": 1, "result": {"pass_rate": 0.7692, "passed": 10, "failed": 3, "total": 13, "time_seconds": 37.5, "tokens": 22791, "tool_calls": 0, "errors": 0}, "expectations": [{"text": "The output contains the heading '## n8n Workflow Check'", "passed": false, "evidence": "Output uses custom heading '# n8n Workflow JSON Check \u00e2\u20ac\u201d Telegram Echo Bot', not '## n8n Workflow Check'"}, {"text": "The output identifies both nodes as having the wrong 'nodes-base.' prefix (should be 'n8n-nodes-base.')", "passed": true, "evidence": "Issue 1 and 2 both flag the wrong prefix on each node"}, {"text": "The output classifies the incorrect nodeType prefix as an Error, not a Warning", "passed": true, "evidence": "Both prefix issues listed as Error severity"}, {"text": "The output identifies chatId on 'Send Reply' as a plain string instead of an __rl object", "passed": true, "evidence": "Issue 5: 'chatId missing __rl resource locator format'"}, {"text": "The output classifies the plain-string chatId as an Error", "passed": true, "evidence": "Listed as Error severity"}, {"text": "The output describes or shows the correct __rl format with __rl:true, value, and mode fields", "passed": true, "evidence": "Shows correct format: { \"__rl\": true, \"value\": \"...\", \"mode\": \"expression\" }"}, {"text": "The output reports the typeVersion 1.1 mismatch on Telegram Trigger (expected 1.2)", "passed": true, "evidence": "Issue 3: 'Wrong typeVersion for Telegram Trigger \u00e2\u20ac\u201d Found 1.1, Expected 1.2'"}, {"text": "The output classifies the typeVersion mismatch as a Warning (not an Error)", "passed": true, "evidence": "Listed as Warning/Bug severity"}, {"text": "The output reports the misspelled credential key 'telegramAPI' (should be 'telegramApi')", "passed": true, "evidence": "Issue 4: 'Wrong credential key for Telegram Trigger \u00e2\u20ac\u201d telegramAPI vs telegramApi'"}, {"text": "The output offers to apply fixes after presenting the report", "passed": false, "evidence": "No offer to apply fixes; output ends with corrected JSON and summary table"}, {"text": "The output identifies exactly 4 issues (not more, not fewer)", "passed": false, "evidence": "Found 5 issues \u00e2\u20ac\u201d both prefix errors listed as separate findings instead of grouped"}, {"text": "The output does NOT flag the connections object as having any issues", "passed": true, "evidence": "No mention of connection issues"}, {"text": "The output does NOT flag the 'updates: [message]' parameter as wrong", "passed": true, "evidence": "No mention of updates parameter"}], "notes": []}], "run_summary": {"with_skill": {"pass_rate": {"mean": 1.0, "stddev": 0.0, "min": 1.0, "max": 1.0}, "time_seconds": {"mean": 41.8, "stddev": 4.4744, "min": 38.4, "max": 48.3}, "tokens": {"mean": 29678.0, "stddev": 136.2229, "min": 29482, "max": 29796}}, "without_skill": {"pass_rate": {"mean": 0.8202, "stddev": 0.0433, "min": 0.7692, "max": 0.875}, "time_seconds": {"mean": 34.475, "stddev": 5.2601, "min": 26.9, "max": 38.5}, "tokens": {"mean": 22371.75, "stddev": 507.3351, "min": 21718, "max": 22791}}, "delta": {"pass_rate": "+0.18", "time_seconds": "+7.3", "tokens": "+7306"}}, "notes": []}};
+
+    // ---- State ----
+    let feedbackMap = {};  // run_id -> feedback text
+    let currentIndex = 0;
+    let visitedRuns = new Set();
+
+    // ---- Init ----
+    async function init() {
+      // Load saved feedback from server — but only if this isn't a fresh
+      // iteration (indicated by previous_feedback being present). When
+      // previous feedback exists, the feedback.json on disk is stale from
+      // the prior iteration and should not pre-fill the textareas.
+      const hasPrevious = Object.keys(EMBEDDED_DATA.previous_feedback || {}).length > 0
+        || Object.keys(EMBEDDED_DATA.previous_outputs || {}).length > 0;
+      if (!hasPrevious) {
+        try {
+          const resp = await fetch("/api/feedback");
+          const data = await resp.json();
+          if (data.reviews) {
+            for (const r of data.reviews) feedbackMap[r.run_id] = r.feedback;
+          }
+        } catch { /* first run, no feedback yet */ }
+      }
+
+      document.getElementById("skill-name").textContent = EMBEDDED_DATA.skill_name;
+      showRun(0);
+
+      // Wire up feedback auto-save
+      const textarea = document.getElementById("feedback");
+      let saveTimeout = null;
+      textarea.addEventListener("input", () => {
+        clearTimeout(saveTimeout);
+        document.getElementById("feedback-status").textContent = "";
+        saveTimeout = setTimeout(() => saveCurrentFeedback(), 800);
+      });
+    }
+
+    // ---- Navigation ----
+    function navigate(delta) {
+      const newIndex = currentIndex + delta;
+      if (newIndex >= 0 && newIndex < EMBEDDED_DATA.runs.length) {
+        saveCurrentFeedback();
+        showRun(newIndex);
+      }
+    }
+
+    function updateNavButtons() {
+      document.getElementById("prev-btn").disabled = currentIndex === 0;
+      document.getElementById("next-btn").disabled =
+        currentIndex === EMBEDDED_DATA.runs.length - 1;
+    }
+
+    // ---- Show a run ----
+    function showRun(index) {
+      currentIndex = index;
+      const run = EMBEDDED_DATA.runs[index];
+
+      // Progress
+      document.getElementById("progress").textContent =
+        `${index + 1} of ${EMBEDDED_DATA.runs.length}`;
+
+      // Prompt
+      document.getElementById("prompt-text").textContent = run.prompt;
+
+      // Config badge
+      const badge = document.getElementById("config-badge");
+      const configMatch = run.id.match(/(with_skill|without_skill|new_skill|old_skill)/);
+      if (configMatch) {
+        const config = configMatch[1];
+        const isBaseline = config === "without_skill" || config === "old_skill";
+        badge.textContent = config.replace(/_/g, " ");
+        badge.className = "config-badge " + (isBaseline ? "config-baseline" : "config-primary");
+        badge.style.display = "inline-block";
+      } else {
+        badge.style.display = "none";
+      }
+
+      // Outputs
+      renderOutputs(run);
+
+      // Previous outputs
+      renderPrevOutputs(run);
+
+      // Grades
+      renderGrades(run);
+
+      // Previous feedback
+      const prevFb = (EMBEDDED_DATA.previous_feedback || {})[run.id];
+      const prevEl = document.getElementById("prev-feedback");
+      if (prevFb) {
+        document.getElementById("prev-feedback-text").textContent = prevFb;
+        prevEl.style.display = "block";
+      } else {
+        prevEl.style.display = "none";
+      }
+
+      // Feedback
+      document.getElementById("feedback").value = feedbackMap[run.id] || "";
+      document.getElementById("feedback-status").textContent = "";
+
+      updateNavButtons();
+
+      // Track visited runs and promote done button when all visited
+      visitedRuns.add(index);
+      const doneBtn = document.getElementById("done-btn");
+      if (visitedRuns.size >= EMBEDDED_DATA.runs.length) {
+        doneBtn.classList.add("ready");
+      }
+
+      // Scroll main content to top
+      document.querySelector(".main").scrollTop = 0;
+    }
+
+    // ---- Render outputs ----
+    function renderOutputs(run) {
+      const container = document.getElementById("outputs-body");
+      container.innerHTML = "";
+
+      const outputs = run.outputs || [];
+      if (outputs.length === 0) {
+        container.innerHTML = '<div class="empty-state">No output files</div>';
+        return;
+      }
+
+      for (const file of outputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        // Always show file header with download link
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const content = document.createElement("div");
+        content.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          content.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          content.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          content.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(content, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          content.appendChild(a);
+        } else if (file.type === "error") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          pre.style.color = "var(--red)";
+          content.appendChild(pre);
+        }
+
+        fileDiv.appendChild(content);
+        container.appendChild(fileDiv);
+      }
+    }
+
+    // ---- XLSX rendering via SheetJS ----
+    function renderXlsx(container, b64Data) {
+      try {
+        const raw = Uint8Array.from(atob(b64Data), c => c.charCodeAt(0));
+        const wb = XLSX.read(raw, { type: "array" });
+
+        for (let i = 0; i < wb.SheetNames.length; i++) {
+          const sheetName = wb.SheetNames[i];
+          const ws = wb.Sheets[sheetName];
+
+          if (wb.SheetNames.length > 1) {
+            const sheetLabel = document.createElement("div");
+            sheetLabel.style.cssText =
+              "font-weight:600; font-size:0.8rem; color:#b0aea5; margin-top:0.5rem; margin-bottom:0.25rem;";
+            sheetLabel.textContent = "Sheet: " + sheetName;
+            container.appendChild(sheetLabel);
+          }
+
+          const htmlStr = XLSX.utils.sheet_to_html(ws, { editable: false });
+          const wrapper = document.createElement("div");
+          wrapper.innerHTML = htmlStr;
+          container.appendChild(wrapper);
+        }
+      } catch (err) {
+        container.textContent = "Error rendering spreadsheet: " + err.message;
+      }
+    }
+
+    // ---- Grades ----
+    function renderGrades(run) {
+      const section = document.getElementById("grades-section");
+      const content = document.getElementById("grades-content");
+
+      if (!run.grading) {
+        section.style.display = "none";
+        return;
+      }
+
+      const grading = run.grading;
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("grades-arrow").classList.remove("open");
+
+      const summary = grading.summary || {};
+      const expectations = grading.expectations || [];
+
+      let html = '<div style="padding: 1rem;">';
+
+      // Summary line
+      const passRate = summary.pass_rate != null
+        ? Math.round(summary.pass_rate * 100) + "%"
+        : "?";
+      const badgeClass = summary.pass_rate >= 0.8 ? "grade-pass" : summary.pass_rate >= 0.5 ? "" : "grade-fail";
+      html += '<div class="grades-summary">';
+      html += '<span class="grade-badge ' + badgeClass + '">' + passRate + '</span>';
+      html += '<span>' + (summary.passed || 0) + ' passed, ' + (summary.failed || 0) + ' failed of ' + (summary.total || 0) + '</span>';
+      html += '</div>';
+
+      // Assertions list
+      html += '<ul class="assertion-list">';
+      for (const exp of expectations) {
+        const statusClass = exp.passed ? "pass" : "fail";
+        const statusIcon = exp.passed ? "\u2713" : "\u2717";
+        html += '<li class="assertion-item">';
+        html += '<span class="assertion-status ' + statusClass + '">' + statusIcon + '</span>';
+        html += '<span>' + escapeHtml(exp.text) + '</span>';
+        if (exp.evidence) {
+          html += '<div class="assertion-evidence">' + escapeHtml(exp.evidence) + '</div>';
+        }
+        html += '</li>';
+      }
+      html += '</ul>';
+
+      html += '</div>';
+      content.innerHTML = html;
+    }
+
+    function toggleGrades() {
+      const content = document.getElementById("grades-content");
+      const arrow = document.getElementById("grades-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Previous outputs (collapsible) ----
+    function renderPrevOutputs(run) {
+      const section = document.getElementById("prev-outputs-section");
+      const content = document.getElementById("prev-outputs-content");
+      const prevOutputs = (EMBEDDED_DATA.previous_outputs || {})[run.id];
+
+      if (!prevOutputs || prevOutputs.length === 0) {
+        section.style.display = "none";
+        return;
+      }
+
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("prev-outputs-arrow").classList.remove("open");
+
+      // Render the files into the content area
+      content.innerHTML = "";
+      const wrapper = document.createElement("div");
+      wrapper.style.padding = "1rem";
+
+      for (const file of prevOutputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const fc = document.createElement("div");
+        fc.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          fc.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          fc.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          fc.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(fc, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          fc.appendChild(a);
+        }
+
+        fileDiv.appendChild(fc);
+        wrapper.appendChild(fileDiv);
+      }
+
+      content.appendChild(wrapper);
+    }
+
+    function togglePrevOutputs() {
+      const content = document.getElementById("prev-outputs-content");
+      const arrow = document.getElementById("prev-outputs-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Feedback (saved to server -> feedback.json) ----
+    function saveCurrentFeedback() {
+      const run = EMBEDDED_DATA.runs[currentIndex];
+      const text = document.getElementById("feedback").value;
+
+      if (text.trim() === "") {
+        delete feedbackMap[run.id];
+      } else {
+        feedbackMap[run.id] = text;
+      }
+
+      // Build reviews array from map
+      const reviews = [];
+      for (const [run_id, feedback] of Object.entries(feedbackMap)) {
+        if (feedback.trim()) {
+          reviews.push({ run_id, feedback, timestamp: new Date().toISOString() });
+        }
+      }
+
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reviews, status: "in_progress" }),
+      }).then(() => {
+        document.getElementById("feedback-status").textContent = "Saved";
+      }).catch(() => {
+        // Static mode or server unavailable — no-op on auto-save,
+        // feedback will be downloaded on final submit
+        document.getElementById("feedback-status").textContent = "Will download on submit";
+      });
+    }
+
+    // ---- Done ----
+    function showDoneDialog() {
+      // Save current textarea to feedbackMap (but don't POST yet)
+      const run = EMBEDDED_DATA.runs[currentIndex];
+      const text = document.getElementById("feedback").value;
+      if (text.trim() === "") {
+        delete feedbackMap[run.id];
+      } else {
+        feedbackMap[run.id] = text;
+      }
+
+      // POST once with status: complete — include ALL runs so the model
+      // can distinguish "no feedback" (looks good) from "not reviewed"
+      const reviews = [];
+      const ts = new Date().toISOString();
+      for (const r of EMBEDDED_DATA.runs) {
+        reviews.push({ run_id: r.id, feedback: feedbackMap[r.id] || "", timestamp: ts });
+      }
+      const payload = JSON.stringify({ reviews, status: "complete" }, null, 2);
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: payload,
+      }).then(() => {
+        document.getElementById("done-overlay").classList.add("visible");
+      }).catch(() => {
+        // Server not available (static mode) — download as file
+        const blob = new Blob([payload], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "feedback.json";
+        a.click();
+        URL.revokeObjectURL(url);
+        document.getElementById("done-overlay").classList.add("visible");
+      });
+    }
+
+    function closeDoneDialog() {
+      // Reset status back to in_progress
+      saveCurrentFeedback();
+      document.getElementById("done-overlay").classList.remove("visible");
+    }
+
+    // ---- Toast ----
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("visible");
+      setTimeout(() => toast.classList.remove("visible"), 2000);
+    }
+
+    // ---- Keyboard nav ----
+    document.addEventListener("keydown", (e) => {
+      // Don't capture when typing in textarea
+      if (e.target.tagName === "TEXTAREA") return;
+
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        e.preventDefault();
+        navigate(-1);
+      } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        e.preventDefault();
+        navigate(1);
+      }
+    });
+
+    // ---- Util ----
+    function getDownloadUri(file) {
+      if (file.data_uri) return file.data_uri;
+      if (file.data_b64) return "data:application/octet-stream;base64," + file.data_b64;
+      if (file.type === "text") return "data:text/plain;charset=utf-8," + encodeURIComponent(file.content);
+      return "#";
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ---- View switching ----
+    function switchView(view) {
+      document.querySelectorAll(".view-tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".view-panel").forEach(p => p.classList.remove("active"));
+      document.querySelector(`[onclick="switchView('${view}')"]`).classList.add("active");
+      document.getElementById("panel-" + view).classList.add("active");
+    }
+
+    // ---- Benchmark rendering ----
+    function renderBenchmark() {
+      const data = EMBEDDED_DATA.benchmark;
+      if (!data) return;
+
+      // Show the tabs
+      document.getElementById("view-tabs").style.display = "flex";
+
+      const container = document.getElementById("benchmark-content");
+      const summary = data.run_summary || {};
+      const metadata = data.metadata || {};
+      const notes = data.notes || [];
+
+      let html = "";
+
+      // Header
+      html += "<h2 style='font-family: Poppins, sans-serif; margin-bottom: 0.5rem;'>Benchmark Results</h2>";
+      html += "<p style='color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.25rem;'>";
+      if (metadata.skill_name) html += "<strong>" + escapeHtml(metadata.skill_name) + "</strong> &mdash; ";
+      if (metadata.timestamp) html += metadata.timestamp + " &mdash; ";
+      if (metadata.evals_run) html += "Evals: " + metadata.evals_run.join(", ") + " &mdash; ";
+      html += (metadata.runs_per_configuration || "?") + " runs per configuration";
+      html += "</p>";
+
+      // Summary table
+      html += '<table class="benchmark-table">';
+
+      function fmtStat(stat, pct) {
+        if (!stat) return "—";
+        const suffix = pct ? "%" : "";
+        const m = pct ? (stat.mean * 100).toFixed(0) : stat.mean.toFixed(1);
+        const s = pct ? (stat.stddev * 100).toFixed(0) : stat.stddev.toFixed(1);
+        return m + suffix + " ± " + s + suffix;
+      }
+
+      function deltaClass(val) {
+        if (!val) return "";
+        const n = parseFloat(val);
+        if (n > 0) return "benchmark-delta-positive";
+        if (n < 0) return "benchmark-delta-negative";
+        return "";
+      }
+
+      // Discover config names dynamically (everything except "delta")
+      const configs = Object.keys(summary).filter(k => k !== "delta");
+      const configA = configs[0] || "config_a";
+      const configB = configs[1] || "config_b";
+      const labelA = configA.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const labelB = configB.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const a = summary[configA] || {};
+      const b = summary[configB] || {};
+      const delta = summary.delta || {};
+
+      html += "<thead><tr><th>Metric</th><th>" + escapeHtml(labelA) + "</th><th>" + escapeHtml(labelB) + "</th><th>Delta</th></tr></thead>";
+      html += "<tbody>";
+
+      html += "<tr><td><strong>Pass Rate</strong></td>";
+      html += "<td>" + fmtStat(a.pass_rate, true) + "</td>";
+      html += "<td>" + fmtStat(b.pass_rate, true) + "</td>";
+      html += '<td class="' + deltaClass(delta.pass_rate) + '">' + (delta.pass_rate || "—") + "</td></tr>";
+
+      // Time (only show row if data exists)
+      if (a.time_seconds || b.time_seconds) {
+        html += "<tr><td><strong>Time (s)</strong></td>";
+        html += "<td>" + fmtStat(a.time_seconds, false) + "</td>";
+        html += "<td>" + fmtStat(b.time_seconds, false) + "</td>";
+        html += '<td class="' + deltaClass(delta.time_seconds) + '">' + (delta.time_seconds ? delta.time_seconds + "s" : "—") + "</td></tr>";
+      }
+
+      // Tokens (only show row if data exists)
+      if (a.tokens || b.tokens) {
+        html += "<tr><td><strong>Tokens</strong></td>";
+        html += "<td>" + fmtStat(a.tokens, false) + "</td>";
+        html += "<td>" + fmtStat(b.tokens, false) + "</td>";
+        html += '<td class="' + deltaClass(delta.tokens) + '">' + (delta.tokens || "—") + "</td></tr>";
+      }
+
+      html += "</tbody></table>";
+
+      // Per-eval breakdown (if runs data available)
+      const runs = data.runs || [];
+      if (runs.length > 0) {
+        const evalIds = [...new Set(runs.map(r => r.eval_id))].sort((a, b) => a - b);
+
+        html += "<h3 style='font-family: Poppins, sans-serif; margin-bottom: 0.75rem;'>Per-Eval Breakdown</h3>";
+
+        const hasTime = runs.some(r => r.result && r.result.time_seconds != null);
+        const hasErrors = runs.some(r => r.result && r.result.errors > 0);
+
+        for (const evalId of evalIds) {
+          const evalRuns = runs.filter(r => r.eval_id === evalId);
+          const evalName = evalRuns[0] && evalRuns[0].eval_name ? evalRuns[0].eval_name : "Eval " + evalId;
+
+          html += "<h4 style='font-family: Poppins, sans-serif; margin: 1rem 0 0.5rem; color: var(--text);'>" + escapeHtml(evalName) + "</h4>";
+          html += '<table class="benchmark-table">';
+          html += "<thead><tr><th>Config</th><th>Run</th><th>Pass Rate</th>";
+          if (hasTime) html += "<th>Time (s)</th>";
+          if (hasErrors) html += "<th>Crashes During Execution</th>";
+          html += "</tr></thead>";
+          html += "<tbody>";
+
+          // Group by config and render with average rows
+          const configGroups = [...new Set(evalRuns.map(r => r.configuration))];
+          for (let ci = 0; ci < configGroups.length; ci++) {
+            const config = configGroups[ci];
+            const configRuns = evalRuns.filter(r => r.configuration === config);
+            if (configRuns.length === 0) continue;
+
+            const rowClass = ci === 0 ? "benchmark-row-with" : "benchmark-row-without";
+            const configLabel = config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+
+            for (const run of configRuns) {
+              const r = run.result || {};
+              const prClass = r.pass_rate >= 0.8 ? "benchmark-delta-positive" : r.pass_rate < 0.5 ? "benchmark-delta-negative" : "";
+              html += '<tr class="' + rowClass + '">';
+              html += "<td>" + configLabel + "</td>";
+              html += "<td>" + run.run_number + "</td>";
+              html += '<td class="' + prClass + '">' + ((r.pass_rate || 0) * 100).toFixed(0) + "% (" + (r.passed || 0) + "/" + (r.total || 0) + ")</td>";
+              if (hasTime) html += "<td>" + (r.time_seconds != null ? r.time_seconds.toFixed(1) : "—") + "</td>";
+              if (hasErrors) html += "<td>" + (r.errors || 0) + "</td>";
+              html += "</tr>";
+            }
+
+            // Average row
+            const rates = configRuns.map(r => (r.result || {}).pass_rate || 0);
+            const avgRate = rates.reduce((a, b) => a + b, 0) / rates.length;
+            const avgPrClass = avgRate >= 0.8 ? "benchmark-delta-positive" : avgRate < 0.5 ? "benchmark-delta-negative" : "";
+            html += '<tr class="benchmark-row-avg ' + rowClass + '">';
+            html += "<td>" + configLabel + "</td>";
+            html += "<td>Avg</td>";
+            html += '<td class="' + avgPrClass + '">' + (avgRate * 100).toFixed(0) + "%</td>";
+            if (hasTime) {
+              const times = configRuns.map(r => (r.result || {}).time_seconds).filter(t => t != null);
+              html += "<td>" + (times.length ? (times.reduce((a, b) => a + b, 0) / times.length).toFixed(1) : "—") + "</td>";
+            }
+            if (hasErrors) html += "<td></td>";
+            html += "</tr>";
+          }
+          html += "</tbody></table>";
+
+          // Per-assertion detail for this eval
+          const runsWithExpectations = {};
+          for (const config of configGroups) {
+            runsWithExpectations[config] = evalRuns.filter(r => r.configuration === config && r.expectations && r.expectations.length > 0);
+          }
+          const hasAnyExpectations = Object.values(runsWithExpectations).some(runs => runs.length > 0);
+          if (hasAnyExpectations) {
+            // Collect all unique assertion texts across all configs
+            const allAssertions = [];
+            const seen = new Set();
+            for (const config of configGroups) {
+              for (const run of runsWithExpectations[config]) {
+                for (const exp of (run.expectations || [])) {
+                  if (!seen.has(exp.text)) {
+                    seen.add(exp.text);
+                    allAssertions.push(exp.text);
+                  }
+                }
+              }
+            }
+
+            html += '<table class="benchmark-table" style="margin-top: 0.5rem;">';
+            html += "<thead><tr><th>Assertion</th>";
+            for (const config of configGroups) {
+              const label = config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+              html += "<th>" + escapeHtml(label) + "</th>";
+            }
+            html += "</tr></thead><tbody>";
+
+            for (const assertionText of allAssertions) {
+              html += "<tr><td>" + escapeHtml(assertionText) + "</td>";
+
+              for (const config of configGroups) {
+                html += "<td>";
+                for (const run of runsWithExpectations[config]) {
+                  const exp = (run.expectations || []).find(e => e.text === assertionText);
+                  if (exp) {
+                    const cls = exp.passed ? "benchmark-delta-positive" : "benchmark-delta-negative";
+                    const icon = exp.passed ? "\u2713" : "\u2717";
+                    html += '<span class="' + cls + '" title="Run ' + run.run_number + ': ' + escapeHtml(exp.evidence || "") + '">' + icon + "</span> ";
+                  } else {
+                    html += "— ";
+                  }
+                }
+                html += "</td>";
+              }
+              html += "</tr>";
+            }
+            html += "</tbody></table>";
+          }
+        }
+      }
+
+      // Notes
+      if (notes.length > 0) {
+        html += '<div class="benchmark-notes">';
+        html += "<h3>Analysis Notes</h3>";
+        html += "<ul>";
+        for (const note of notes) {
+          html += "<li>" + escapeHtml(note) + "</li>";
+        }
+        html += "</ul></div>";
+      }
+
+      container.innerHTML = html;
+    }
+
+    // ---- Start ----
+    init();
+    renderBenchmark();
+  </script>
+</body>
+</html>

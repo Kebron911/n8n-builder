@@ -1,0 +1,87 @@
+{
+  "expectations": [
+    {
+      "text": "The output identifies documentId as a plain string that should use the __rl format",
+      "passed": true,
+      "evidence": "Critical Issue 1 explicitly states: 'documentId missing __rl wrapper' and shows the plain string '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms' as wrong."
+    },
+    {
+      "text": "The output identifies sheetName as a plain string that should use the __rl format",
+      "passed": true,
+      "evidence": "Critical Issue 2 explicitly states: 'sheetName missing __rl wrapper' and shows the plain string 'Sheet1' as wrong."
+    },
+    {
+      "text": "Both documentId and sheetName issues are classified as Errors",
+      "passed": true,
+      "evidence": "Both are labeled 'Critical Issue 1' and 'Critical Issue 2'. The summary states '2 critical errors detected (both __rl field violations on googleSheets node)'."
+    },
+    {
+      "text": "The output shows or describes the correct __rl format for documentId",
+      "passed": true,
+      "evidence": "Correct format shown: '{ \"__rl\": true, \"value\": \"1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms\", \"mode\": \"id\" }'"
+    },
+    {
+      "text": "The output shows or describes the correct __rl format for sheetName",
+      "passed": true,
+      "evidence": "Correct format shown: '{ \"__rl\": true, \"value\": \"Sheet1\", \"mode\": \"name\" }'"
+    },
+    {
+      "text": "The output does NOT flag the googleSheetsOAuth2Api credential key as incorrect",
+      "passed": true,
+      "evidence": "No mention of credential key issues anywhere in the output. Only the two __rl issues and a minor responseMode note are discussed."
+    },
+    {
+      "text": "The output does NOT flag typeVersion 4.5 for googleSheets as incorrect",
+      "passed": true,
+      "evidence": "No mention of typeVersion anywhere in the output. Only __rl field violations and a responseMode note are raised."
+    },
+    {
+      "text": "The output correctly identifies the 'Google Sheets' node by name in the findings",
+      "passed": true,
+      "evidence": "Summary states '2 critical errors detected (both __rl field violations on googleSheets node)'. The issues reference the Google Sheets node context, though using 'googleSheets' rather than the display name 'Google Sheets'."
+    },
+    {
+      "text": "The output offers to apply fixes after listing the errors",
+      "passed": false,
+      "evidence": "The output lists the correct fixes with code examples but does not explicitly offer to apply them. There is no statement like 'Would you like me to fix these?' or 'I can apply these corrections for you.'"
+    },
+    {
+      "text": "The output does NOT flag the 'appendOrUpdate' operation name as invalid",
+      "passed": true,
+      "evidence": "No mention of the 'appendOrUpdate' operation anywhere in the output. Only __rl issues and responseMode are discussed."
+    },
+    {
+      "text": "The output does NOT flag the missing 'columns' parameter as a critical error (it's optional)",
+      "passed": true,
+      "evidence": "No mention of a missing 'columns' parameter anywhere in the output."
+    }
+  ],
+  "summary": {
+    "passed": 10,
+    "failed": 1,
+    "total": 11,
+    "pass_rate": 0.91
+  },
+  "execution_metrics": {
+    "total_tool_calls": 2,
+    "total_steps": 3,
+    "errors_encountered": 0,
+    "output_chars": 978
+  },
+  "timing": {},
+  "claims": [
+    "documentId requires __rl resource locator format",
+    "sheetName requires __rl resource locator format",
+    "Both are classified as critical errors",
+    "Correct __rl format provided for both fields",
+    "responseMode 'onReceived' flagged as a minor informational note (not an error)"
+  ],
+  "eval_feedback": {
+    "suggestions": [
+      "The output should explicitly offer to apply the fixes (e.g., 'Would you like me to apply these fixes to the workflow JSON?'). This is a common UX expectation for a checker tool.",
+      "The sheetName __rl fix uses mode 'name' which may not be the most precise correction — the CLAUDE.md reference uses mode 'list' with cachedResultName for Sheet1. This could be a minor accuracy concern.",
+      "The output refers to 'googleSheets node' in the summary rather than the display name 'Google Sheets' — minor naming inconsistency but not a failure."
+    ],
+    "overall": "Strong performance. The output correctly identified both __rl violations as critical errors with correct fix examples, avoided all false positives (no flags on valid typeVersion, credential key, operation name, or optional columns parameter). The only failure is the missing offer to apply fixes, which is a UX/completeness gap rather than a technical accuracy issue."
+  }
+}

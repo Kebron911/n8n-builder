@@ -1,0 +1,91 @@
+{
+  "skill_name": "n8n-node-configuration",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I want to configure a Slack node to post a message to #general saying 'Deployment complete!'. What's the minimal valid configuration I need?",
+      "expected_output": "resource: message, operation: post, channel: #general, text: Deployment complete! — those four fields are the minimal requirement for a Slack post operation.",
+      "files": [],
+      "expectations": [
+        "The output includes resource: 'message' in the configuration",
+        "The output includes operation: 'post' in the configuration",
+        "The output includes channel with a value like '#general'",
+        "The output includes text with the message content",
+        "The output does NOT include fields only required for other operations (like messageId, which is for update)",
+        "The output demonstrates the resource/operation pattern as the key to understanding which fields are required",
+        "The output recommends validating the config after building it",
+        "The output uses __rl format for the channel field (not a plain string like '#general')",
+        "The output specifies typeVersion 2.3 for the Slack node"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I need to configure an HTTP Request node to POST a JSON body to https://api.example.com/webhooks. The body should contain 'event' and 'data' fields. What configuration do I need?",
+      "expected_output": "method: POST, url, sendBody: true (required for POST), body with contentType: json and content containing event and data fields. Explain the sendBody dependency.",
+      "files": [],
+      "expectations": [
+        "The output sets method to 'POST'",
+        "The output sets url to 'https://api.example.com/webhooks'",
+        "The output includes sendBody: true as a required field for POST",
+        "The output includes a body object with contentType: 'json'",
+        "The output includes a content field inside body for the event and data fields",
+        "The output explains or demonstrates that body only becomes required when sendBody is true (property dependency)",
+        "The output sets authentication to 'none' or explains available auth options",
+        "The output explains or demonstrates that body only becomes required when sendBody is true (property dependency)",
+        "The output specifies the typeVersion for httpRequest (4.2)"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I need to configure an IF node to check if $json.status equals 'active'. Can you show me the correct condition structure?",
+      "expected_output": "conditions.conditions array with type: string, operation: equals, leftValue: ={{$json.status}}, rightValue: active. Equals is a binary operator so NO singleValue needed.",
+      "files": [],
+      "expectations": [
+        "The output uses the conditions.conditions array structure",
+        "The output sets the operator type to 'string'",
+        "The output sets operation to 'equals'",
+        "The output sets leftValue to '={{$json.status}}' or similar expression",
+        "The output sets rightValue to 'active'",
+        "The output does NOT include singleValue: true (equals is a binary operator)",
+        "The output mentions that output index 0 is the true branch and index 1 is the false branch",
+        "The output uses combinator: 'and' or similar for the conditions wrapper",
+        "The condition object includes an 'id' field (required for IF node conditions)",
+        "The output uses 'combinator' at the conditions wrapper level (not inside individual conditions)"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "What's the difference between using get_node with detail 'standard' vs detail 'full'? When should I use each?",
+      "expected_output": "Standard covers 95% of cases at 1-2K tokens — use first. Full returns 3-8K tokens with complete schema — only when standard is insufficient. Also mention search_properties mode as an alternative to full for finding specific fields.",
+      "files": [],
+      "expectations": [
+        "The output states that standard detail is the default and recommended starting point",
+        "The output states that standard covers 95% of configuration needs",
+        "The output notes that standard returns approximately 1-2K tokens",
+        "The output notes that full returns 3-8K tokens and should be used sparingly",
+        "The output identifies specific scenarios where full is appropriate (debugging, complex advanced configs)",
+        "The output mentions search_properties mode as an alternative for finding a specific field",
+        "The output does NOT recommend jumping to 'full' as the default approach",
+        "The output explicitly states to use 'standard' first, and only escalate to 'full' if standard is insufficient",
+        "The output does NOT suggest 'full' is safer or more complete in a way that implies it should be default"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "I need to update a Slack message I already sent. I have the message ID. How is the configuration different from posting a new message?",
+      "expected_output": "For update operation: resource: message, operation: update, messageId: <id>, text: <new text>. Note: channel is NOT required for update (it was for post). Different operations = different required fields.",
+      "files": [],
+      "expectations": [
+        "The output uses operation: 'update' (not 'post')",
+        "The output includes messageId as a required field for update",
+        "The output includes text for the new message content",
+        "The output does NOT list channel as required for the update operation",
+        "The output explains that the required fields differ by operation (operation-aware configuration)",
+        "The output does NOT include channel as mandatory (it's optional or not needed for update)",
+        "The output recommends using get_node to discover operation-specific fields",
+        "The output explicitly states 'channel is NOT required for update' (not just omits it from config)",
+        "The output does NOT include channel as mandatory (it's optional or not needed for update)"
+      ]
+    }
+  ]
+}

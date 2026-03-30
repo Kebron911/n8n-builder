@@ -1,0 +1,67 @@
+{
+  "eval_id": 4,
+  "config": "with_skill",
+  "expectations": [
+    {
+      "text": "The output identifies documentId as a plain string that should use the __rl format",
+      "passed": true,
+      "evidence": "Error 1: 'Google Sheets \u00e2\u20ac\u201d documentId is a plain string but requires the __rl object format'"
+    },
+    {
+      "text": "The output identifies sheetName as a plain string that should use the __rl format",
+      "passed": true,
+      "evidence": "Error 2: 'Google Sheets \u00e2\u20ac\u201d sheetName is a plain string but requires the __rl object format'"
+    },
+    {
+      "text": "Both documentId and sheetName issues are classified as Errors",
+      "passed": true,
+      "evidence": "Both listed under 'Errors (must fix before activating)'"
+    },
+    {
+      "text": "The output shows or describes the correct __rl format for documentId",
+      "passed": true,
+      "evidence": "Shows: { \"__rl\": true, \"value\": \"1BxiMVs0XRA5...\", \"mode\": \"id\" }"
+    },
+    {
+      "text": "The output shows or describes the correct __rl format for sheetName",
+      "passed": true,
+      "evidence": "Shows: { \"__rl\": true, \"value\": \"gid=0\", \"mode\": \"list\", \"cachedResultName\": \"Sheet1\" }"
+    },
+    {
+      "text": "The output does NOT flag the googleSheetsOAuth2Api credential key as incorrect",
+      "passed": true,
+      "evidence": "Credential key listed under Clean section with no issues"
+    },
+    {
+      "text": "The output does NOT flag typeVersion 4.5 for googleSheets as incorrect",
+      "passed": true,
+      "evidence": "'typeVersions \u00e2\u20ac\u201d webhook v2, googleSheets v4.5 both correct' in Clean section"
+    },
+    {
+      "text": "The output correctly identifies the 'Google Sheets' node by name in the findings",
+      "passed": true,
+      "evidence": "Both errors start with '**Google Sheets**'"
+    },
+    {
+      "text": "The output offers to apply fixes after listing the errors",
+      "passed": true,
+      "evidence": "Ends with 'Want me to apply these fixes directly to the workflow?'"
+    },
+    {
+      "text": "The output does NOT flag the 'appendOrUpdate' operation name as invalid",
+      "passed": true,
+      "evidence": "operation not mentioned as an issue; no flag on appendOrUpdate"
+    },
+    {
+      "text": "The output does NOT flag the missing 'columns' parameter as a critical error (it's optional)",
+      "passed": true,
+      "evidence": "columns parameter not mentioned at all"
+    }
+  ],
+  "summary": {
+    "pass_rate": 1.0,
+    "passed": 11,
+    "failed": 0,
+    "total": 11
+  }
+}

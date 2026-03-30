@@ -1,0 +1,76 @@
+{
+  "expectations": [
+    {
+      "text": "The output identifies that OpenAI Chat Model is wired via 'main' instead of 'ai_languageModel'",
+      "passed": true,
+      "evidence": "Error #2 states: 'OpenAI Chat Model — Wrong connection type: the node connects to AI Agent via \"main\", but LangChain sub-nodes must use ai_languageModel as the connection key and type.'"
+    },
+    {
+      "text": "The output classifies the wrong AI sub-node connection type as an Error",
+      "passed": true,
+      "evidence": "The wrong connection type appears under '### Errors (must fix before activating)' as item #2."
+    },
+    {
+      "text": "The output states the correct connection type should be 'ai_languageModel'",
+      "passed": true,
+      "evidence": "Error #2 explicitly states: 'LangChain sub-nodes must use ai_languageModel as the connection key and type' and provides the corrected JSON with 'ai_languageModel' as the key."
+    },
+    {
+      "text": "The output warns that there is no respondToWebhook node despite responseMode being 'responseNode'",
+      "passed": true,
+      "evidence": "Warning #2 states: 'Webhook — responseMode is set to \"responseNode\" but there is no respondToWebhook node in the workflow. The webhook will never send a response back to the caller.'"
+    },
+    {
+      "text": "The output does NOT flag the Webhook node's typeVersion or path as issues",
+      "passed": true,
+      "evidence": "The output does not mention any issue with the Webhook node's typeVersion or path. The Webhook node only appears in warnings about responseMode/respondToWebhook and the timeout concern, not for typeVersion or path."
+    },
+    {
+      "text": "The output does NOT flag the AI Agent node's configuration as problematic",
+      "passed": true,
+      "evidence": "The AI Agent node is not mentioned as having any configuration issue. It appears only incidentally in connection fix examples."
+    },
+    {
+      "text": "The output correctly identifies the OpenAI Chat Model node by name in the finding",
+      "passed": true,
+      "evidence": "Both Error #1 and Error #2 explicitly name '**OpenAI Chat Model**' as the node with the issue."
+    },
+    {
+      "text": "The output does not report any false errors on the @n8n/n8n-nodes-langchain node types",
+      "passed": false,
+      "evidence": "Error #1 flags '@n8n/n8n-nodes-langchain.lmChatOpenAi' as a non-existent type and says the correct type is '@n8n/n8n-nodes-langchain.lmOpenAi'. Per grading notes, lmChatOpenAi IS a valid LangChain node type, making this a false positive error."
+    },
+    {
+      "text": "The output does NOT suggest the '@n8n/n8n-nodes-langchain.lmChatOpenAi' node type is a wrong prefix",
+      "passed": true,
+      "evidence": "The output does not flag the prefix '@n8n/n8n-nodes-langchain' as wrong. Error #1 flags the suffix 'lmChatOpenAi' as non-existent (claiming it should be 'lmOpenAi'), not the prefix. The prefix is correctly treated as valid."
+    },
+    {
+      "text": "The output does NOT suggest the AI Agent node's text parameter is misconfigured",
+      "passed": true,
+      "evidence": "No mention of the AI Agent node's text parameter anywhere in the output."
+    },
+    {
+      "text": "The output identifies both issues (wrong connection type AND missing respondToWebhook) not just one",
+      "passed": true,
+      "evidence": "The wrong connection type appears as Error #2 and the missing respondToWebhook appears as Warning #2. Both issues are present in the output."
+    }
+  ],
+  "summary": {
+    "passed": 10,
+    "failed": 1,
+    "total": 11,
+    "pass_rate": 0.91
+  },
+  "execution_metrics": {},
+  "timing": {},
+  "claims": [],
+  "eval_feedback": {
+    "suggestions": [
+      "The skill incorrectly flagged '@n8n/n8n-nodes-langchain.lmChatOpenAi' as a non-existent node type (Error #1). This is a valid LangChain node type. The skill should be updated to recognize 'lmChatOpenAi' as a valid type alongside 'lmOpenAi'. Consider maintaining an updated list of valid LangChain node types or being more conservative about flagging node types as non-existent.",
+      "The missing respondToWebhook issue was correctly identified but placed as a Warning rather than an Error. Since responseMode 'responseNode' without a respondToWebhook node will cause the webhook to hang indefinitely without ever responding, this could be argued as an Error rather than a Warning.",
+      "The skill correctly identified the primary issue (wrong connection type via 'main') and classified it as an Error, which is good."
+    ],
+    "overall": "The skill performed well overall (10/11), correctly identifying the primary wiring issue and the missing respondToWebhook node. The one failure was a false positive where the skill incorrectly flagged 'lmChatOpenAi' as a non-existent node type — this is a valid LangChain node type variant. The skill needs to expand its knowledge of valid LangChain node types to avoid this category of false positive."
+  }
+}

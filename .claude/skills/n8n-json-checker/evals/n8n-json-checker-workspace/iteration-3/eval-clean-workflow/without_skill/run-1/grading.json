@@ -1,0 +1,61 @@
+{
+  "expectations": [
+    {
+      "text": "The output does NOT list any Errors for this workflow",
+      "passed": true,
+      "evidence": "The output states 'The workflow JSON is valid and well-formed. No errors or issues were found.' and all nodes are marked PASS. No errors are listed anywhere."
+    },
+    {
+      "text": "The output does NOT falsely flag the httpRequest authentication:none as an error",
+      "passed": true,
+      "evidence": "The HTTP Request node review says 'Parameters: method, url, and authentication all present and valid' and 'Status: PASS'. No flag on authentication:none."
+    },
+    {
+      "text": "The output does NOT falsely flag the Code node's jsCode as an error",
+      "passed": true,
+      "evidence": "The Code node review says 'jsCode contains valid JavaScript that maps over items and adds processed: true' and 'Status: PASS'. No issue flagged."
+    },
+    {
+      "text": "The output uses the '## n8n Workflow Check' heading",
+      "passed": false,
+      "evidence": "The output uses '# Workflow JSON Analysis: \"Hourly Data Fetch\"' as the main heading and '## Summary', '## Node Review', etc. as sub-headings. The exact heading '## n8n Workflow Check' is not present."
+    },
+    {
+      "text": "The output either says the workflow is clean/looks good or lists only informational warnings",
+      "passed": true,
+      "evidence": "The Verdict section states 'No issues found. This workflow is correctly structured and ready to create/deploy in n8n.' No warnings or errors listed."
+    },
+    {
+      "text": "The output does NOT flag correct typeVersions (1.2, 4.2, 2) as problems",
+      "passed": true,
+      "evidence": "All typeVersions are confirmed as matching recommended versions: scheduleTrigger 1.2 = PASS, httpRequest 4.2 = PASS, code 2 = PASS. The checklist row 'typeVersions match recommended values' = PASS."
+    },
+    {
+      "text": "The output explicitly states the workflow passed or has no errors — not just omits errors by silence",
+      "passed": true,
+      "evidence": "Explicit statements include: 'No errors or issues were found.' in the Summary, all nodes marked PASS, and the Verdict: 'No issues found. This workflow is correctly structured and ready to create/deploy in n8n.'"
+    },
+    {
+      "text": "The output does NOT suggest adding respondToWebhook (there is no Webhook node in this workflow at all)",
+      "passed": true,
+      "evidence": "The output does not mention respondToWebhook anywhere. It correctly analyzes only the three nodes present: Schedule Trigger, HTTP Request, and Code node."
+    }
+  ],
+  "summary": {
+    "passed": 7,
+    "failed": 1,
+    "total": 8,
+    "pass_rate": 0.875
+  },
+  "execution_metrics": {},
+  "timing": {},
+  "claims": [],
+  "eval_feedback": {
+    "suggestions": [
+      "The without_skill baseline output does not use the '## n8n Workflow Check' heading — this was expected per the note in the grading instructions.",
+      "The output is otherwise high quality: it correctly identifies a clean workflow, avoids all false positives, and explicitly states no errors were found.",
+      "The skill version should ensure it uses '## n8n Workflow Check' as the required heading to pass expectation 4."
+    ],
+    "overall": "The without_skill baseline output scores 7/8 (87.5%). The only failure is the missing '## n8n Workflow Check' heading, which was anticipated in the grading note. All substantive correctness expectations pass — no false positives on authentication, jsCode, typeVersions, or respondToWebhook, and the workflow is explicitly declared clean with no errors."
+  }
+}

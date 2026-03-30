@@ -1,6 +1,16 @@
 ---
 name: n8n-workflow-patterns
-description: Proven workflow architectural patterns from real n8n workflows. Use when building new workflows, designing workflow structure, choosing workflow patterns, planning workflow architecture, or asking about webhook processing, HTTP API integration, database operations, AI agent workflows, or scheduled tasks.
+description: >
+  Proven workflow architectural patterns for planning WHAT to build before
+  touching any tools. Use FIRST when building or planning a new workflow —
+  before sourcing nodes or calling MCP tools. Covers the 5 core patterns:
+  webhook processing, HTTP API integration, database operations, AI agent
+  workflows, and scheduled tasks. Each pattern has a canonical node sequence,
+  data flow diagram, error handling strategy, and real template examples.
+  Trigger on: "build a workflow", "design a workflow", "what pattern should I
+  use", "how should I structure this", or any new workflow request before
+  implementation starts. Use this BEFORE n8n-node-configuration (specific
+  node fields) and BEFORE n8n-mcp-tools-expert (how to call tools).
 ---
 
 # n8n Workflow Patterns

@@ -1,6 +1,17 @@
 ---
 name: n8n-validation-expert
-description: Interpret validation errors and guide fixing them. Use when encountering validation errors, validation warnings, false positives, operator structure issues, or need help understanding validation results. Also use when asking about validation profiles, error types, or the validation loop process.
+description: >
+  Interpret MCP validator errors and guide fixing them DURING active workflow
+  building or fixing. Use when n8n_validate_workflow returns errors and you
+  need to understand what they mean and how to fix them — covering error types
+  (missing_required, invalid_value, type_mismatch, invalid_expression,
+  invalid_reference), validation profiles (runtime vs strict vs ai-friendly),
+  the validate→fix→revalidate loop, auto-sanitization behavior, and common
+  false positives. Trigger on: validation errors from the MCP validator,
+  "what does this error mean", "which validation profile should I use",
+  "is this a false positive", operator structure issues.
+  Use AFTER n8n-json-checker (pre-flight) — this skill handles errors that
+  come back from the live MCP validator, not static JSON review.
 ---
 
 # n8n Validation Expert

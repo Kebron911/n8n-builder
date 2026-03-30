@@ -1,0 +1,76 @@
+{
+  "expectations": [
+    {
+      "text": "The output identifies documentId as a plain string that should use the __rl format",
+      "passed": true,
+      "evidence": "Line 5: '**Google Sheets** — `documentId` is a plain string `\"1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms\"` — must use `__rl` object format.'"
+    },
+    {
+      "text": "The output identifies sheetName as a plain string that should use the __rl format",
+      "passed": true,
+      "evidence": "Line 10: '**Google Sheets** — `sheetName` is a plain string `\"Sheet1\"` — must use `__rl` object format.'"
+    },
+    {
+      "text": "Both documentId and sheetName issues are classified as Errors",
+      "passed": true,
+      "evidence": "Both issues appear under the '### Errors (must fix before activating)' section heading on line 3."
+    },
+    {
+      "text": "The output shows or describes the correct __rl format for documentId",
+      "passed": true,
+      "evidence": "Lines 6-8 show the correct format: `{ \"__rl\": true, \"value\": \"1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms\", \"mode\": \"id\" }`"
+    },
+    {
+      "text": "The output shows or describes the correct __rl format for sheetName",
+      "passed": true,
+      "evidence": "Lines 11-13 show the correct format: `{ \"__rl\": true, \"value\": \"gid=0\", \"mode\": \"list\", \"cachedResultName\": \"Sheet1\" }`"
+    },
+    {
+      "text": "The output does NOT flag the googleSheetsOAuth2Api credential key as incorrect",
+      "passed": true,
+      "evidence": "Line 18 explicitly marks it as clean: '- credential keys — `googleSheetsOAuth2Api` is correct'"
+    },
+    {
+      "text": "The output does NOT flag typeVersion 4.5 for googleSheets as incorrect",
+      "passed": true,
+      "evidence": "Line 17 marks typeVersion as clean: '- typeVersion — no issues found'. No mention of 4.5 being wrong."
+    },
+    {
+      "text": "The output correctly identifies the 'Google Sheets' node by name in the findings",
+      "passed": true,
+      "evidence": "Both error entries (lines 5 and 10) are prefixed with '**Google Sheets**' identifying the node by name."
+    },
+    {
+      "text": "The output offers to apply fixes after listing the errors",
+      "passed": true,
+      "evidence": "Line 27: 'Want me to apply these fixes directly to the workflow?'"
+    },
+    {
+      "text": "The output does NOT flag the 'appendOrUpdate' operation name as invalid",
+      "passed": true,
+      "evidence": "No mention of 'appendOrUpdate' anywhere in the output. The output only flags the two __rl format errors."
+    },
+    {
+      "text": "The output does NOT flag the missing 'columns' parameter as a critical error (it's optional)",
+      "passed": true,
+      "evidence": "No mention of 'columns' parameter anywhere in the output. Only the two __rl format issues are listed as errors."
+    }
+  ],
+  "summary": {
+    "passed": 11,
+    "failed": 0,
+    "total": 11,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {},
+  "timing": {},
+  "claims": [],
+  "eval_feedback": {
+    "suggestions": [
+      "The output is concise and precise — it correctly identifies exactly the two __rl issues without any false positives.",
+      "The 'Clean' section is a good pattern: it explicitly lists checked items that passed, which builds confidence that the checker ran thoroughly.",
+      "The note about MCP runtime validation not being available is transparent and useful for the user."
+    ],
+    "overall": "Perfect score. The output correctly identified both __rl format issues as errors, provided accurate corrected JSON for both, avoided all false positives (credential key, typeVersion, operation name, optional columns parameter), named the node correctly, and offered to apply fixes. This is an excellent checker output."
+  }
+}

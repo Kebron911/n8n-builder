@@ -1,0 +1,86 @@
+{
+  "skill_name": "n8n-expression-syntax",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I added $json.email in a Set node field to map the email from the previous node, but it just shows the literal text '$json.email' in my output. What am I doing wrong?",
+      "expected_output": "Missing {{ }} wrapper. Must write {{$json.email}} for expressions in n8n node fields. Without braces, values are treated as literal text.",
+      "files": [],
+      "expectations": [
+        "The output identifies the missing {{ }} wrapper as the problem",
+        "The output shows {{$json.email}} as the corrected expression",
+        "The output explains that without {{ }}, the value is treated as a literal string",
+        "The output does NOT suggest switching to a Code node as the solution",
+        "The output does NOT suggest using JavaScript template literals `${value}` in expression fields",
+        "The output does not blame the Set node or suggest a different node type",
+        "The output does NOT suggest toggling the expression mode toggle as the primary fix",
+        "The corrected expression {{$json.email}} appears verbatim in the output (exact format)"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "My workflow receives a form submission via Webhook and I use a Set node to extract the fields. I wrote {{$json.name}} and {{$json.email}} in the Set node but both show 'undefined'. The webhook test shows the data is arriving correctly with name and email fields.",
+      "expected_output": "Webhook data is nested under .body. Must use {{$json.body.name}} and {{$json.body.email}}. The Webhook node wraps all incoming request data under the body key.",
+      "files": [],
+      "expectations": [
+        "The output explains that webhook data is nested under the .body property",
+        "The output shows {{$json.body.name}} as the corrected expression",
+        "The output shows {{$json.body.email}} as the corrected expression",
+        "The output explains WHY webhook data is under .body (Webhook node wraps request data to preserve headers, params)",
+        "The output confirms that the {{ }} syntax is otherwise correct",
+        "The output does NOT say the issue is missing {{ }} braces (those are already present)",
+        "The output does NOT suggest the webhook is not configured correctly",
+        "The output does NOT say the issue is a missing {{ }} wrapper — those are already present in the original",
+        "The output does NOT suggest reconfiguring the webhook node"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I'm trying to reference a node called 'HTTP Request' in my expression. I wrote {{$node.HTTP Request.json.data}} but I get a syntax error. How do I fix this?",
+      "expected_output": "Node names with spaces must use bracket notation with quotes: {{$node[\"HTTP Request\"].json.data}}. Node names are also case-sensitive.",
+      "files": [],
+      "expectations": [
+        "The output identifies that node names with spaces require bracket notation with quotes",
+        "The output shows the corrected expression: {{$node[\"HTTP Request\"].json.data}}",
+        "The output mentions that node names are case-sensitive",
+        "The output does NOT suggest renaming the node to remove the space as the required fix",
+        "The output explains why bracket notation is required (dot notation cannot contain spaces)",
+        "The output does NOT say the expression format itself ({{ }}) is wrong",
+        "The exact corrected string {{$node[\"HTTP Request\"].json.data}} or equivalent appears in the output",
+        "The output mentions renaming the node as an optional alternative but NOT the required fix"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Can I use n8n expressions like {{$json.field}} inside a Code node to get data from previous nodes?",
+      "expected_output": "No — Code nodes use direct JavaScript access, not {{ }} syntax. Use $json.field, $input.first().json.field, or $node['NodeName'].json.field directly.",
+      "files": [],
+      "expectations": [
+        "The output clearly states that {{ }} expression syntax does NOT work inside Code nodes",
+        "The output shows the correct Code node equivalent using direct JavaScript: $json.field",
+        "The output shows $input.first().json.field as an alternative Code node pattern",
+        "The output explains why — Code nodes execute JavaScript directly, not template expressions",
+        "The output distinguishes clearly between expression fields (use {{ }}) and Code nodes (use JS directly)",
+        "The output does NOT say expressions can work in some special way inside Code nodes",
+        "The output does NOT say {{ }} syntax works in Code nodes under any circumstances",
+        "The output confirms $node['NodeName'].json.field is valid Code node syntax for cross-node references"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "How do I get today's date in an n8n expression field? I need it in 'yyyy-MM-dd' format for a Google Sheets node.",
+      "expected_output": "Use {{$now.toFormat('yyyy-MM-dd')}}. $now is the built-in timestamp variable. toFormat() is a Luxon DateTime method.",
+      "files": [],
+      "expectations": [
+        "The output shows {{$now.toFormat('yyyy-MM-dd')}} as the correct expression",
+        "The output uses $now (not new Date() or Date.now())",
+        "The output mentions toFormat() as the Luxon DateTime formatting method",
+        "The output does NOT suggest using a Code node just to format a date",
+        "The output does NOT suggest JavaScript's new Date().toISOString() for expression fields",
+        "The correct expression produces output like '2026-03-27' (ISO date format)",
+        "The output mentions that Luxon is built-in to n8n (not imported)",
+        "The output does NOT suggest $now.toISOString() — that is not a Luxon method"
+      ]
+    }
+  ]
+}

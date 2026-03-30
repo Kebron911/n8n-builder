@@ -1,0 +1,330 @@
+{
+  "instance": "https://professionalaiassistants.com/n8n",
+  "date": "2026-03-30T02:52:15.283Z",
+  "summary": {
+    "total": 57,
+    "passed": 57,
+    "failed": 0
+  },
+  "nodeTypeChecks": [
+    {
+      "type": "n8n-nodes-base.telegramTrigger",
+      "expectedVersion": 1.2,
+      "status": "exists",
+      "wfId": "q96m4nQVl3YPuS7O"
+    },
+    {
+      "type": "n8n-nodes-base.telegram",
+      "expectedVersion": 1.2,
+      "status": "exists",
+      "wfId": "yxylEcaHmbUZbMmb"
+    },
+    {
+      "type": "n8n-nodes-base.webhook",
+      "expectedVersion": 2,
+      "status": "exists",
+      "wfId": "Asp2fWbs4X9YA4R3"
+    },
+    {
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "expectedVersion": 1.2,
+      "status": "exists",
+      "wfId": "UIK6vGWPa8YUp7NG"
+    },
+    {
+      "type": "n8n-nodes-base.manualTrigger",
+      "expectedVersion": 1,
+      "status": "exists",
+      "wfId": "Va8CoF1WzLQGAmeZ"
+    },
+    {
+      "type": "n8n-nodes-base.httpRequest",
+      "expectedVersion": 4.2,
+      "status": "exists",
+      "wfId": "YCJ8XU4bDRzA7uYq"
+    },
+    {
+      "type": "n8n-nodes-base.code",
+      "expectedVersion": 2,
+      "status": "exists",
+      "wfId": "sA4cbzwAMgMt8w3P"
+    },
+    {
+      "type": "n8n-nodes-base.set",
+      "expectedVersion": 3.4,
+      "status": "exists",
+      "wfId": "21n0rw1Cfqex90y6"
+    },
+    {
+      "type": "n8n-nodes-base.if",
+      "expectedVersion": 2.2,
+      "status": "exists",
+      "wfId": "rWQtNrSsdy7wxyCg"
+    },
+    {
+      "type": "n8n-nodes-base.switch",
+      "expectedVersion": 3.2,
+      "status": "exists",
+      "wfId": "VfafxU9QSrXD0hzL"
+    },
+    {
+      "type": "n8n-nodes-base.merge",
+      "expectedVersion": 3,
+      "status": "exists",
+      "wfId": "DuSzI9V5rLTGbDsL"
+    },
+    {
+      "type": "n8n-nodes-base.splitInBatches",
+      "expectedVersion": 3,
+      "status": "exists",
+      "wfId": "hCHcZvP77kDDmVRL"
+    },
+    {
+      "type": "n8n-nodes-base.respondToWebhook",
+      "expectedVersion": 1.1,
+      "status": "exists",
+      "wfId": "7dcMdtWefRa8CtmJ"
+    },
+    {
+      "type": "n8n-nodes-base.filter",
+      "expectedVersion": 2,
+      "status": "exists",
+      "wfId": "g2o5hwuZqL6V2vew"
+    },
+    {
+      "type": "n8n-nodes-base.aggregate",
+      "expectedVersion": 1,
+      "status": "exists",
+      "wfId": "3cYHEYbddTyeLEAe"
+    },
+    {
+      "type": "n8n-nodes-base.removeDuplicates",
+      "expectedVersion": 1.1,
+      "status": "exists",
+      "wfId": "OmRtXBxp2eLOQT67"
+    },
+    {
+      "type": "n8n-nodes-base.wait",
+      "expectedVersion": 1.1,
+      "status": "exists",
+      "wfId": "T7Ugv0ouoO9w98TA"
+    },
+    {
+      "type": "n8n-nodes-base.errorTrigger",
+      "expectedVersion": 1,
+      "status": "exists",
+      "wfId": "Mj84A4hFOgqOGAW9"
+    },
+    {
+      "type": "n8n-nodes-base.executeCommand",
+      "expectedVersion": 1,
+      "status": "exists",
+      "wfId": "HGdMZkoGlo1PLAGc"
+    },
+    {
+      "type": "n8n-nodes-base.stickyNote",
+      "expectedVersion": 1,
+      "status": "exists",
+      "wfId": "sj76waJ765dHt4Up"
+    },
+    {
+      "type": "n8n-nodes-base.noOp",
+      "expectedVersion": 1,
+      "status": "exists",
+      "wfId": "FFlX6NpLFcl6P9Iy"
+    },
+    {
+      "type": "n8n-nodes-base.slack",
+      "expectedVersion": 2.3,
+      "status": "exists",
+      "wfId": "vj5erR6fioiqpmeD"
+    },
+    {
+      "type": "n8n-nodes-base.gmail",
+      "expectedVersion": 2.1,
+      "status": "exists",
+      "wfId": "FJ7VELYH5pOTjWGK"
+    },
+    {
+      "type": "n8n-nodes-base.googleSheets",
+      "expectedVersion": 4.5,
+      "status": "exists",
+      "wfId": "OABi5B4uU2cyzJF7"
+    },
+    {
+      "type": "n8n-nodes-base.googleDrive",
+      "expectedVersion": 3,
+      "status": "exists",
+      "wfId": "hFA3SCNszJb2xGDs"
+    },
+    {
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "expectedVersion": 1.7,
+      "status": "exists",
+      "wfId": "RbzPuoRa8sk2CvT7"
+    },
+    {
+      "type": "@n8n/n8n-nodes-langchain.lmOpenAi",
+      "expectedVersion": 1.2,
+      "status": "exists",
+      "wfId": "W6nOC6n59Zdrk7Jq"
+    },
+    {
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "expectedVersion": 1.3,
+      "status": "exists",
+      "wfId": "C0PlobzLwHtppMyF"
+    },
+    {
+      "type": "@n8n/n8n-nodes-langchain.calculatorTool",
+      "expectedVersion": 1,
+      "status": "exists",
+      "wfId": "XDZLcTe2wxWj9RbQ"
+    },
+    {
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "expectedVersion": 1.1,
+      "status": "exists",
+      "wfId": "AYdt5ukdHsUfND1y"
+    },
+    {
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "expectedVersion": 1.2,
+      "status": "exists",
+      "wfId": "RUPL9W78vcF1WVtn"
+    },
+    {
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "expectedVersion": 1,
+      "status": "exists",
+      "wfId": "0XUkWNt7WSmFZ1yX"
+    }
+  ],
+  "configValidations": [
+    {
+      "label": "Manual Trigger",
+      "status": "pass",
+      "wfId": "jDARK0GXE4qKBRkB"
+    },
+    {
+      "label": "Telegram Trigger",
+      "status": "pass",
+      "wfId": "W7w2x1XNY4WLIt6N"
+    },
+    {
+      "label": "Telegram Send Message",
+      "status": "pass",
+      "wfId": "Pqn0WFq6wrE3Gkmu"
+    },
+    {
+      "label": "Webhook Trigger",
+      "status": "pass",
+      "wfId": "ZxpinR88hh75TYjf"
+    },
+    {
+      "label": "Schedule Trigger",
+      "status": "pass",
+      "wfId": "DARnci4Qg9pmJPOQ"
+    },
+    {
+      "label": "HTTP Request",
+      "status": "pass",
+      "wfId": "M2j4oSvOZdzRltqL"
+    },
+    {
+      "label": "Code Node (JS)",
+      "status": "pass",
+      "wfId": "XdboEf0f6o6pe2lF"
+    },
+    {
+      "label": "Edit Fields (Set)",
+      "status": "pass",
+      "wfId": "qdwzZ5LXnKnsGr9e"
+    },
+    {
+      "label": "IF Node",
+      "status": "pass",
+      "wfId": "Bf2WKS6uBDmTlxcl"
+    },
+    {
+      "label": "Filter",
+      "status": "pass",
+      "wfId": "4aSPEL6TQVbuVuVE"
+    },
+    {
+      "label": "Switch",
+      "status": "pass",
+      "wfId": "FOYRAIx5GKmRpQAC"
+    },
+    {
+      "label": "Merge",
+      "status": "pass",
+      "wfId": "MW7dqoMDVnvbzM7W"
+    },
+    {
+      "label": "Aggregate",
+      "status": "pass",
+      "wfId": "sjV03EsvjV5CS7Oc"
+    },
+    {
+      "label": "Remove Duplicates",
+      "status": "pass",
+      "wfId": "ng2h9dsjYnOwV34T"
+    },
+    {
+      "label": "Wait",
+      "status": "pass",
+      "wfId": "sEXdo6Z8CVwhqD3u"
+    },
+    {
+      "label": "Respond to Webhook",
+      "status": "pass",
+      "wfId": "NAoe8vEoAiGCghWz"
+    },
+    {
+      "label": "Split In Batches",
+      "status": "pass",
+      "wfId": "QXtsHSySWZwp88ug"
+    },
+    {
+      "label": "NoOp",
+      "status": "pass",
+      "wfId": "01GGLbOKjYC92IfX"
+    },
+    {
+      "label": "Slack Send Message",
+      "status": "pass",
+      "wfId": "RcUE1SjGr5fkzCq8"
+    },
+    {
+      "label": "Gmail Send Email",
+      "status": "pass",
+      "wfId": "AixgCZso7K2LZV7d"
+    },
+    {
+      "label": "Google Sheets Append Row",
+      "status": "pass",
+      "wfId": "9O8OBx4vkwhjXK4X"
+    },
+    {
+      "label": "AI Agent (LangChain)",
+      "status": "pass",
+      "wfId": "xcHuy8rGlXtOQWFn"
+    },
+    {
+      "label": "OpenAI Chat Model",
+      "status": "pass",
+      "wfId": "TvEsvlqDeryNmrIb"
+    },
+    {
+      "label": "Window Buffer Memory",
+      "status": "pass",
+      "wfId": "XXgylZl5aHsug86V"
+    },
+    {
+      "label": "Error Trigger",
+      "status": "pass",
+      "wfId": "t780xvsdPnmFjSGc"
+    }
+  ]
+}

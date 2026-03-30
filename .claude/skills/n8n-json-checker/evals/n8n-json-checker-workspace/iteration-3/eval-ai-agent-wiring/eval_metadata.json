@@ -1,0 +1,15 @@
+{
+  "eval_id": 2,
+  "eval_name": "eval-ai-agent-wiring",
+  "prompt": "Any issues with this n8n workflow?\n\n```json\n{\n  \"name\": \"AI Support Agent\",\n  \"nodes\": [\n    {\n      \"name\": \"Webhook\",\n      \"type\": \"n8n-nodes-base.webhook\",\n      \"typeVersion\": 2,\n      \"position\": [250, 300],\n      \"parameters\": {\n        \"httpMethod\": \"POST\",\n        \"path\": \"support\",\n        \"responseMode\": \"responseNode\"\n      }\n    },\n    {\n      \"name\": \"AI Agent\",\n      \"type\": \"@n8n/n8n-nodes-langchain.agent\",\n      \"typeVersion\": 1.7,\n      \"position\": [500, 300],\n      \"parameters\": {\n        \"text\": \"={{ $json.body.message }}\",\n        \"options\": {}\n      }\n    },\n    {\n      \"name\": \"OpenAI Chat Model\",\n      \"type\": \"@n8n/n8n-nodes-langchain.lmChatOpenAi\",\n      \"typeVersion\": 1,\n      \"position\": [500, 500],\n      \"parameters\": {\n        \"model\": \"gpt-4o\"\n      },\n      \"credentials\": {\n        \"openAiApi\": { \"id\": \"2\", \"name\": \"OpenAI\" }\n      }\n    }\n  ],\n  \"connections\": {\n    \"Webhook\": {\n      \"main\": [[{ \"node\": \"AI Agent\", \"type\": \"main\", \"index\": 0 }]]\n    },\n    \"OpenAI Chat Model\": {\n      \"main\": [[{ \"node\": \"AI Agent\", \"type\": \"main\", \"index\": 0 }]]\n    }\n  }\n}\n```",
+  "assertions": [
+    "The output identifies that OpenAI Chat Model is wired via 'main' instead of 'ai_languageModel'",
+    "The output classifies the wrong AI sub-node connection type as an Error",
+    "The output states the correct connection type should be 'ai_languageModel'",
+    "The output warns that there is no respondToWebhook node despite responseMode being 'responseNode'",
+    "The output does NOT flag the Webhook node's typeVersion or path as issues",
+    "The output does NOT flag the AI Agent node's configuration as problematic",
+    "The output correctly identifies the OpenAI Chat Model node by name in the finding",
+    "The output does not report any false errors on the @n8n/n8n-nodes-langchain node types"
+  ]
+}

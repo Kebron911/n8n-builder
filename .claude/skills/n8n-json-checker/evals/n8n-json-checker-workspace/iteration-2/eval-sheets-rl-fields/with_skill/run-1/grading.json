@@ -1,0 +1,88 @@
+{
+  "expectations": [
+    {
+      "text": "The output identifies documentId as a plain string that should use the __rl format",
+      "passed": true,
+      "evidence": "Line 10: '**Google Sheets** — `documentId` is a plain string but must use the `__rl` object format'"
+    },
+    {
+      "text": "The output identifies sheetName as a plain string that should use the __rl format",
+      "passed": true,
+      "evidence": "Line 15: '**Google Sheets** — `sheetName` is a plain string `\"Sheet1\"` but must use the `__rl` object format'"
+    },
+    {
+      "text": "Both documentId and sheetName issues are classified as Errors",
+      "passed": true,
+      "evidence": "Both issues appear under '### Errors (must fix before activating)' section (lines 8-18)"
+    },
+    {
+      "text": "The output shows or describes the correct __rl format for documentId",
+      "passed": true,
+      "evidence": "Lines 11-13 show: `\"documentId\": { \"__rl\": true, \"value\": \"1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms\", \"mode\": \"id\" }`"
+    },
+    {
+      "text": "The output shows or describes the correct __rl format for sheetName",
+      "passed": true,
+      "evidence": "Lines 16-18 show: `\"sheetName\": { \"__rl\": true, \"value\": \"Sheet1\", \"mode\": \"list\", \"cachedResultName\": \"Sheet1\" }` with an alternative mode option also provided"
+    },
+    {
+      "text": "The output does NOT flag the googleSheetsOAuth2Api credential key as incorrect",
+      "passed": true,
+      "evidence": "Line 33: 'Credential key name — `googleSheetsOAuth2Api` is correct' listed under Clean section"
+    },
+    {
+      "text": "The output does NOT flag typeVersion 4.5 for googleSheets as incorrect",
+      "passed": true,
+      "evidence": "Line 32: 'typeVersion — Webhook `2` and Google Sheets `4.5` both match expected versions' listed under Clean section"
+    },
+    {
+      "text": "The output correctly identifies the 'Google Sheets' node by name in the findings",
+      "passed": true,
+      "evidence": "Both error items (lines 10 and 15) correctly refer to '**Google Sheets**' as the node name"
+    },
+    {
+      "text": "The output offers to apply fixes after listing the errors",
+      "passed": true,
+      "evidence": "Line 44: 'Want me to apply these fixes directly to the workflow?'"
+    },
+    {
+      "text": "The output does NOT flag the 'appendOrUpdate' operation name as invalid",
+      "passed": true,
+      "evidence": "No mention of 'appendOrUpdate' anywhere in the output. The operation is not flagged in errors, warnings, or clean sections."
+    },
+    {
+      "text": "The output does NOT flag the missing 'columns' parameter as a critical error (it's optional)",
+      "passed": true,
+      "evidence": "No mention of a missing 'columns' parameter in the errors or warnings sections. Only documentId and sheetName __rl issues are listed as errors."
+    }
+  ],
+  "summary": {
+    "passed": 11,
+    "failed": 0,
+    "total": 11,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "total_tool_calls": 3,
+    "total_steps": 4,
+    "errors_encountered": 0,
+    "output_chars": 1342
+  },
+  "timing": {},
+  "claims": [
+    "Identified both documentId and sheetName as requiring __rl format",
+    "Correctly classified both issues as Errors",
+    "Provided correct __rl fix examples for both fields",
+    "Validated googleSheetsOAuth2Api credential key as correct",
+    "Validated typeVersion 4.5 as correct",
+    "Did not produce false positives for appendOrUpdate operation or missing columns parameter",
+    "Offered to apply fixes at the end of the output"
+  ],
+  "eval_feedback": {
+    "suggestions": [
+      "The sheetName fix uses mode: 'list' with a display name value rather than the GID-based format (gid=0). The skill does note the alternative 'mode: id' option, which is good. Consider whether the primary suggestion should default to the more robust GID format.",
+      "The warning about credential IDs not transferring across instances is a general informational note and is appropriate as a warning rather than an error."
+    ],
+    "overall": "Perfect score — all 11 expectations passed. The skill correctly identified both __rl issues, classified them as errors, provided accurate fix examples, avoided all false positives (credential key, typeVersion, appendOrUpdate operation, missing columns), and offered to apply fixes. Output is clean, concise, and actionable."
+  }
+}

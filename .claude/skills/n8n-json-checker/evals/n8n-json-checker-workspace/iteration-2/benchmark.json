@@ -1,0 +1,640 @@
+{
+  "metadata": {
+    "skill_name": "n8n-json-checker",
+    "skill_path": "<path/to/skill>",
+    "executor_model": "<model-name>",
+    "analyzer_model": "<model-name>",
+    "timestamp": "2026-03-28T13:56:23Z",
+    "evals_run": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "runs_per_configuration": 3
+  },
+  "runs": [
+    {
+      "eval_id": 2,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 11,
+        "failed": 0,
+        "total": 11,
+        "time_seconds": 77.5,
+        "tokens": 33411,
+        "tool_calls": 5,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The output identifies that OpenAI Chat Model is wired via 'main' instead of 'ai_languageModel'",
+          "passed": true,
+          "evidence": "Error #1: 'OpenAI Chat Model \u00e2\u20ac\u201d Wrong connection type used for LangChain sub-node \u00e2\u20ac\u201d The node is connected via \"main\" instead of \"ai_languageModel\"'"
+        },
+        {
+          "text": "The output classifies the wrong AI sub-node connection type as an Error",
+          "passed": true,
+          "evidence": "The finding appears under '### Errors (must fix before activating)' section, classified as Error #1."
+        },
+        {
+          "text": "The output states the correct connection type should be 'ai_languageModel'",
+          "passed": true,
+          "evidence": "Fix shows: 'ai_languageModel': [[{ 'node': 'AI Agent', 'type': 'ai_languageModel', 'index': 0 }]] \u00e2\u20ac\u201d explicitly states the correct key is 'ai_languageModel'."
+        },
+        {
+          "text": "The output warns that there is no respondToWebhook node despite responseMode being 'responseNode'",
+          "passed": true,
+          "evidence": "Warning #1: 'Webhook \u00e2\u20ac\u201d Missing respondToWebhook node \u00e2\u20ac\u201d The Webhook uses \"responseMode\": \"responseNode\" but no respondToWebhook node exists downstream.'"
+        },
+        {
+          "text": "The output does NOT flag the Webhook node's typeVersion or path as issues",
+          "passed": true,
+          "evidence": "The 'Clean' section states: 'typeVersion \u00e2\u20ac\u201d Webhook (2), AI Agent (1.7) match expected versions'. No issue raised about webhook path. The webhook is only flagged for missing respondToWebhook."
+        },
+        {
+          "text": "The output does NOT flag the AI Agent node's configuration as problematic",
+          "passed": true,
+          "evidence": "Under 'Clean': 'typeVersion \u00e2\u20ac\u201d Webhook (2), AI Agent (1.7) match expected versions'. No errors or warnings raised for AI Agent node configuration itself."
+        },
+        {
+          "text": "The output correctly identifies the OpenAI Chat Model node by name in the finding",
+          "passed": true,
+          "evidence": "Error #1 starts with '**OpenAI Chat Model**' \u00e2\u20ac\u201d the node is identified by its exact name."
+        },
+        {
+          "text": "The output does not report any false errors on the @n8n/n8n-nodes-langchain node types",
+          "passed": true,
+          "evidence": "No errors are raised about @n8n/n8n-nodes-langchain node types in general. The only error is specifically about the connection type used (main vs ai_languageModel), which is a legitimate error. Clean section confirms 'nodeType formats \u00e2\u20ac\u201d all valid'."
+        },
+        {
+          "text": "The output does NOT flag the OpenAI Chat Model node type '@n8n/n8n-nodes-langchain.lmChatOpenAi' as a wrong prefix",
+          "passed": true,
+          "evidence": "No mention of the node type prefix being wrong anywhere in the output. 'nodeType formats \u00e2\u20ac\u201d all valid' in the Clean section confirms it is accepted."
+        },
+        {
+          "text": "The output does NOT suggest the AI Agent node's text parameter is misconfigured",
+          "passed": true,
+          "evidence": "No mention of the AI Agent's text parameter in errors, warnings, or the clean section. The AI Agent configuration is not flagged as problematic."
+        },
+        {
+          "text": "The output identifies both issues (wrong connection type AND missing respondToWebhook) not just one",
+          "passed": true,
+          "evidence": "Error #1 covers the wrong connection type (main vs ai_languageModel). Warning #1 covers the missing respondToWebhook node. Both issues are present in the output."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 3,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 8,
+        "failed": 0,
+        "total": 8,
+        "time_seconds": 69.6,
+        "tokens": 33253,
+        "tool_calls": 6,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The output does NOT list any Errors for this workflow",
+          "passed": true,
+          "evidence": "Output states 'Zero errors. Zero warnings. The workflow is ready to activate.' and '\u00e2\u0153\u201c No issues found. Workflow looks good to activate.' No errors are listed anywhere."
+        },
+        {
+          "text": "The output does NOT falsely flag the httpRequest authentication:none as an error",
+          "passed": true,
+          "evidence": "Check 2.5 Credential Keys states 'N/A \u00e2\u20ac\u201d no credential blocks (HTTP uses `authentication: \"none\"`)' \u00e2\u20ac\u201d correctly treats it as N/A, not an error."
+        },
+        {
+          "text": "The output does NOT falsely flag the Code node's jsCode as an error",
+          "passed": true,
+          "evidence": "Check 2.3a Code Node Content states 'Clean \u00e2\u20ac\u201d no ES6 imports, no `this.getCredentials`, no unavailable variables, correct return format `[{ json: {...} }]`' \u00e2\u20ac\u201d correctly passes."
+        },
+        {
+          "text": "The output uses the '## n8n Workflow Check' heading",
+          "passed": true,
+          "evidence": "First line of result.md is '## n8n Workflow Check' exactly."
+        },
+        {
+          "text": "The output either says the workflow is clean/looks good or lists only informational warnings",
+          "passed": true,
+          "evidence": "Output states '\u00e2\u0153\u201c No issues found. Workflow looks good to activate.' and 'Zero errors. Zero warnings.' \u00e2\u20ac\u201d clearly clean with no warnings at all."
+        },
+        {
+          "text": "The output does NOT flag correct typeVersions (1.2, 4.2, 2) as problems",
+          "passed": true,
+          "evidence": "Check 2.4 typeVersion states 'Clean \u00e2\u20ac\u201d scheduleTrigger:1.2, httpRequest:4.2, code:2 all match expected' \u00e2\u20ac\u201d all three versions explicitly verified as correct."
+        },
+        {
+          "text": "The output explicitly states the workflow passed or has no errors \u00e2\u20ac\u201d not just omits errors by silence",
+          "passed": true,
+          "evidence": "Output explicitly states 'Zero errors. Zero warnings. The workflow is ready to activate.' and '\u00e2\u0153\u201c No issues found. Workflow looks good to activate.' \u00e2\u20ac\u201d explicit positive confirmation, not just silence."
+        },
+        {
+          "text": "The output does NOT suggest adding respondToWebhook (there is no Webhook node in this workflow at all)",
+          "passed": true,
+          "evidence": "Check 2.9 Webhook Checks states 'N/A' \u00e2\u20ac\u201d no respondToWebhook suggestion made. The workflow has no Webhook node and the skill correctly identifies this as not applicable."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 4,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 11,
+        "failed": 0,
+        "total": 11,
+        "time_seconds": 65.8,
+        "tokens": 28818,
+        "tool_calls": 3,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The output identifies documentId as a plain string that should use the __rl format",
+          "passed": true,
+          "evidence": "Line 10: '**Google Sheets** \u00e2\u20ac\u201d `documentId` is a plain string but must use the `__rl` object format'"
+        },
+        {
+          "text": "The output identifies sheetName as a plain string that should use the __rl format",
+          "passed": true,
+          "evidence": "Line 15: '**Google Sheets** \u00e2\u20ac\u201d `sheetName` is a plain string `\"Sheet1\"` but must use the `__rl` object format'"
+        },
+        {
+          "text": "Both documentId and sheetName issues are classified as Errors",
+          "passed": true,
+          "evidence": "Both issues appear under '### Errors (must fix before activating)' section (lines 8-18)"
+        },
+        {
+          "text": "The output shows or describes the correct __rl format for documentId",
+          "passed": true,
+          "evidence": "Lines 11-13 show: `\"documentId\": { \"__rl\": true, \"value\": \"1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms\", \"mode\": \"id\" }`"
+        },
+        {
+          "text": "The output shows or describes the correct __rl format for sheetName",
+          "passed": true,
+          "evidence": "Lines 16-18 show: `\"sheetName\": { \"__rl\": true, \"value\": \"Sheet1\", \"mode\": \"list\", \"cachedResultName\": \"Sheet1\" }` with an alternative mode option also provided"
+        },
+        {
+          "text": "The output does NOT flag the googleSheetsOAuth2Api credential key as incorrect",
+          "passed": true,
+          "evidence": "Line 33: 'Credential key name \u00e2\u20ac\u201d `googleSheetsOAuth2Api` is correct' listed under Clean section"
+        },
+        {
+          "text": "The output does NOT flag typeVersion 4.5 for googleSheets as incorrect",
+          "passed": true,
+          "evidence": "Line 32: 'typeVersion \u00e2\u20ac\u201d Webhook `2` and Google Sheets `4.5` both match expected versions' listed under Clean section"
+        },
+        {
+          "text": "The output correctly identifies the 'Google Sheets' node by name in the findings",
+          "passed": true,
+          "evidence": "Both error items (lines 10 and 15) correctly refer to '**Google Sheets**' as the node name"
+        },
+        {
+          "text": "The output offers to apply fixes after listing the errors",
+          "passed": true,
+          "evidence": "Line 44: 'Want me to apply these fixes directly to the workflow?'"
+        },
+        {
+          "text": "The output does NOT flag the 'appendOrUpdate' operation name as invalid",
+          "passed": true,
+          "evidence": "No mention of 'appendOrUpdate' anywhere in the output. The operation is not flagged in errors, warnings, or clean sections."
+        },
+        {
+          "text": "The output does NOT flag the missing 'columns' parameter as a critical error (it's optional)",
+          "passed": true,
+          "evidence": "No mention of a missing 'columns' parameter in the errors or warnings sections. Only documentId and sheetName __rl issues are listed as errors."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 1,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.92,
+        "passed": 12,
+        "failed": 1,
+        "total": 13,
+        "time_seconds": 44.7,
+        "tokens": 1456,
+        "tool_calls": 3,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The output contains the heading '## n8n Workflow Check'",
+          "passed": true,
+          "evidence": "Line 1 of result.md: '## n8n Workflow Check'"
+        },
+        {
+          "text": "The output identifies both nodes as having the wrong 'nodes-base.' prefix (should be 'n8n-nodes-base.')",
+          "passed": true,
+          "evidence": "Error 1: 'Telegram Trigger \u00e2\u20ac\u201d Wrong type prefix \u00e2\u20ac\u201d nodes-base.telegramTrigger is missing the n8n- prefix. Change to n8n-nodes-base.telegramTrigger.' Error 2: 'Send Reply \u00e2\u20ac\u201d Wrong type prefix \u00e2\u20ac\u201d nodes-base.telegram is missing the n8n- prefix. Change to n8n-nodes-base.telegram.'"
+        },
+        {
+          "text": "The output classifies the incorrect nodeType prefix as an Error, not a Warning",
+          "passed": true,
+          "evidence": "Both wrong-prefix issues appear under '### Errors (must fix before activating)' section, items 1 and 2."
+        },
+        {
+          "text": "The output identifies chatId on 'Send Reply' as a plain string instead of an __rl object",
+          "passed": true,
+          "evidence": "Error 3: 'Send Reply \u00e2\u20ac\u201d chatId must use __rl object format, not a plain string.' with the offending plain string shown."
+        },
+        {
+          "text": "The output classifies the plain-string chatId as an Error",
+          "passed": true,
+          "evidence": "chatId issue appears under '### Errors (must fix before activating)' section as item 3."
+        },
+        {
+          "text": "The output describes or shows the correct __rl format with __rl:true, value, and mode fields",
+          "passed": true,
+          "evidence": "The fix shown is: '{ \"__rl\": true, \"value\": \"={{ $json.message.chat.id }}\", \"mode\": \"expression\" }' \u00e2\u20ac\u201d all three fields present."
+        },
+        {
+          "text": "The output reports the typeVersion 1.1 mismatch on Telegram Trigger (expected 1.2)",
+          "passed": true,
+          "evidence": "Warning 1: 'Telegram Trigger \u00e2\u20ac\u201d typeVersion is 1.1, expected 1.2 \u00e2\u20ac\u201d Upgrade to stay on the current recommended version.'"
+        },
+        {
+          "text": "The output classifies the typeVersion mismatch as a Warning (not an Error)",
+          "passed": true,
+          "evidence": "typeVersion issue appears under '### Warnings (review, may be acceptable)' section as item 1."
+        },
+        {
+          "text": "The output reports the misspelled credential key 'telegramAPI' (should be 'telegramApi')",
+          "passed": true,
+          "evidence": "Warning 2: 'Telegram Trigger \u00e2\u20ac\u201d Credential key is telegramAPI (capital \"API\") \u00e2\u20ac\u201d The correct key is telegramApi (camelCase).'"
+        },
+        {
+          "text": "The output offers to apply fixes after presenting the report",
+          "passed": true,
+          "evidence": "Final line: 'Want me to apply these fixes directly to the workflow JSON?'"
+        },
+        {
+          "text": "The output identifies exactly 4 issues (not more, not fewer)",
+          "passed": false,
+          "evidence": "The output identifies 5 issues: 3 errors (wrong prefix \u00c3\u20142 counted as 2, chatId __rl) + 3 warnings (typeVersion, credential key, plus a spurious 'Credential IDs are instance-specific' note). However counting the planted bugs: wrong prefix is listed as 2 separate errors (items 1 and 2) rather than grouped as 1 issue, and there is an extra Warning 3 about credential ID portability which is a false positive not planted in the workflow. The 4 planted bugs are all found, but a 5th false-positive issue is added (Warning 3 about credential IDs not transferring across instances), making the total distinct reported issues 5."
+        },
+        {
+          "text": "The output does NOT flag the connections object as having any issues",
+          "passed": true,
+          "evidence": "Under '### Clean \u00e2\u0153\u201c': 'Connection structure \u00e2\u20ac\u201d linear chain wired correctly'. No connection issues flagged."
+        },
+        {
+          "text": "The output does NOT flag the 'updates: [message]' parameter as wrong",
+          "passed": true,
+          "evidence": "No mention of 'updates' parameter being wrong anywhere in the output."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 2,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.82,
+        "passed": 9,
+        "failed": 2,
+        "total": 11,
+        "time_seconds": 58.9,
+        "tokens": 21795,
+        "tool_calls": 3,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The output identifies that OpenAI Chat Model is wired via 'main' instead of 'ai_languageModel'",
+          "passed": true,
+          "evidence": "Issue 3 (line 39-59) explicitly states: 'The OpenAI Chat Model is connected to AI Agent using the \"main\" connection type' and shows the incorrect connections JSON with 'main' key."
+        },
+        {
+          "text": "The output classifies the wrong AI sub-node connection type as an Error",
+          "passed": true,
+          "evidence": "Issue 3 is labeled '## Issue 3 \u00e2\u20ac\u201d OpenAI Chat Model wired with wrong connection type (ERROR \u00e2\u20ac\u201d Critical)' in the heading."
+        },
+        {
+          "text": "The output states the correct connection type should be 'ai_languageModel'",
+          "passed": true,
+          "evidence": "Issue 3 states: 'For a language model sub-node, the correct connection type is ai_languageModel' and provides corrected JSON using 'ai_languageModel' as both the key and type value."
+        },
+        {
+          "text": "The output warns that there is no respondToWebhook node despite responseMode being 'responseNode'",
+          "passed": true,
+          "evidence": "Issue 4 (lines 63-97) is titled 'Missing \"Respond to Webhook\" node (Structural Problem)' and explains: 'The Webhook trigger is configured with responseMode: responseNode... Without this node, the webhook will hang indefinitely.'"
+        },
+        {
+          "text": "The output does NOT flag the Webhook node's typeVersion or path as issues",
+          "passed": true,
+          "evidence": "No issue mentions the Webhook node's typeVersion or path. The only webhook-related issue is Issue 4 about the missing respondToWebhook node, not about the webhook configuration itself."
+        },
+        {
+          "text": "The output does NOT flag the AI Agent node's configuration as problematic",
+          "passed": true,
+          "evidence": "None of the 5 issues target the AI Agent node's configuration. The AI Agent node appears untouched in the corrected JSON with the same parameters (text, options, typeVersion 1.7)."
+        },
+        {
+          "text": "The output correctly identifies the OpenAI Chat Model node by name in the finding",
+          "passed": true,
+          "evidence": "Issues 1, 2, 3, and 5 all explicitly name 'OpenAI Chat Model' as the affected node. Issue 3 states '**Node:** `OpenAI Chat Model`' and references it in the connections block."
+        },
+        {
+          "text": "The output does not report any false errors on the @n8n/n8n-nodes-langchain node types",
+          "passed": false,
+          "evidence": "Issue 1 flags '@n8n/n8n-nodes-langchain.lmChatOpenAi' as wrong, claiming the correct type is 'lmOpenAi'. This is a false positive \u00e2\u20ac\u201d 'lmChatOpenAi' is a valid LangChain node type with the correct '@n8n/n8n-nodes-langchain' prefix. The baseline incorrectly treats this as an error."
+        },
+        {
+          "text": "The output does NOT flag the OpenAI Chat Model node type '@n8n/n8n-nodes-langchain.lmChatOpenAi' as a wrong prefix",
+          "passed": true,
+          "evidence": "Issue 1 does NOT flag the prefix '@n8n/n8n-nodes-langchain' as wrong. It only claims 'lmChatOpenAi' should be 'lmOpenAi'. The prefix itself is not questioned. The expectation is specifically about the prefix, not the full type name."
+        },
+        {
+          "text": "The output does NOT suggest the AI Agent node's text parameter is misconfigured",
+          "passed": true,
+          "evidence": "No issue mentions the AI Agent node's 'text' parameter. The corrected JSON retains 'text': '={{ $json.body.message }}' unchanged."
+        },
+        {
+          "text": "The output identifies both issues (wrong connection type AND missing respondToWebhook) not just one",
+          "passed": true,
+          "evidence": "Issue 3 covers the wrong connection type ('main' instead of 'ai_languageModel') and Issue 4 covers the missing Respond to Webhook node. Both are present and substantive."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 3,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.875,
+        "passed": 7,
+        "failed": 1,
+        "total": 8,
+        "time_seconds": 34.4,
+        "tokens": 22154,
+        "tool_calls": 2,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The output does NOT list any Errors for this workflow",
+          "passed": true,
+          "evidence": "Output explicitly states 'Errors: 0' in the Issues Found section and no error items are listed anywhere."
+        },
+        {
+          "text": "The output does NOT falsely flag the httpRequest authentication:none as an error",
+          "passed": true,
+          "evidence": "HTTP Request node review states 'authentication: \"none\" \u00e2\u20ac\u201d all correct' and gives Status: PASS."
+        },
+        {
+          "text": "The output does NOT falsely flag the Code node's jsCode as an error",
+          "passed": true,
+          "evidence": "Code node review states 'jsCode uses valid n8n JavaScript pattern' and gives Status: PASS."
+        },
+        {
+          "text": "The output uses the '## n8n Workflow Check' heading",
+          "passed": false,
+          "evidence": "The output uses '# n8n Workflow JSON Analysis: \"Hourly Data Fetch\"' as the heading, not '## n8n Workflow Check'. The skill-specific heading is absent."
+        },
+        {
+          "text": "The output either says the workflow is clean/looks good or lists only informational warnings",
+          "passed": true,
+          "evidence": "Verdict: 'This workflow JSON is valid and ready to use.' Summary states 'No errors or misconfigurations were found.' Warnings: 0."
+        },
+        {
+          "text": "The output does NOT flag correct typeVersions (1.2, 4.2, 2) as problems",
+          "passed": true,
+          "evidence": "All three typeVersions are explicitly confirmed: scheduleTrigger 1.2 'matches recommended version', httpRequest 4.2 'matches recommended version', code node 2 'matches recommended version'."
+        },
+        {
+          "text": "The output explicitly states the workflow passed or has no errors \u00e2\u20ac\u201d not just omits errors by silence",
+          "passed": true,
+          "evidence": "Output explicitly states 'Errors: 0', 'No errors or misconfigurations were found', and 'Verdict: This workflow JSON is valid and ready to use.'"
+        },
+        {
+          "text": "The output does NOT suggest adding respondToWebhook (there is no Webhook node in this workflow at all)",
+          "passed": true,
+          "evidence": "No mention of respondToWebhook or Webhook node anywhere in the output. The workflow is correctly identified as a Schedule Trigger based pipeline."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 4,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.91,
+        "passed": 10,
+        "failed": 1,
+        "total": 11,
+        "time_seconds": 42.4,
+        "tokens": 20626,
+        "tool_calls": 2,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The output identifies documentId as a plain string that should use the __rl format",
+          "passed": true,
+          "evidence": "Critical Issue 1 explicitly states: 'documentId missing __rl wrapper' and shows the plain string '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms' as wrong."
+        },
+        {
+          "text": "The output identifies sheetName as a plain string that should use the __rl format",
+          "passed": true,
+          "evidence": "Critical Issue 2 explicitly states: 'sheetName missing __rl wrapper' and shows the plain string 'Sheet1' as wrong."
+        },
+        {
+          "text": "Both documentId and sheetName issues are classified as Errors",
+          "passed": true,
+          "evidence": "Both are labeled 'Critical Issue 1' and 'Critical Issue 2'. The summary states '2 critical errors detected (both __rl field violations on googleSheets node)'."
+        },
+        {
+          "text": "The output shows or describes the correct __rl format for documentId",
+          "passed": true,
+          "evidence": "Correct format shown: '{ \"__rl\": true, \"value\": \"1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms\", \"mode\": \"id\" }'"
+        },
+        {
+          "text": "The output shows or describes the correct __rl format for sheetName",
+          "passed": true,
+          "evidence": "Correct format shown: '{ \"__rl\": true, \"value\": \"Sheet1\", \"mode\": \"name\" }'"
+        },
+        {
+          "text": "The output does NOT flag the googleSheetsOAuth2Api credential key as incorrect",
+          "passed": true,
+          "evidence": "No mention of credential key issues anywhere in the output. Only the two __rl issues and a minor responseMode note are discussed."
+        },
+        {
+          "text": "The output does NOT flag typeVersion 4.5 for googleSheets as incorrect",
+          "passed": true,
+          "evidence": "No mention of typeVersion anywhere in the output. Only __rl field violations and a responseMode note are raised."
+        },
+        {
+          "text": "The output correctly identifies the 'Google Sheets' node by name in the findings",
+          "passed": true,
+          "evidence": "Summary states '2 critical errors detected (both __rl field violations on googleSheets node)'. The issues reference the Google Sheets node context, though using 'googleSheets' rather than the display name 'Google Sheets'."
+        },
+        {
+          "text": "The output offers to apply fixes after listing the errors",
+          "passed": false,
+          "evidence": "The output lists the correct fixes with code examples but does not explicitly offer to apply them. There is no statement like 'Would you like me to fix these?' or 'I can apply these corrections for you.'"
+        },
+        {
+          "text": "The output does NOT flag the 'appendOrUpdate' operation name as invalid",
+          "passed": true,
+          "evidence": "No mention of the 'appendOrUpdate' operation anywhere in the output. Only __rl issues and responseMode are discussed."
+        },
+        {
+          "text": "The output does NOT flag the missing 'columns' parameter as a critical error (it's optional)",
+          "passed": true,
+          "evidence": "No mention of a missing 'columns' parameter anywhere in the output."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 1,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.69,
+        "passed": 9,
+        "failed": 4,
+        "total": 13,
+        "time_seconds": 72.3,
+        "tokens": 3748,
+        "tool_calls": 4,
+        "errors": 1
+      },
+      "expectations": [
+        {
+          "text": "The output contains the heading '## n8n Workflow Check'",
+          "passed": false,
+          "evidence": "The output heading is '# n8n Workflow JSON Analysis \u00e2\u20ac\u201d Telegram Echo Bot', not '## n8n Workflow Check'. No heading matching '## n8n Workflow Check' appears anywhere in the output."
+        },
+        {
+          "text": "The output identifies both nodes as having the wrong 'nodes-base.' prefix (should be 'n8n-nodes-base.')",
+          "passed": true,
+          "evidence": "Issue 1 states: 'Both nodes use `nodes-base.` as the type prefix' and lists both 'nodes-base.telegramTrigger' and 'nodes-base.telegram', explicitly identifying both Telegram Trigger and Send Reply nodes."
+        },
+        {
+          "text": "The output classifies the incorrect nodeType prefix as an Error, not a Warning",
+          "passed": true,
+          "evidence": "Issue 1 is labeled 'CRITICAL' in the summary table: '| 1 | CRITICAL | Wrong node type prefix (`nodes-base.` instead of `n8n-nodes-base.`) on both nodes'. CRITICAL is more severe than Error, which satisfies the requirement of not being a Warning."
+        },
+        {
+          "text": "The output identifies chatId on 'Send Reply' as a plain string instead of an __rl object",
+          "passed": true,
+          "evidence": "Issue 4 states: 'The `chatId` field uses a plain string expression: `\"chatId\": \"={{ $json.message.chat.id }}\"`' and explicitly calls out that it requires the __rl object format."
+        },
+        {
+          "text": "The output classifies the plain-string chatId as an Error",
+          "passed": true,
+          "evidence": "Issue 4 is labeled 'CRITICAL' in the summary table: '| 4 | CRITICAL | `chatId` missing `__rl` resource locator format'. CRITICAL is more severe than Error, satisfying the 'not a Warning' requirement."
+        },
+        {
+          "text": "The output describes or shows the correct __rl format with __rl:true, value, and mode fields",
+          "passed": true,
+          "evidence": "Issue 4 shows the correct format: '\"chatId\": { \"__rl\": true, \"value\": \"={{ $json.message.chat.id }}\", \"mode\": \"expression\" }' \u00e2\u20ac\u201d all three required fields (__rl:true, value, and mode) are present."
+        },
+        {
+          "text": "The output reports the typeVersion 1.1 mismatch on Telegram Trigger (expected 1.2)",
+          "passed": true,
+          "evidence": "Issue 2 states: 'The node uses `\"typeVersion\": 1.1`, but the correct recommended version is `1.2`.' and shows the fix in a code block."
+        },
+        {
+          "text": "The output classifies the typeVersion mismatch as a Warning (not an Error)",
+          "passed": false,
+          "evidence": "Issue 2 is labeled 'ERROR' in the issue heading ('### Issue 2 \u00e2\u20ac\u201d Wrong `typeVersion` on Telegram Trigger (ERROR)') and in the summary table ('| 2 | ERROR | ...'). The expectation requires classification as a Warning, but it was classified as an Error."
+        },
+        {
+          "text": "The output reports the misspelled credential key 'telegramAPI' (should be 'telegramApi')",
+          "passed": true,
+          "evidence": "Issue 3 states: 'The credentials block uses `\"telegramAPI\"` (uppercase `API`)' and shows the corrected key as `\"telegramApi\"` (lowercase `pi`)."
+        },
+        {
+          "text": "The output offers to apply fixes after presenting the report",
+          "passed": false,
+          "evidence": "The output presents a corrected workflow JSON directly (under '## Corrected Workflow JSON') but does not offer or ask whether to apply fixes. It simply provides the corrected JSON without any offer or prompt to apply changes."
+        },
+        {
+          "text": "The output identifies exactly 4 issues (not more, not fewer)",
+          "passed": false,
+          "evidence": "The output identifies 5 issues: the 4 planted bugs plus Issue 5 ('Nodes missing `id` field'). The summary table explicitly states 'Total issues: 5 (2 critical, 2 errors, 1 minor)'. The missing `id` field is a false positive not in the set of 4 planted bugs."
+        },
+        {
+          "text": "The output does NOT flag the connections object as having any issues",
+          "passed": true,
+          "evidence": "No issue mentions the connections object. The corrected JSON includes the same connections structure, and no issue was raised about it."
+        },
+        {
+          "text": "The output does NOT flag the 'updates: [message]' parameter as wrong",
+          "passed": true,
+          "evidence": "No issue mentions the 'updates' parameter. The corrected JSON preserves '\"updates\": [\"message\"]' unchanged, confirming it was not flagged."
+        }
+      ],
+      "notes": []
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 0.98,
+        "stddev": 0.04,
+        "min": 0.92,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 64.4,
+        "stddev": 14.0083,
+        "min": 44.7,
+        "max": 77.5
+      },
+      "tokens": {
+        "mean": 24234.5,
+        "stddev": 15334.167,
+        "min": 1456,
+        "max": 33411
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.8237,
+        "stddev": 0.0966,
+        "min": 0.69,
+        "max": 0.91
+      },
+      "time_seconds": {
+        "mean": 52.0,
+        "stddev": 16.9472,
+        "min": 34.4,
+        "max": 72.3
+      },
+      "tokens": {
+        "mean": 17080.75,
+        "stddev": 8912.4078,
+        "min": 3748,
+        "max": 22154
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.16",
+      "time_seconds": "+12.4",
+      "tokens": "+7154"
+    }
+  },
+  "notes": []
+}

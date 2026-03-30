@@ -1,0 +1,87 @@
+{
+  "skill_name": "n8n-mcp-tools-expert",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I want to build an n8n workflow that sends a Slack message. What's the correct sequence of MCP tools I should use to find the node, understand its config, and deploy the workflow?",
+      "expected_output": "search_nodes({query: 'slack'}) → get_node({nodeType: 'nodes-base.slack'}) → configure → validate_node({nodeType: 'nodes-base.slack', config, profile: 'runtime'}) → n8n_create_workflow with n8n-nodes-base.slack → validate → activate.",
+      "files": [],
+      "expectations": [
+        "The output recommends search_nodes as the first step with a relevant query",
+        "The output uses 'nodes-base.slack' format (short prefix) for get_node and validate_node",
+        "The output uses 'n8n-nodes-base.slack' format (full prefix) for n8n_create_workflow",
+        "The output specifies detail: 'standard' or notes it is the default for get_node",
+        "The output includes validate_node with profile: 'runtime'",
+        "The output ends with workflow activation via n8n_update_partial_workflow with activateWorkflow type",
+        "The output presents the sequence in order: search → get_node → configure → validate → create → validate → activate",
+        "The output mentions search_templates as an alternative or supplement to search_nodes for complex nodes",
+        "The output does NOT place validation after activation in the sequence"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "What's the difference between 'nodes-base.slack' and 'n8n-nodes-base.slack'? I keep getting node not found errors and I'm not sure which format to use.",
+      "expected_output": "nodes-base.slack = short format for search/validate tools (search_nodes, get_node, validate_node). n8n-nodes-base.slack = full format for workflow management tools (n8n_create_workflow, n8n_update_partial_workflow). Wrong format causes silent failures.",
+      "files": [],
+      "expectations": [
+        "The output clearly explains that 'nodes-base.slack' is for search and validation tools",
+        "The output clearly explains that 'n8n-nodes-base.slack' is for workflow create/update tools",
+        "The output lists which specific tools use each format",
+        "The output explains that using the wrong format causes 'node not found' errors",
+        "The output mentions that search_nodes returns both formats (nodeType and workflowNodeType)",
+        "The output does NOT say both formats are interchangeable",
+        "The output addresses the LangChain prefix: '@n8n/n8n-nodes-langchain.agent' for workflow tools vs 'langchain.agent' for search/validate tools",
+        "The output does NOT say either format works for both contexts"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "How do I activate a workflow after building and validating it with n8n-mcp tools?",
+      "expected_output": "Use n8n_update_partial_workflow with operations: [{type: 'activateWorkflow'}]. Must run AFTER n8n_validate_workflow returns zero errors. Not a separate tool — it's an operation type inside update.",
+      "files": [],
+      "expectations": [
+        "The output shows n8n_update_partial_workflow with operations containing type: 'activateWorkflow'",
+        "The output specifies that activation should happen AFTER validation passes with zero errors",
+        "The output includes the workflow id parameter",
+        "The output does NOT suggest there is a separate n8n_activate_workflow tool",
+        "The output recommends using n8n_validate_workflow before activating",
+        "The output does NOT say to validate after activation as a required step",
+        "The output shows the workflowId parameter in the n8n_update_partial_workflow call",
+        "The output does NOT show a separate n8n_activate_workflow function call"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "I'm adding connections to an IF node in my workflow. The true branch should go to a 'Send Email' node and the false branch should go to a 'Log Error' node. What's the correct way to specify which output using n8n_update_partial_workflow?",
+      "expected_output": "Use smart parameters with branch: 'true' and branch: 'false'. Two separate addConnection operations. This is clearer than using numeric sourceIndex.",
+      "files": [],
+      "expectations": [
+        "The output uses the 'branch' parameter for IF node connections",
+        "The output uses branch: 'true' for the connection to 'Send Email'",
+        "The output uses branch: 'false' for the connection to 'Log Error'",
+        "The output uses n8n_update_partial_workflow with addConnection operation type",
+        "The output includes both the source ('IF') and target node names in each connection",
+        "The output does NOT ONLY use numeric sourceIndex (smart branch parameters are preferred)",
+        "The output shows two separate addConnection operations (one per branch)",
+        "The output explains that IF node main[0] is the true branch and main[1] is the false branch",
+        "The output does NOT show both branches connected to the same input index on the target nodes"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "I get too many validation warnings when I use validate_node on my AI agent workflow — things like 'missing error handling' and 'no retry logic'. Is there a way to reduce this noise?",
+      "expected_output": "Use profile: 'ai-friendly' instead of 'runtime' for AI/LangChain workflows. It's less noisy and reduces false positives. 'runtime' is still recommended for non-AI nodes.",
+      "files": [],
+      "expectations": [
+        "The output recommends profile: 'ai-friendly' to reduce validation noise for AI workflows",
+        "The output explains that ai-friendly reduces false positives compared to runtime",
+        "The output notes that runtime is still the recommended default for non-AI node validation",
+        "The output does NOT suggest ignoring all validation output",
+        "The output does NOT suggest switching to profile: 'minimal' (too permissive for pre-deployment)",
+        "The output explains the tradeoff: ai-friendly reduces noise but may allow some questionable configs",
+        "The output does NOT suggest switching to profile: 'minimal' as the noise-reduction solution",
+        "The output names at least one specific type of warning that ai-friendly suppresses vs runtime"
+      ]
+    }
+  ]
+}

@@ -6,7 +6,7 @@
 
 Build n8n workflows by prompt using Claude Code + n8n-mcp MCP tools.
 
-**Instance:** https://n8n.cdeprosperity.com
+**Instance:** https://professionalaiassistants.com/n8n
 **MCP:** `npx n8n-mcp` (stdio) — node docs, templates, validation, workflow API
 
 ---
@@ -16,18 +16,25 @@ Build n8n workflows by prompt using Claude Code + n8n-mcp MCP tools.
 When asked to create a workflow, follow this exact sequence:
 
 1. **Identify nodes** — Determine trigger + action nodes from the request
-2. **Skip lookup for known nodes** — If all nodes appear in [Common Node Configs](#common-node-configs) below, use those directly. No search needed.
-3. **Look up unfamiliar nodes only** — `search_nodes` → `get_node` (detail: "standard") for anything not in the list
-4. **Create** — `n8n_create_workflow` with full correct config in one call
-5. **Validate & Fix Loop** — `n8n_validate_workflow` with profile `"runtime"`. If errors exist:
+2. **Source node configs** using this decision tree (in order):
+   - **In Common Node Configs below?** → use directly, no lookup needed
+   - **Complex/unfamiliar integration?** → `search_templates` first — 34,000+ real working configs. Effective queries:
+     - `"telegram bot"`, `"google sheets append row"`, `"slack notification"`
+     - `"ai agent openai"`, `"airtable create record"`, `"notion database"`
+     - Extract the relevant node config from the template result, adapt as needed
+   - **Not found in templates?** → `search_nodes` → `get_node` (detail: `"standard"`)
+3. **Create** — `n8n_create_workflow` with full correct config in one call
+4. **Validate & Fix Loop** — `n8n_validate_workflow` with profile `"runtime"`. If errors exist:
    - Read each error message → identify the offending node/field
    - Patch via `n8n_update_partial_workflow` with corrected node config
    - Re-validate. **Max 3 attempts.** If still failing after 3 tries, report the remaining errors to the user and do not activate.
    - Skip warnings unless they indicate a real misconfiguration.
-6. **Activate** — `n8n_update_partial_workflow` with `{ type: "activateWorkflow" }` after clean validation (0 errors)
-7. **Report** — Workflow URL + node summary + **all credentials** user needs to connect in n8n UI (list each credential type + which nodes use it)
-
-**Do not search templates for common integrations.** Only use `search_templates` when the workflow pattern is genuinely unclear.
+5. **Activate** — `n8n_update_partial_workflow` with `{ type: "activateWorkflow" }` after clean validation (0 errors)
+6. **Test** — For manual trigger workflows, call `execute_workflow` with the workflow ID to verify it runs. For webhook workflows, provide the test URL: `https://professionalaiassistants.com/n8n/webhook-test/{path}`
+7. **Report** — Include all of the following:
+   - **Workflow URL:** `https://professionalaiassistants.com/n8n/workflow/{workflow_id}`
+   - Node summary (trigger type, key action nodes)
+   - **Credentials to configure** — list each credential type + which nodes use it (see [Credential Handling](#credential-handling))
 
 ### Context Window Management
 
@@ -58,6 +65,7 @@ Certain node fields **require** the `__rl` object format — a plain string will
 ```json
 { "__rl": true, "value": "={{ $json.chat.id }}", "mode": "expression" }
 { "__rl": true, "value": "STATIC_VALUE", "mode": "id" }
+{ "__rl": true, "value": "gid=0", "mode": "list", "cachedResultName": "Sheet1", "cachedResultUrl": "..." }
 ```
 
 **Known resource locator fields — always use `__rl` format:**
@@ -68,8 +76,50 @@ Certain node fields **require** the `__rl` object format — a plain string will
 | `n8n-nodes-base.slack` | `channel`, `user` |
 | `n8n-nodes-base.gmail` | `sendTo`, `messageId`, `labelIds` |
 | `n8n-nodes-base.googleSheets` | `documentId`, `sheetName` |
+| `n8n-nodes-base.googleDrive` | `driveId`, `folderId`, `fileId` |
 | `n8n-nodes-base.notion` | `pageId`, `databaseId` |
 | `n8n-nodes-base.airtable` | `baseId`, `tableId` |
+
+---
+
+## typeVersion Reference
+
+Use these versions exactly. Older versions may still work but miss features/fixes.
+
+| Node type | typeVersion |
+|-----------|-------------|
+| `n8n-nodes-base.telegramTrigger` | `1.2` |
+| `n8n-nodes-base.telegram` | `1.2` |
+| `n8n-nodes-base.webhook` | `2` |
+| `n8n-nodes-base.scheduleTrigger` | `1.2` |
+| `n8n-nodes-base.manualTrigger` | `1` |
+| `n8n-nodes-base.httpRequest` | `4.2` |
+| `n8n-nodes-base.code` | `2` |
+| `n8n-nodes-base.set` | `3.4` |
+| `n8n-nodes-base.if` | `2.2` |
+| `n8n-nodes-base.switch` | `3.2` |
+| `n8n-nodes-base.merge` | `3` |
+| `n8n-nodes-base.splitInBatches` | `3` |
+| `n8n-nodes-base.respondToWebhook` | `1.1` |
+| `n8n-nodes-base.filter` | `2` |
+| `n8n-nodes-base.aggregate` | `1` |
+| `n8n-nodes-base.removeDuplicates` | `1.1` |
+| `n8n-nodes-base.wait` | `1.1` |
+| `n8n-nodes-base.errorTrigger` | `1` |
+| `n8n-nodes-base.executeCommand` | `1` |
+| `n8n-nodes-base.stickyNote` | `1` |
+| `n8n-nodes-base.noOp` | `1` |
+| `n8n-nodes-base.slack` | `2.3` |
+| `n8n-nodes-base.gmail` | `2.1` |
+| `n8n-nodes-base.googleSheets` | `4.5` |
+| `n8n-nodes-base.googleDrive` | `3` |
+| `@n8n/n8n-nodes-langchain.agent` | `1.7` |
+| `@n8n/n8n-nodes-langchain.lmOpenAi` | `1.2` |
+| `@n8n/n8n-nodes-langchain.memoryBufferWindow` | `1.3` |
+| `@n8n/n8n-nodes-langchain.calculatorTool` | `1` |
+| `@n8n/n8n-nodes-langchain.toolHttpRequest` | `1.1` |
+| `@n8n/n8n-nodes-langchain.outputParserStructured` | `1.2` |
+| `@n8n/n8n-nodes-langchain.textClassifier` | `1` |
 
 ---
 
@@ -89,6 +139,18 @@ $items("NodeName")                     — all items from a node
 ## Common Node Configs
 
 Use these verbatim — no lookup needed. All use `typeVersion` matching the current recommended version.
+
+### Manual Trigger
+
+```json
+{
+  "name": "When clicking 'Test workflow'",
+  "type": "n8n-nodes-base.manualTrigger",
+  "typeVersion": 1,
+  "position": [250, 300],
+  "parameters": {}
+}
+```
 
 ### Telegram Trigger
 
@@ -161,6 +223,20 @@ Use these verbatim — no lookup needed. All use `typeVersion` matching the curr
 }
 ```
 
+### Error Trigger
+
+```json
+{
+  "name": "Error Trigger",
+  "type": "n8n-nodes-base.errorTrigger",
+  "typeVersion": 1,
+  "position": [250, 300],
+  "parameters": {}
+}
+```
+
+Use this as the start of a dedicated error-handling workflow. Set `settings.errorWorkflow` on production workflows to point to this workflow's ID.
+
 ### HTTP Request
 
 ```json
@@ -204,22 +280,89 @@ const data = $input.first().json;
 const all = $input.all();
 ```
 
-### AI Agent (OpenAI / LangChain)
+### Filter
 
 ```json
 {
-  "name": "AI Agent",
-  "type": "@n8n/n8n-nodes-langchain.agent",
-  "typeVersion": 1.7,
+  "name": "Filter",
+  "type": "n8n-nodes-base.filter",
+  "typeVersion": 2,
   "position": [500, 300],
   "parameters": {
-    "text": "={{ $json.message }}",
+    "conditions": {
+      "options": { "caseSensitive": true, "leftValue": "" },
+      "conditions": [
+        {
+          "id": "condition_0",
+          "leftValue": "={{ $json.status }}",
+          "rightValue": "active",
+          "operator": { "type": "string", "operation": "equals" }
+        }
+      ],
+      "combinator": "and"
+    },
     "options": {}
   }
 }
 ```
 
-Connect LLM as sub-node via `ai_languageModel` connection type.
+Items that pass the condition continue; others are dropped. Unlike IF, there is only one output.
+
+### Aggregate
+
+```json
+{
+  "name": "Aggregate",
+  "type": "n8n-nodes-base.aggregate",
+  "typeVersion": 1,
+  "position": [700, 300],
+  "parameters": {
+    "aggregate": "aggregateAllItemData",
+    "destinationFieldName": "data",
+    "options": {}
+  }
+}
+```
+
+Modes: `aggregateAllItemData` (wraps all items into one array field), `aggregateIndividualFields` (use `fieldsToAggregate` to pick specific fields).
+
+### Remove Duplicates
+
+```json
+{
+  "name": "Remove Duplicates",
+  "type": "n8n-nodes-base.removeDuplicates",
+  "typeVersion": 1.1,
+  "position": [700, 300],
+  "parameters": {
+    "compare": "allFields",
+    "options": {}
+  }
+}
+```
+
+`compare` options: `"allFields"` (default), `"selectedFields"` (add `"fieldsToCompare": { "fields": [{ "fieldName": "id" }] }`).
+
+### Edit Fields (Set Node)
+
+```json
+{
+  "name": "Edit Fields",
+  "type": "n8n-nodes-base.set",
+  "typeVersion": 3.4,
+  "position": [500, 300],
+  "parameters": {
+    "mode": "manual",
+    "fields": {
+      "values": [
+        { "name": "newField", "stringValue": "={{ $json.existingField }}" },
+        { "name": "staticField", "stringValue": "hello" }
+      ]
+    },
+    "options": {}
+  }
+}
+```
 
 ### IF Node
 
@@ -297,27 +440,6 @@ Output 0 = true branch, Output 1 = false branch. See [Connections Reference](#co
 
 Each rule maps to an output index (0, 1, 2…). Fallback output is the last index.
 
-### Edit Fields (Set Node)
-
-```json
-{
-  "name": "Edit Fields",
-  "type": "n8n-nodes-base.set",
-  "typeVersion": 3.4,
-  "position": [500, 300],
-  "parameters": {
-    "mode": "manual",
-    "fields": {
-      "values": [
-        { "name": "newField", "stringValue": "={{ $json.existingField }}" },
-        { "name": "staticField", "stringValue": "hello" }
-      ]
-    },
-    "options": {}
-  }
-}
-```
-
 ### Merge Node
 
 ```json
@@ -335,6 +457,25 @@ Each rule maps to an output index (0, 1, 2…). Fallback output is the last inde
 ```
 
 Merge has **two inputs** (index 0 and 1). Both must be wired in `connections`. Modes: `append`, `combine` (with `mergeByPosition` or `mergeByFields`), `chooseBranch`.
+
+### Wait
+
+```json
+{
+  "name": "Wait",
+  "type": "n8n-nodes-base.wait",
+  "typeVersion": 1.1,
+  "position": [700, 300],
+  "parameters": {
+    "resume": "timeInterval",
+    "amount": 5,
+    "unit": "seconds",
+    "options": {}
+  }
+}
+```
+
+`resume` options: `"timeInterval"` (wait fixed duration), `"webhook"` (wait for external call), `"form"` (wait for form submission). `unit` options: `"seconds"`, `"minutes"`, `"hours"`, `"days"`.
 
 ### Respond to Webhook
 
@@ -384,6 +525,197 @@ Output 0 = batch (loop body), Output 1 = done. Wire loop body back to Split In B
 ```
 
 Useful as a placeholder on branches that need no action (e.g., false branch of IF).
+
+### Slack — Send Message
+
+```json
+{
+  "name": "Slack",
+  "type": "n8n-nodes-base.slack",
+  "typeVersion": 2.3,
+  "position": [700, 300],
+  "parameters": {
+    "resource": "message",
+    "operation": "post",
+    "channel": { "__rl": true, "value": "#general", "mode": "name" },
+    "text": "={{ $json.message }}",
+    "otherOptions": {}
+  },
+  "credentials": {
+    "slackApi": { "id": "1", "name": "Slack account" }
+  }
+}
+```
+
+`channel` mode options: `"name"` (use `#channel-name`), `"id"` (use channel ID), `"expression"`. For OAuth2 credentials, use `slackOAuth2Api` instead of `slackApi`.
+
+### Gmail — Send Email
+
+```json
+{
+  "name": "Gmail",
+  "type": "n8n-nodes-base.gmail",
+  "typeVersion": 2.1,
+  "position": [700, 300],
+  "parameters": {
+    "resource": "message",
+    "operation": "send",
+    "sendTo": { "__rl": true, "value": "={{ $json.email }}", "mode": "expression" },
+    "subject": "={{ $json.subject }}",
+    "emailType": "text",
+    "message": "={{ $json.body }}",
+    "options": {}
+  },
+  "credentials": {
+    "gmailOAuth2": { "id": "1", "name": "Gmail account" }
+  }
+}
+```
+
+`emailType` options: `"text"`, `"html"`. For HTML emails, change `message` key to `html`.
+
+### Google Sheets — Append Row
+
+```json
+{
+  "name": "Google Sheets",
+  "type": "n8n-nodes-base.googleSheets",
+  "typeVersion": 4.5,
+  "position": [700, 300],
+  "parameters": {
+    "resource": "sheet",
+    "operation": "append",
+    "documentId": { "__rl": true, "value": "SPREADSHEET_ID", "mode": "id" },
+    "sheetName": { "__rl": true, "value": "gid=0", "mode": "list", "cachedResultName": "Sheet1" },
+    "columns": {
+      "mappingMode": "autoMapInputData",
+      "value": {},
+      "matchingColumns": [],
+      "schema": []
+    },
+    "options": {}
+  },
+  "credentials": {
+    "googleSheetsOAuth2Api": { "id": "1", "name": "Google Sheets account" }
+  }
+}
+```
+
+For **read** operations, change `operation` to `"read"` and add `"filtersUI": { "values": [] }`. For **update**, use `operation: "update"` with `matchingColumns` set to the key column name.
+
+### AI Agent (OpenAI / LangChain)
+
+```json
+{
+  "name": "AI Agent",
+  "type": "@n8n/n8n-nodes-langchain.agent",
+  "typeVersion": 1.7,
+  "position": [500, 300],
+  "parameters": {
+    "text": "={{ $json.message }}",
+    "options": {}
+  }
+}
+```
+
+Connect LLM as sub-node via `ai_languageModel` connection type. Always pair with OpenAI Chat Model below.
+
+### OpenAI Chat Model (LangChain sub-node)
+
+```json
+{
+  "name": "OpenAI Chat Model",
+  "type": "@n8n/n8n-nodes-langchain.lmOpenAi",
+  "typeVersion": 1.2,
+  "position": [500, 500],
+  "parameters": {
+    "model": "gpt-4o-mini",
+    "options": {}
+  },
+  "credentials": {
+    "openAiApi": { "id": "1", "name": "OpenAI account" }
+  }
+}
+```
+
+Connect via `ai_languageModel` → AI Agent. Common models: `"gpt-4o"`, `"gpt-4o-mini"`, `"gpt-4-turbo"`.
+
+### Window Buffer Memory (LangChain sub-node)
+
+```json
+{
+  "name": "Window Buffer Memory",
+  "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+  "typeVersion": 1.3,
+  "position": [700, 500],
+  "parameters": {
+    "sessionKey": "={{ $json.sessionId }}",
+    "contextWindowLength": 10
+  }
+}
+```
+
+Connect via `ai_memory` → AI Agent. `contextWindowLength` = number of message pairs to retain.
+
+### Calculator Tool (LangChain sub-node)
+
+```json
+{
+  "name": "Calculator",
+  "type": "@n8n/n8n-nodes-langchain.calculatorTool",
+  "typeVersion": 1,
+  "position": [300, 500],
+  "parameters": {}
+}
+```
+
+Connect via `ai_tool` → AI Agent. No configuration needed — gives the agent math capabilities.
+
+### HTTP Request Tool (LangChain sub-node)
+
+```json
+{
+  "name": "HTTP Request Tool",
+  "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+  "typeVersion": 1.1,
+  "position": [500, 500],
+  "parameters": {
+    "name": "search_api",
+    "description": "Search an external API. Input should be a search query string.",
+    "method": "GET",
+    "url": "https://api.example.com/search",
+    "sendQuery": true,
+    "parametersQuery": {
+      "values": [{ "name": "q", "valueProvider": "fieldValue", "value": "" }]
+    }
+  }
+}
+```
+
+Connect via `ai_tool` → AI Agent. The agent passes its tool input as the query parameter.
+
+### Structured Output Parser (LangChain sub-node)
+
+```json
+{
+  "name": "Structured Output Parser",
+  "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+  "typeVersion": 1.2,
+  "position": [700, 500],
+  "parameters": {
+    "schema": {
+      "type": "object",
+      "properties": {
+        "result": { "type": "string", "description": "The main result" },
+        "confidence": { "type": "number", "description": "Confidence score 0-1" }
+      },
+      "required": ["result"]
+    }
+  }
+}
+```
+
+Connect via `ai_outputParser` → AI Agent. Forces the LLM to return structured JSON matching the schema.
 
 ---
 
@@ -470,17 +802,20 @@ The `connections` object wires nodes together. This is the most error-prone part
     "OpenAI Chat Model": {
       "ai_languageModel": [[{ "node": "AI Agent", "type": "ai_languageModel", "index": 0 }]]
     },
-    "Tool Node": {
+    "Calculator": {
       "ai_tool": [[{ "node": "AI Agent", "type": "ai_tool", "index": 0 }]]
     },
-    "Memory Node": {
+    "Window Buffer Memory": {
       "ai_memory": [[{ "node": "AI Agent", "type": "ai_memory", "index": 0 }]]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [[{ "node": "AI Agent", "type": "ai_outputParser", "index": 0 }]]
     }
   }
 }
 ```
 
-Sub-node connection types: `ai_languageModel`, `ai_tool`, `ai_memory`, `ai_outputParser`. The sub-node's key uses the **sub-node connection type** as the key (not `main`).
+Sub-node connection types: `ai_languageModel`, `ai_tool`, `ai_memory`, `ai_outputParser`. The sub-node's key uses the **sub-node connection type** as the key (not `main`). Multiple tools connect to the same agent — each tool gets its own entry under its own name.
 
 ### Loop (Split In Batches)
 
@@ -502,26 +837,40 @@ Sub-node connection types: `ai_languageModel`, `ai_tool`, `ai_memory`, `ai_outpu
 
 Output 0 = loop body → wire back to Split In Batches. Output 1 = done.
 
-### Error Handling Branch
+### Error Output (continueErrorOutput)
 
-Use the `onError` property on a node to define error behavior:
+Add `"onError": "continueErrorOutput"` to any node to give it a second output for errors. Wire it like an IF branch:
 
 ```json
 {
-  "name": "HTTP Request",
-  "type": "n8n-nodes-base.httpRequest",
-  "typeVersion": 4.2,
-  "position": [500, 300],
-  "onError": "continueErrorOutput",
-  "parameters": { "method": "GET", "url": "https://api.example.com/endpoint" }
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [{ "node": "Success Handler", "type": "main", "index": 0 }],
+        [{ "node": "Error Handler", "type": "main", "index": 0 }]
+      ]
+    }
+  }
 }
 ```
 
-With `"onError": "continueErrorOutput"`, the node gets a second output:
-- `main[0]` = success
-- `main[1]` = error
+The node config must include `"onError": "continueErrorOutput"`. `main[0]` = success, `main[1]` = error. The error output receives the original item plus an `error` field with message and stack.
 
-Wire the error output like an IF branch.
+### Error Trigger Workflow (separate workflow pattern)
+
+For production workflows, create a dedicated error-handler workflow:
+
+```json
+{
+  "connections": {
+    "Error Trigger": {
+      "main": [[{ "node": "Slack", "type": "main", "index": 0 }]]
+    }
+  }
+}
+```
+
+Then on the main workflow, set `settings.errorWorkflow` to this workflow's ID. The Error Trigger receives `$json.execution` (id, url, error, workflowData).
 
 ---
 
@@ -531,6 +880,32 @@ Wire the error output like an IF branch.
 - **Warnings** → informational, skip unless they indicate a real misconfiguration
 - Profile `"runtime"` is the standard for pre-deploy checks
 - Auto-sanitization runs on every update (fixes operator structures automatically — no manual action needed)
+
+---
+
+## Testing Workflows
+
+After activation, verify the workflow runs correctly:
+
+### Manual Trigger workflows
+```
+execute_workflow({ workflowId: "WORKFLOW_ID" })
+```
+Check the response for execution status. A successful run returns execution data with `finished: true`.
+
+### Webhook workflows
+- **Test URL** (workflow must be open in editor): `https://professionalaiassistants.com/n8n/webhook-test/{path}`
+- **Production URL** (workflow must be active): `https://professionalaiassistants.com/n8n/webhook/{path}`
+- Send a POST request with test data matching the expected payload structure.
+
+### Schedule / Trigger workflows
+- Temporarily change the schedule to run every minute, activate, wait for one execution, then restore the schedule.
+- Or use `execute_workflow` with `startNodes` to run from a specific node.
+
+### Interpreting execution results
+- `finished: true` + no error → success
+- `finished: false` + `data.resultData.error` → inspect the error message and the node that failed
+- Empty output from a node → upstream data didn't match (check IF/Filter conditions and expression paths)
 
 ---
 
@@ -554,7 +929,8 @@ Optional `settings` object at the workflow level — include when relevant:
     "saveManualExecutions": true,
     "saveExecutionProgress": true,
     "executionTimeout": 300,
-    "timezone": "America/New_York"
+    "timezone": "America/New_York",
+    "errorWorkflow": "WORKFLOW_ID_OF_ERROR_HANDLER"
   }
 }
 ```
@@ -565,7 +941,7 @@ Optional `settings` object at the workflow level — include when relevant:
 | `executionTimeout` | `-1` (none) | Set for workflows hitting external APIs that may hang |
 | `saveExecutionProgress` | `false` | Set `true` for long/complex workflows to enable partial replay |
 | `timezone` | Instance default | Set when Schedule Trigger needs a specific timezone |
-| `errorWorkflow` | none | Set to a workflow ID that handles error notifications |
+| `errorWorkflow` | none | Set to ID of a workflow starting with Error Trigger node |
 
 Include `settings` in the top-level workflow object alongside `nodes` and `connections`.
 
@@ -592,13 +968,18 @@ Include `settings` in the top-level workflow object alongside `nodes` and `conne
 | Node | Credential key |
 |------|----------------|
 | Telegram / Telegram Trigger | `telegramApi` |
-| Slack | `slackApi` or `slackOAuth2Api` |
+| Slack (API token) | `slackApi` |
+| Slack (OAuth2) | `slackOAuth2Api` |
 | Gmail | `gmailOAuth2` |
 | Google Sheets | `googleSheetsOAuth2Api` |
+| Google Drive | `googleDriveOAuth2Api` |
+| YouTube | `youTubeOAuth2Api` |
 | Notion | `notionApi` |
+| Airtable | `airtableTokenApi` |
 | OpenAI (LangChain) | `openAiApi` |
 | HTTP Request (Header Auth) | `httpHeaderAuth` |
 | HTTP Request (Bearer) | `httpBearerAuth` |
+| HTTP Request (Basic Auth) | `httpBasicAuth` |
 
 ### Reporting credentials to the user
 
@@ -606,13 +987,17 @@ In the **Report** step, list every credential the user needs to connect:
 
 > **Credentials to configure in n8n UI:**
 > 1. Telegram Bot API → "Telegram account" (nodes: Telegram Trigger, Send Reply)
-> 2. OpenAI API Key → "OpenAI" (nodes: OpenAI Chat Model)
+> 2. OpenAI API Key → "OpenAI account" (nodes: OpenAI Chat Model)
 
 ---
 
 ## n8n Instance
 
-**URL:** https://n8n.cdeprosperity.com
+**URL:** https://professionalaiassistants.com/n8n
 **Type:** Self-hosted VPS
+
+Workflow URL pattern: `https://professionalaiassistants.com/n8n/workflow/{workflow_id}`
+Webhook test URL: `https://professionalaiassistants.com/n8n/webhook-test/{path}`
+Webhook production URL: `https://professionalaiassistants.com/n8n/webhook/{path}`
 
 Credential IDs in workflow JSON (e.g. `"id": "1"`) are placeholders. User connects real credentials in the n8n UI after the workflow is created.

@@ -1,0 +1,105 @@
+{
+  "expectations": [
+    {
+      "text": "The output contains the heading '## n8n Workflow Check'",
+      "passed": false,
+      "evidence": "The output heading is '# n8n Workflow JSON Analysis — Telegram Echo Bot', not '## n8n Workflow Check'. No heading matching '## n8n Workflow Check' appears anywhere in the output."
+    },
+    {
+      "text": "The output identifies both nodes as having the wrong 'nodes-base.' prefix (should be 'n8n-nodes-base.')",
+      "passed": true,
+      "evidence": "Issue 1 states: 'Both nodes use `nodes-base.` as the type prefix' and lists both 'nodes-base.telegramTrigger' and 'nodes-base.telegram', explicitly identifying both Telegram Trigger and Send Reply nodes."
+    },
+    {
+      "text": "The output classifies the incorrect nodeType prefix as an Error, not a Warning",
+      "passed": true,
+      "evidence": "Issue 1 is labeled 'CRITICAL' in the summary table: '| 1 | CRITICAL | Wrong node type prefix (`nodes-base.` instead of `n8n-nodes-base.`) on both nodes'. CRITICAL is more severe than Error, which satisfies the requirement of not being a Warning."
+    },
+    {
+      "text": "The output identifies chatId on 'Send Reply' as a plain string instead of an __rl object",
+      "passed": true,
+      "evidence": "Issue 4 states: 'The `chatId` field uses a plain string expression: `\"chatId\": \"={{ $json.message.chat.id }}\"`' and explicitly calls out that it requires the __rl object format."
+    },
+    {
+      "text": "The output classifies the plain-string chatId as an Error",
+      "passed": true,
+      "evidence": "Issue 4 is labeled 'CRITICAL' in the summary table: '| 4 | CRITICAL | `chatId` missing `__rl` resource locator format'. CRITICAL is more severe than Error, satisfying the 'not a Warning' requirement."
+    },
+    {
+      "text": "The output describes or shows the correct __rl format with __rl:true, value, and mode fields",
+      "passed": true,
+      "evidence": "Issue 4 shows the correct format: '\"chatId\": { \"__rl\": true, \"value\": \"={{ $json.message.chat.id }}\", \"mode\": \"expression\" }' — all three required fields (__rl:true, value, and mode) are present."
+    },
+    {
+      "text": "The output reports the typeVersion 1.1 mismatch on Telegram Trigger (expected 1.2)",
+      "passed": true,
+      "evidence": "Issue 2 states: 'The node uses `\"typeVersion\": 1.1`, but the correct recommended version is `1.2`.' and shows the fix in a code block."
+    },
+    {
+      "text": "The output classifies the typeVersion mismatch as a Warning (not an Error)",
+      "passed": false,
+      "evidence": "Issue 2 is labeled 'ERROR' in the issue heading ('### Issue 2 — Wrong `typeVersion` on Telegram Trigger (ERROR)') and in the summary table ('| 2 | ERROR | ...'). The expectation requires classification as a Warning, but it was classified as an Error."
+    },
+    {
+      "text": "The output reports the misspelled credential key 'telegramAPI' (should be 'telegramApi')",
+      "passed": true,
+      "evidence": "Issue 3 states: 'The credentials block uses `\"telegramAPI\"` (uppercase `API`)' and shows the corrected key as `\"telegramApi\"` (lowercase `pi`)."
+    },
+    {
+      "text": "The output offers to apply fixes after presenting the report",
+      "passed": false,
+      "evidence": "The output presents a corrected workflow JSON directly (under '## Corrected Workflow JSON') but does not offer or ask whether to apply fixes. It simply provides the corrected JSON without any offer or prompt to apply changes."
+    },
+    {
+      "text": "The output identifies exactly 4 issues (not more, not fewer)",
+      "passed": false,
+      "evidence": "The output identifies 5 issues: the 4 planted bugs plus Issue 5 ('Nodes missing `id` field'). The summary table explicitly states 'Total issues: 5 (2 critical, 2 errors, 1 minor)'. The missing `id` field is a false positive not in the set of 4 planted bugs."
+    },
+    {
+      "text": "The output does NOT flag the connections object as having any issues",
+      "passed": true,
+      "evidence": "No issue mentions the connections object. The corrected JSON includes the same connections structure, and no issue was raised about it."
+    },
+    {
+      "text": "The output does NOT flag the 'updates: [message]' parameter as wrong",
+      "passed": true,
+      "evidence": "No issue mentions the 'updates' parameter. The corrected JSON preserves '\"updates\": [\"message\"]' unchanged, confirming it was not flagged."
+    }
+  ],
+  "summary": {
+    "passed": 9,
+    "failed": 4,
+    "total": 13,
+    "pass_rate": 0.69
+  },
+  "execution_metrics": {
+    "total_tool_calls": 4,
+    "total_steps": 4,
+    "errors_encountered": 1,
+    "output_chars": 3748
+  },
+  "timing": {
+    "total_tokens": 27011,
+    "duration_ms": 72273,
+    "total_duration_seconds": 72.3
+  },
+  "claims": [
+    "Identified wrong nodeType prefix on both nodes as CRITICAL",
+    "Identified chatId plain string as CRITICAL with correct __rl fix shown",
+    "Identified typeVersion 1.1 mismatch but classified as ERROR instead of Warning",
+    "Identified telegramAPI credential key casing bug",
+    "False positive: flagged missing 'id' field on nodes as Issue 5",
+    "Provided full corrected workflow JSON instead of offering to apply fixes",
+    "Did not use the '## n8n Workflow Check' heading format"
+  ],
+  "eval_feedback": {
+    "suggestions": [
+      "The baseline failed to use the expected heading '## n8n Workflow Check' — this suggests the skill likely enforces a specific output format that the baseline does not follow.",
+      "The typeVersion mismatch should be classified as a Warning, not an Error — the baseline over-escalated the severity, which could cause user confusion.",
+      "The baseline introduced a false positive (missing 'id' field) that inflated the issue count to 5 instead of 4 — the skill should help the model focus on real bugs and avoid false positives.",
+      "The baseline does not offer to apply fixes — it dumps the corrected JSON directly, which is a different UX pattern than the expected 'offer to fix' pattern. The skill likely prompts for an offer-then-apply flow.",
+      "Despite these failures, the baseline correctly identified all 4 planted bugs, showed the correct __rl format, did not flag connections or 'updates' parameter — core detection accuracy is good (9/13)."
+    ],
+    "overall": "The baseline passes 9 of 13 expectations (69%). It correctly detects all 4 planted bugs and avoids false flags on connections and the 'updates' parameter. It fails on: output heading format, typeVersion severity classification (ERROR vs Warning), introducing a false-positive issue (missing 'id'), and not offering to apply fixes. The skill adds value primarily in output format standardization, correct severity classification, and preventing false positives."
+  }
+}

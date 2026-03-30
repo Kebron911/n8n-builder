@@ -1,0 +1,90 @@
+{
+  "skill_name": "n8n-workflow-patterns",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I want to build a workflow that receives a GitHub webhook when a PR is opened and automatically posts a Slack notification with the PR title and author. What pattern should I use and what nodes do I need?",
+      "expected_output": "Webhook Processing pattern. Nodes: Webhook trigger → Set (format message using $json.body fields) → Slack (post to channel). Reference the $json.body structure for GitHub webhook data.",
+      "files": [],
+      "expectations": [
+        "The output identifies this as the Webhook Processing pattern",
+        "The output includes a Webhook node as the trigger",
+        "The output includes a Slack node to send the notification",
+        "The output includes a transformation step (Set node or Code node) to format the message",
+        "The output references $json.body to access the webhook payload data",
+        "The output follows the Webhook → Transform → Notify sequence",
+        "The output mentions that the Webhook node should use POST method",
+        "The output mentions that GitHub PR data arrives under $json.body fields (e.g. $json.body.pull_request)",
+        "The output does NOT set responseMode to 'responseNode' (no respondToWebhook node needed for a notification workflow)"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I need to build an AI chatbot that can answer customer questions and look up order status from our database. What n8n workflow pattern and nodes should I use?",
+      "expected_output": "AI Agent Workflow pattern. AI Agent node with OpenAI Chat Model via ai_languageModel, database tool node via ai_tool, memory via ai_memory. Trigger via Webhook or Telegram.",
+      "files": [],
+      "expectations": [
+        "The output identifies this as the AI Agent Workflow pattern",
+        "The output includes the @n8n/n8n-nodes-langchain.agent node",
+        "The output connects the OpenAI Chat Model via 'ai_languageModel' connection type",
+        "The output mentions connecting tool nodes via 'ai_tool' connection type for database access",
+        "The output mentions memory (ai_memory connection) for conversation context",
+        "The output uses the correct LangChain connection type notation (ai_languageModel, not main)",
+        "The output suggests an appropriate trigger (Webhook or Telegram Trigger)",
+        "The output specifies typeVersion 1.7 for the AI Agent node",
+        "The output does NOT wire the OpenAI node via 'main' connection type"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "My workflow needs to process 50,000 customer records from a database, transform each one, and write them to another system. It times out when I try to process them all at once. What's the right architecture?",
+      "expected_output": "Loop pattern with Split In Batches node. Process in chunks (e.g. 100 at a time). Wire output 0 (batch) back to Split In Batches. Output 1 (done) goes to the next step. This prevents timeouts.",
+      "files": [],
+      "expectations": [
+        "The output recommends the Split In Batches node (n8n-nodes-base.splitInBatches)",
+        "The output explains the loop wiring: batch output (main[0]) connects back to Split In Batches input",
+        "The output explains that main[1] is the 'done' output that continues after all batches",
+        "The output suggests a batch size (10, 50, 100, or similar)",
+        "The output explains this prevents timeouts by processing in smaller chunks",
+        "The output does NOT suggest processing all 50,000 records in a single Code node",
+        "The output describes the loop pattern correctly as a cycle, not a linear sequence",
+        "The output explicitly shows or states that the batch output (main[0]) loops BACK to Split In Batches input",
+        "The output does NOT suggest processing 50,000 records in a single Code node as a valid alternative"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "I'm setting up a daily report workflow that fetches analytics data and emails it to my team. What should I always include to make it production-ready?",
+      "expected_output": "Schedule Trigger, fetch data, Code/Set to format, Email output. Plus: Error Trigger node → Slack/email notification for failures. Workflow settings: timezone, saveExecutionProgress:true, executionTimeout for long-running fetches.",
+      "files": [],
+      "expectations": [
+        "The output includes a Schedule Trigger as the starting node",
+        "The output recommends adding an Error Trigger node for error handling",
+        "The output suggests connecting the Error Trigger to a notification (Slack, email, etc.)",
+        "The output mentions relevant workflow settings (timezone for the schedule trigger)",
+        "The output mentions saveExecutionProgress or executionTimeout as useful settings",
+        "The output follows the scheduled tasks pattern: Schedule → Fetch → Process → Deliver",
+        "The output emphasizes error handling as essential for production workflows",
+        "The output indicates the Error Trigger belongs in a SEPARATE workflow (not wired inside the same workflow)",
+        "The output includes setting the 'errorWorkflow' in the workflow settings, pointing to the error handler workflow ID"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "I have two separate API calls that each return data I need to combine into a single output. They're independent and could run at the same time. What's the best pattern?",
+      "expected_output": "Parallel Processing with Merge node. Wire trigger → both API nodes simultaneously (split). Both connect to Merge node — one on input index 0, other on input index 1. Merge mode: combine by position or merge by fields.",
+      "files": [],
+      "expectations": [
+        "The output recommends the Merge node to combine the two data streams",
+        "The output shows or describes a parallel branch structure (trigger connects to both API nodes)",
+        "The output explains that Merge requires two inputs wired to input index 0 and index 1",
+        "The output uses the correct 'index': 0 and 'index': 1 distinction for Merge inputs",
+        "The output suggests a merge mode (combine, mergeByPosition, or append)",
+        "The output does NOT suggest running the two API calls sequentially when they're independent",
+        "The output does NOT wire both API outputs to the same input index of Merge",
+        "The output shows the trigger connecting to BOTH API nodes (not API node 1 → API node 2 sequentially)",
+        "The output shows API node 1 connecting to Merge input index 0 and API node 2 to input index 1 (distinct indices)"
+      ]
+    }
+  ]
+}

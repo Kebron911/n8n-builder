@@ -5,8 +5,8 @@
       "args": ["-y", "n8n-mcp"],
       "env": {
         "MCP_MODE": "stdio",
-        "N8N_API_URL": "https://n8n.cdeprosperity.com",
-        "N8N_API_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhMDZlMjYxOC04YmIyLTQ4N2MtYTA5Ny0wMjA4NDBmOGI3MDEiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiOWRiNmIwNzAtMmJmZC00YzJlLThmNDMtYjQzN2MxYjA2N2E2IiwiaWF0IjoxNzcxMDc3NzczfQ.M5Vw48gNCRQYULhx2HNAN7vwBtEEXP7M7BQwEjmuCAI"
+        "N8N_API_URL": "https://professionalaiassistants.com/n8n",
+        "N8N_API_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzYjE0ODJiMy0zY2RhLTRmOGUtOTZjNy0yOGNlZDVmZjc0MzMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiOWQ4ZjE1OTgtMDU2MC00MWZlLWIyMmQtNWNkNmQwNDExNTM5IiwiaWF0IjoxNzc0NDU1MzY4LCJleHAiOjE3NzcwMDMyMDB9.AeOiDce3uNQhhidZ0ObHqbcYMgnCJDZDToZDZYTSzBg"
       }
     }
   }

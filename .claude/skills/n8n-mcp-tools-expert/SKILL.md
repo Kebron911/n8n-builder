@@ -1,6 +1,16 @@
 ---
 name: n8n-mcp-tools-expert
-description: Expert guide for using n8n-mcp MCP tools effectively. Use when searching for nodes, validating configurations, accessing templates, managing workflows, or using any n8n-mcp tool. Provides tool selection guidance, parameter formats, and common patterns.
+description: >
+  Expert guide for HOW to call n8n-mcp MCP tools correctly. Use when you need
+  to know the right tool to call, the correct parameter format, or which nodeType
+  prefix to use (nodes-base.* vs n8n-nodes-base.*). Covers: search_nodes,
+  get_node detail levels, validate_node profiles, n8n_create_workflow,
+  n8n_update_partial_workflow operations, search_templates, smart parameters
+  (branch/case), intent parameter, auto-sanitization behavior, and template
+  deployment. Trigger on: "how do I call X tool", "what parameters does X take",
+  "which tool should I use for Y", "what's the nodeType format", or any
+  confusion about MCP tool usage. Use AFTER n8n-workflow-patterns (which tells
+  you WHAT to build) — this skill tells you HOW to build it with the tools.
 ---
 
 # n8n MCP Tools Expert

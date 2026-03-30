@@ -1,0 +1,80 @@
+{
+  "skill_name": "n8n-json-checker",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Check this n8n workflow JSON for issues:\n\n```json\n{\n  \"name\": \"Telegram Echo Bot\",\n  \"nodes\": [\n    {\n      \"name\": \"Telegram Trigger\",\n      \"type\": \"nodes-base.telegramTrigger\",\n      \"typeVersion\": 1.1,\n      \"position\": [250, 300],\n      \"parameters\": {\n        \"updates\": [\"message\"],\n        \"additionalFields\": {}\n      },\n      \"credentials\": {\n        \"telegramAPI\": { \"id\": \"1\", \"name\": \"Telegram account\" }\n      }\n    },\n    {\n      \"name\": \"Send Reply\",\n      \"type\": \"nodes-base.telegram\",\n      \"typeVersion\": 1.2,\n      \"position\": [500, 300],\n      \"parameters\": {\n        \"resource\": \"message\",\n        \"operation\": \"sendMessage\",\n        \"chatId\": \"={{ $json.message.chat.id }}\",\n        \"text\": \"={{ $json.message.text }}\",\n        \"additionalFields\": {}\n      },\n      \"credentials\": {\n        \"telegramApi\": { \"id\": \"1\", \"name\": \"Telegram account\" }\n      }\n    }\n  ],\n  \"connections\": {\n    \"Telegram Trigger\": {\n      \"main\": [[{ \"node\": \"Send Reply\", \"type\": \"main\", \"index\": 0 }]]\n    }\n  }\n}\n```",
+      "expected_output": "Should find: (1) both nodes have wrong nodeType prefix 'nodes-base.' instead of 'n8n-nodes-base.', (2) chatId on Send Reply is a plain string instead of __rl object, (3) Telegram Trigger has wrong typeVersion 1.1 instead of 1.2, (4) wrong credential key 'telegramAPI' (should be 'telegramApi') on the trigger node",
+      "files": [],
+      "expectations": [
+        "The output contains the heading '## n8n Workflow Check'",
+        "The output identifies both nodes as having the wrong 'nodes-base.' prefix (should be 'n8n-nodes-base.')",
+        "The output classifies the incorrect nodeType prefix as an Error, not a Warning",
+        "The output identifies chatId on 'Send Reply' as a plain string instead of an __rl object",
+        "The output classifies the plain-string chatId as an Error",
+        "The output describes or shows the correct __rl format with __rl:true, value, and mode fields",
+        "The output reports the typeVersion 1.1 mismatch on Telegram Trigger (expected 1.2)",
+        "The output classifies the typeVersion mismatch as a Warning (not an Error)",
+        "The output reports the misspelled credential key 'telegramAPI' (should be 'telegramApi')",
+        "The output offers to apply fixes after presenting the report",
+        "The output identifies exactly 4 issues (not more, not fewer)",
+        "The output does NOT flag the connections object as having any issues",
+        "The output does NOT flag the 'updates: [message]' parameter as wrong"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Any issues with this n8n workflow?\n\n```json\n{\n  \"name\": \"AI Support Agent\",\n  \"nodes\": [\n    {\n      \"name\": \"Webhook\",\n      \"type\": \"n8n-nodes-base.webhook\",\n      \"typeVersion\": 2,\n      \"position\": [250, 300],\n      \"parameters\": {\n        \"httpMethod\": \"POST\",\n        \"path\": \"support\",\n        \"responseMode\": \"responseNode\"\n      }\n    },\n    {\n      \"name\": \"AI Agent\",\n      \"type\": \"@n8n/n8n-nodes-langchain.agent\",\n      \"typeVersion\": 1.7,\n      \"position\": [500, 300],\n      \"parameters\": {\n        \"text\": \"={{ $json.body.message }}\",\n        \"options\": {}\n      }\n    },\n    {\n      \"name\": \"OpenAI Chat Model\",\n      \"type\": \"@n8n/n8n-nodes-langchain.lmChatOpenAi\",\n      \"typeVersion\": 1,\n      \"position\": [500, 500],\n      \"parameters\": {\n        \"model\": \"gpt-4o\"\n      },\n      \"credentials\": {\n        \"openAiApi\": { \"id\": \"2\", \"name\": \"OpenAI\" }\n      }\n    }\n  ],\n  \"connections\": {\n    \"Webhook\": {\n      \"main\": [[{ \"node\": \"AI Agent\", \"type\": \"main\", \"index\": 0 }]]\n    },\n    \"OpenAI Chat Model\": {\n      \"main\": [[{ \"node\": \"AI Agent\", \"type\": \"main\", \"index\": 0 }]]\n    }\n  }\n}\n```",
+      "expected_output": "Should find: (1) OpenAI Chat Model is wired via 'main' connection instead of 'ai_languageModel' — the LLM won't connect to the agent, (2) Webhook uses responseMode: responseNode but there is no respondToWebhook node in the workflow",
+      "files": [],
+      "expectations": [
+        "The output identifies that OpenAI Chat Model is wired via 'main' instead of 'ai_languageModel'",
+        "The output classifies the wrong AI sub-node connection type as an Error",
+        "The output states the correct connection type should be 'ai_languageModel'",
+        "The output warns that there is no respondToWebhook node despite responseMode being 'responseNode'",
+        "The output does NOT flag the Webhook node's typeVersion or path as issues",
+        "The output does NOT flag the AI Agent node's configuration as problematic",
+        "The output correctly identifies the OpenAI Chat Model node by name in the finding",
+        "The output does not report any false errors on the @n8n/n8n-nodes-langchain node types",
+        "The output does NOT flag the OpenAI Chat Model node type '@n8n/n8n-nodes-langchain.lmChatOpenAi' as a wrong prefix",
+        "The output does NOT suggest the AI Agent node's text parameter is misconfigured",
+        "The output identifies both issues (wrong connection type AND missing respondToWebhook) not just one"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Check this workflow JSON for me:\n\n```json\n{\n  \"name\": \"Hourly Data Fetch\",\n  \"nodes\": [\n    {\n      \"name\": \"Schedule Trigger\",\n      \"type\": \"n8n-nodes-base.scheduleTrigger\",\n      \"typeVersion\": 1.2,\n      \"position\": [250, 300],\n      \"parameters\": {\n        \"rule\": {\n          \"interval\": [{ \"field\": \"hours\", \"hoursInterval\": 1 }]\n        }\n      }\n    },\n    {\n      \"name\": \"HTTP Request\",\n      \"type\": \"n8n-nodes-base.httpRequest\",\n      \"typeVersion\": 4.2,\n      \"position\": [500, 300],\n      \"parameters\": {\n        \"method\": \"GET\",\n        \"url\": \"https://api.example.com/data\",\n        \"authentication\": \"none\"\n      }\n    },\n    {\n      \"name\": \"Process Data\",\n      \"type\": \"n8n-nodes-base.code\",\n      \"typeVersion\": 2,\n      \"position\": [750, 300],\n      \"parameters\": {\n        \"jsCode\": \"return items.map(item => ({ json: { ...item.json, processed: true } }));\"\n      }\n    }\n  ],\n  \"connections\": {\n    \"Schedule Trigger\": {\n      \"main\": [[{ \"node\": \"HTTP Request\", \"type\": \"main\", \"index\": 0 }]]\n    },\n    \"HTTP Request\": {\n      \"main\": [[{ \"node\": \"Process Data\", \"type\": \"main\", \"index\": 0 }]]\n    }\n  }\n}\n```",
+      "expected_output": "Should find no errors. This is a clean workflow with correct typeVersions, correct node type prefixes, proper connections, and all required fields present. Should output the clean bill of health message.",
+      "files": [],
+      "expectations": [
+        "The output does NOT list any Errors for this workflow",
+        "The output does NOT falsely flag the httpRequest authentication:none as an error",
+        "The output does NOT falsely flag the Code node's jsCode as an error",
+        "The output uses the '## n8n Workflow Check' heading",
+        "The output either says the workflow is clean/looks good or lists only informational warnings",
+        "The output does NOT flag correct typeVersions (1.2, 4.2, 2) as problems",
+        "The output explicitly states the workflow passed or has no errors — not just omits errors by silence",
+        "The output does NOT suggest adding respondToWebhook (Webhook uses 'onReceived' mode, not 'responseNode')"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Will this work? I'm building a Google Sheets integration:\n\n```json\n{\n  \"name\": \"Sheets Logger\",\n  \"nodes\": [\n    {\n      \"name\": \"Webhook\",\n      \"type\": \"n8n-nodes-base.webhook\",\n      \"typeVersion\": 2,\n      \"position\": [250, 300],\n      \"parameters\": {\n        \"httpMethod\": \"POST\",\n        \"path\": \"log\",\n        \"responseMode\": \"onReceived\"\n      }\n    },\n    {\n      \"name\": \"Google Sheets\",\n      \"type\": \"n8n-nodes-base.googleSheets\",\n      \"typeVersion\": 4.5,\n      \"position\": [500, 300],\n      \"parameters\": {\n        \"resource\": \"sheet\",\n        \"operation\": \"appendOrUpdate\",\n        \"documentId\": \"1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms\",\n        \"sheetName\": \"Sheet1\"\n      },\n      \"credentials\": {\n        \"googleSheetsOAuth2Api\": { \"id\": \"3\", \"name\": \"Google Sheets\" }\n      }\n    }\n  ],\n  \"connections\": {\n    \"Webhook\": {\n      \"main\": [[{ \"node\": \"Google Sheets\", \"type\": \"main\", \"index\": 0 }]]\n    }\n  }\n}\n```",
+      "expected_output": "documentId and sheetName are plain strings instead of __rl objects. Both are required resource locator fields for googleSheets node. Should flag both as errors.",
+      "files": [],
+      "expectations": [
+        "The output identifies documentId as a plain string that should use the __rl format",
+        "The output identifies sheetName as a plain string that should use the __rl format",
+        "Both documentId and sheetName issues are classified as Errors",
+        "The output shows or describes the correct __rl format for documentId",
+        "The output shows or describes the correct __rl format for sheetName",
+        "The output does NOT flag the googleSheetsOAuth2Api credential key as incorrect",
+        "The output does NOT flag typeVersion 4.5 for googleSheets as incorrect",
+        "The output correctly identifies the 'Google Sheets' node by name in the findings",
+        "The output offers to apply fixes after listing the errors",
+        "The output does NOT flag the 'appendOrUpdate' operation name as invalid",
+        "The output does NOT flag the missing 'columns' parameter as a critical error (it's optional)"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "expectations": [
+    {
+      "text": "The output does NOT list any Errors for this workflow",
+      "passed": true,
+      "evidence": "The output states '✓ No issues found. Workflow looks good to activate.' — no errors are listed anywhere."
+    },
+    {
+      "text": "The output does NOT falsely flag the httpRequest authentication:none as an error",
+      "passed": true,
+      "evidence": "Line 14 explicitly notes 'HTTP Request uses \"authentication\": \"none\", no credentials block required' — treated as correct, not flagged as an error."
+    },
+    {
+      "text": "The output does NOT falsely flag the Code node's jsCode as an error",
+      "passed": true,
+      "evidence": "Line 12 states 'jsCode returns correct [{ json: {...} }] array format; no ES6 imports, no unavailable variables' — treated as correct."
+    },
+    {
+      "text": "The output uses the '## n8n Workflow Check' heading",
+      "passed": true,
+      "evidence": "Line 1 is exactly '## n8n Workflow Check'."
+    },
+    {
+      "text": "The output either says the workflow is clean/looks good or lists only informational warnings",
+      "passed": true,
+      "evidence": "The output says '✓ No issues found. Workflow looks good to activate.' — clean pass with no warnings listed."
+    },
+    {
+      "text": "The output does NOT flag correct typeVersions (1.2, 4.2, 2) as problems",
+      "passed": true,
+      "evidence": "Line 13 confirms 'all three nodes match expected versions (scheduleTrigger: 1.2, httpRequest: 4.2, code: 2)' — treated as correct."
+    },
+    {
+      "text": "The output explicitly states the workflow passed or has no errors — not just omits errors by silence",
+      "passed": true,
+      "evidence": "The output explicitly states '✓ No issues found. Workflow looks good to activate.' and 'static analysis completed successfully with no issues found' (line 20)."
+    },
+    {
+      "text": "The output does NOT suggest adding respondToWebhook (there is no Webhook node in this workflow at all)",
+      "passed": true,
+      "evidence": "Line 17 explicitly notes 'Webhook checks — no webhook nodes present'. No suggestion to add respondToWebhook appears anywhere in the output."
+    }
+  ],
+  "summary": {
+    "passed": 8,
+    "failed": 0,
+    "total": 8,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {},
+  "timing": {},
+  "claims": [],
+  "eval_feedback": {
+    "suggestions": [
+      "The output is exemplary — all checks are explicit and correct. No improvements needed for this case."
+    ],
+    "overall": "Perfect score. The skill correctly identified a clean workflow, used the required heading, explicitly confirmed no errors, validated correct typeVersions, handled authentication:none appropriately, and avoided false positives for webhook and Code node checks."
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "skill_name": "n8n-code-javascript",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I wrote this code in my n8n Code node but the workflow fails and the next node says it received invalid data:\n\n```javascript\nconst items = $input.all();\nconst total = items.reduce((sum, item) => sum + item.json.amount, 0);\n\nreturn {\n  json: {\n    total: total,\n    count: items.length\n  }\n};\n```\n\nWhat's wrong with my code?",
+      "expected_output": "Identify the missing array wrapper. The return should be return [{json: {total, count}}] not return {json: {...}}. Explain that Code nodes require an array of objects with a json property.",
+      "files": [],
+      "expectations": [
+        "The output identifies the missing array wrapper as the root cause",
+        "The output shows the corrected return format: return [{json: {total: total, count: items.length}}]",
+        "The output explicitly states that Code nodes require returning an array",
+        "The output explains that each item in the returned array must have a 'json' property",
+        "The output does NOT flag the $input.all() usage as incorrect",
+        "The output does NOT suggest using {{ }} expression syntax as a fix",
+        "The output does NOT suggest the reduce logic itself is wrong",
+        "The output does NOT suggest the issue is with $input.all() usage",
+        "The output does NOT suggest using a Set node or Code node differently as the fix"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "My n8n Code node processes webhook data but $json.email and $json.name keep returning undefined. My workflow is: Webhook → Code node. Here's my code:\n\n```javascript\nconst email = $json.email;\nconst name = $json.name;\nconsole.log('Email:', email); // logs undefined\n\nreturn [{\n  json: { email, name }\n}];\n```\n\nThe webhook is definitely receiving the data. What's happening?",
+      "expected_output": "Webhook data is nested under .body. The correct access is $json.body.email and $json.body.name. Explain why webhook data is wrapped under body.",
+      "files": [],
+      "expectations": [
+        "The output explains that webhook data is nested under the .body property",
+        "The output shows the corrected access: $json.body.email and $json.body.name",
+        "The output explains WHY webhook data is under .body (the Webhook node wraps all request data)",
+        "The output does NOT say the return format is the problem (it is correct)",
+        "The output does NOT suggest adding {{ }} braces — those are for expression fields, not Code nodes",
+        "The output does NOT suggest the issue is with $json vs $input",
+        "The output correctly identifies the Webhook → Code node pattern as the context for this issue",
+        "The output does NOT say to use $input.first().json.email instead of $json.body.email as the primary fix",
+        "The output confirms that the return format [{json: {...}}] in the original code is already correct"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I have sales records coming into my n8n workflow and I need to calculate total revenue, average order value, and find the highest single order. There will be hundreds of records. Which Code node mode should I use and can you write the code?",
+      "expected_output": "Run Once for All Items mode. Use $input.all() with reduce for totals and Math.max or sort for highest. Return single aggregated result.",
+      "files": [],
+      "expectations": [
+        "The output recommends 'Run Once for All Items' mode",
+        "The output uses $input.all() to access all items",
+        "The output calculates total revenue using reduce or similar aggregation",
+        "The output calculates average order value (total / count)",
+        "The output finds the highest single order (using Math.max, sort, or reduce)",
+        "The output returns a single result object — NOT one result per input item",
+        "The output uses the correct [{json: {...}}] return format",
+        "The output does NOT recommend 'Run Once for Each Item' for aggregation use cases",
+        "The output declares or implies 'Run Once for All Items' mode at the top, before showing code",
+        "The returned array contains exactly one element (not one per input item)"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "How do I make an HTTP GET request to https://api.example.com/users from inside my n8n Code node? I don't want to add a separate node.",
+      "expected_output": "Use await $helpers.httpRequest() with method GET and url. Show the result captured and returned in [{json: {...}}] format. Include try-catch.",
+      "files": [],
+      "expectations": [
+        "The output uses $helpers.httpRequest() as the HTTP method",
+        "The output includes await before $helpers.httpRequest() since it returns a Promise",
+        "The output sets method to 'GET' and url to 'https://api.example.com/users'",
+        "The output returns the response in [{json: {data: response}}] or similar format",
+        "The output does NOT suggest using require('axios') or require('node-fetch') — they are not available",
+        "The output does NOT suggest using require('https') directly",
+        "The output includes or recommends a try-catch for error handling",
+        "The output does NOT suggest using fetch() as an alternative (it may not be available in all n8n versions)",
+        "The output shows the result stored in a variable before returning it"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "I need to filter items where status is 'active', then sort them by score descending, then take only the top 5. What's the best way to write this in a Code node?",
+      "expected_output": "Use $input.all() with .filter() then .sort() then .slice(). Return the mapped result in [{json: item.json}] format. Prefer functional approach over manual loops.",
+      "files": [],
+      "expectations": [
+        "The output uses $input.all() to get all items",
+        "The output uses .filter() to select items where status === 'active'",
+        "The output uses .sort() to order by score descending",
+        "The output uses .slice(0, 5) or equivalent to limit to top 5",
+        "The output returns results in the correct [{json: item.json}] format",
+        "The output chains the operations (filter → sort → slice → map) rather than using nested loops",
+        "The output does NOT use a manual for loop when functional methods would be cleaner",
+        "The output accesses item.json.status in the filter (not item.status directly)",
+        "The output accesses item.json.score in the sort comparator (not item.score directly)"
+      ]
+    }
+  ]
+}

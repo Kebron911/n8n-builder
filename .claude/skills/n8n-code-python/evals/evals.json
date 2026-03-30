@@ -1,0 +1,71 @@
+{
+  "skill_name": "n8n-code-python",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I'm writing Python in an n8n Code node. My code processes items and builds a list, but n8n says it got no data from the Code node. Here's my code:\n\n```python\nitems = _input.all()\nresults = []\nfor item in items:\n    results.append({\"result\": item[\"json\"][\"value\"] * 2})\nreturn results\n```\n\nWhat's wrong?",
+      "expected_output": "The list items are missing the 'json' key wrapper. Each item must be {\"json\": {...}} not just the data dict directly. Correct: results.append({\"json\": {\"result\": item[\"json\"][\"value\"] * 2}})",
+      "files": [],
+      "expectations": [
+        "The output identifies the missing 'json' key in each result dict as the root cause",
+        "The output shows the corrected format: {\"json\": {\"result\": item[\"json\"][\"value\"] * 2}}",
+        "The output confirms _input.all() is the correct way to access all items in Python Code nodes",
+        "The output does NOT flag the return statement itself as wrong (returning a list is correct)",
+        "The output does NOT suggest switching to JavaScript as the primary fix",
+        "The output does NOT suggest the issue is with the item[\"json\"] access pattern",
+        "The output uses Python dict syntax in all code examples, not JavaScript object syntax",
+        "The output does NOT suggest changing the for-loop to a list comprehension as a requirement"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I want to use the pandas library in my n8n Python Code node to process a CSV-like dataset. Will this work?\n\n```python\nimport pandas as pd\ndata = _input.first()[\"json\"][\"rows\"]\ndf = pd.DataFrame(data)\nreturn [{\"json\": {\"summary\": df.describe().to_dict()}}]\n```",
+      "expected_output": "Pandas is NOT available in n8n Python Code nodes — only standard library. Suggest using standard library alternatives: statistics module for stats, list comprehensions for filtering, etc. Or suggest JavaScript which has more helper functions.",
+      "files": [],
+      "expectations": [
+        "The output clearly states that pandas is NOT available in n8n Python Code nodes",
+        "The output explains that only Python standard library modules are available",
+        "The output lists some available alternatives (statistics, json, re, datetime, etc.)",
+        "The output suggests a standard library approach to calculate statistics (statistics module or manual calculation)",
+        "The output mentions that JavaScript may be preferable for data-heavy tasks due to helpers",
+        "The output does NOT say pandas can be installed via pip in n8n Code nodes",
+        "The output does NOT suggest importing requests either (also unavailable)",
+        "The output explicitly names at least one available standard library module (statistics, json, re, datetime, math)",
+        "The output does NOT say pandas can be installed in a different way or workaround"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "How do I access webhook payload data in a Python Code node? My workflow is Webhook → Python Code node and I need to read the 'user_id' and 'action' fields sent in the POST body.",
+      "expected_output": "Webhook data is under _json[\"body\"] in Python. So: user_id = _json[\"body\"][\"user_id\"] and action = _json[\"body\"][\"action\"]. Or use _input.first()[\"json\"][\"body\"].",
+      "files": [],
+      "expectations": [
+        "The output explains that webhook body data is nested under the 'body' key",
+        "The output shows _json[\"body\"][\"user_id\"] or equivalent as the correct access pattern",
+        "The output shows _json[\"body\"][\"action\"] or equivalent",
+        "The output does NOT use JavaScript syntax like $json.body.user_id",
+        "The output uses Python-style dict access (brackets) not dot notation",
+        "The output does NOT suggest the data is available directly at _json[\"user_id\"] without the body wrapper",
+        "The output shows the correct return format [{\"json\": {...}}] in any code example provided",
+        "The output does NOT use $json syntax (that is JavaScript, not Python)"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "When should I use Python vs JavaScript in n8n Code nodes? I'm deciding which to use for a new automation.",
+      "expected_output": "Default to JavaScript — it has $helpers.httpRequest, Luxon DateTime, better n8n support. Use Python only when you need specific Python standard library functions or are significantly more comfortable with Python syntax.",
+      "files": [],
+      "expectations": [
+        "The output recommends JavaScript as the default choice for n8n Code nodes",
+        "The output explains that JavaScript has $helpers.httpRequest() which Python lacks",
+        "The output mentions Luxon DateTime as a JavaScript advantage",
+        "The output identifies valid reasons to use Python (standard library functions, Python familiarity)",
+        "The output does NOT suggest Python is equal to or better than JavaScript for n8n",
+        "The output mentions that Python in n8n is labeled as Beta",
+        "The output does NOT list pandas, requests, or numpy as Python advantages (they're not available)",
+        "The output does NOT say the choice is purely personal preference — it gives a concrete recommendation",
+        "The output does NOT claim Python has equal HTTP request capabilities to JavaScript in n8n"
+      ]
+    }
+  ]
+}

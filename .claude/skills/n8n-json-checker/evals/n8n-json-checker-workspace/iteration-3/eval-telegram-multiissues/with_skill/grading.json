@@ -1,0 +1,91 @@
+{
+  "expectations": [
+    {
+      "text": "The output contains the heading '## n8n Workflow Check'",
+      "passed": true,
+      "evidence": "Line 1: '## n8n Workflow Check'"
+    },
+    {
+      "text": "The output identifies both nodes as having the wrong 'nodes-base.' prefix (should be 'n8n-nodes-base.')",
+      "passed": true,
+      "evidence": "Line 5: 'Telegram Trigger, Send Reply — Wrong type prefix: both nodes use nodes-base. instead of n8n-nodes-base.' — both nodes are explicitly called out."
+    },
+    {
+      "text": "The output classifies the incorrect nodeType prefix as an Error, not a Warning",
+      "passed": true,
+      "evidence": "The prefix issue appears under '### Errors (must fix before activating)' section, item 1."
+    },
+    {
+      "text": "The output identifies chatId on 'Send Reply' as a plain string instead of an __rl object",
+      "passed": true,
+      "evidence": "Line 7: 'Send Reply — chatId is a plain string instead of a resource locator object' with the plain string shown."
+    },
+    {
+      "text": "The output classifies the plain-string chatId as an Error",
+      "passed": true,
+      "evidence": "The chatId issue appears under '### Errors (must fix before activating)' section, item 2."
+    },
+    {
+      "text": "The output describes or shows the correct __rl format with __rl:true, value, and mode fields",
+      "passed": true,
+      "evidence": "Lines 12-14: Shows corrected JSON with '{ \"__rl\": true, \"value\": \"={{ $json.message.chat.id }}\", \"mode\": \"expression\" }'"
+    },
+    {
+      "text": "The output reports the typeVersion 1.1 mismatch on Telegram Trigger (expected 1.2)",
+      "passed": true,
+      "evidence": "Line 20: 'Telegram Trigger — typeVersion is 1.1, expected 1.2 — Update to 1.2 to get the latest fixes and features.'"
+    },
+    {
+      "text": "The output classifies the typeVersion mismatch as a Warning (not an Error)",
+      "passed": true,
+      "evidence": "The typeVersion issue appears under '### Warnings (review, may be acceptable)' section."
+    },
+    {
+      "text": "The output reports the misspelled credential key 'telegramAPI' (should be 'telegramApi')",
+      "passed": true,
+      "evidence": "Line 16: 'Telegram Trigger — Wrong credential key \"telegramAPI\" (capital API) — should be \"telegramApi\" (lowercase a).'"
+    },
+    {
+      "text": "The output offers to apply fixes after presenting the report",
+      "passed": true,
+      "evidence": "Line 30: 'Want me to apply these fixes directly to the workflow?'"
+    },
+    {
+      "text": "The output identifies exactly 4 issues (not more, not fewer)",
+      "passed": true,
+      "evidence": "3 errors (prefix issue grouped as 1, chatId, credential key) + 1 warning (typeVersion) = 4 distinct issues total. The prefix finding covers both nodes but is counted as 1 issue."
+    },
+    {
+      "text": "The output does NOT flag the connections object as having any issues",
+      "passed": true,
+      "evidence": "Line 24 under 'Clean': 'Connection structure — linear chain is correctly wired'. No connection issues flagged."
+    },
+    {
+      "text": "The output does NOT flag the 'updates: [message]' parameter as wrong",
+      "passed": true,
+      "evidence": "There is no mention anywhere in the output of the 'updates' parameter being incorrect. It is implicitly accepted."
+    }
+  ],
+  "summary": {
+    "passed": 13,
+    "failed": 0,
+    "total": 13,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "total_tool_calls": 3,
+    "total_steps": 4,
+    "errors_encountered": 0,
+    "output_chars": 1163
+  },
+  "timing": {},
+  "claims": [],
+  "eval_feedback": {
+    "suggestions": [
+      "The credential key issue (telegramAPI vs telegramApi) is classified as an Error in the output, which is reasonable — however, the expectations do not specify its classification, so this is acceptable either way.",
+      "The output correctly groups both wrong-prefix nodes into a single finding, keeping the issue count at exactly 4.",
+      "The 'Clean' section is a nice structural touch that confirms what was verified and found correct."
+    ],
+    "overall": "Perfect score — all 13 expectations pass. The skill output is well-structured, accurately identifies all 4 issues with correct severity classifications, shows the corrected __rl format, avoids false positives on connections and updates parameter, and offers to apply fixes."
+  }
+}

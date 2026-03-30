@@ -1,0 +1,15 @@
+{
+  "eval_id": 3,
+  "eval_name": "eval-clean-workflow",
+  "prompt": "Check this workflow JSON for me: [Hourly Data Fetch — clean workflow, no bugs]",
+  "assertions": [
+    "The output does NOT list any Errors for this workflow",
+    "The output does NOT falsely flag the httpRequest authentication:none as an error",
+    "The output does NOT falsely flag the Code node's jsCode as an error",
+    "The output uses the '## n8n Workflow Check' heading",
+    "The output either says the workflow is clean/looks good or lists only informational warnings",
+    "The output does NOT flag correct typeVersions (1.2, 4.2, 2) as problems",
+    "The output explicitly states the workflow passed or has no errors — not just omits errors by silence",
+    "The output does NOT suggest adding respondToWebhook (no webhook node in this workflow)"
+  ]
+}
