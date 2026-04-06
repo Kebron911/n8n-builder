@@ -1,0 +1,773 @@
+---
+name: n8n-node-configs
+description: >
+  Ready-to-use node JSON templates, typeVersion table, connections patterns,
+  credential keys, expression conventions, workflow settings, and testing
+  patterns for building n8n workflows. Invoke at the START of any workflow
+  build session — before calling n8n_create_workflow. Contains verbatim configs
+  for all common nodes so no MCP lookup is needed. Trigger on: "build a
+  workflow", "create a workflow", any request that will result in calling
+  n8n_create_workflow or n8n_update_partial_workflow.
+---
+
+# n8n Node Configs Reference
+
+Ready-to-use configs for workflow building. All pinned to n8n **v1.76**.
+
+---
+
+## typeVersion Reference
+
+| Node type | typeVersion |
+|-----------|-------------|
+| `n8n-nodes-base.telegramTrigger` | `1.2` |
+| `n8n-nodes-base.telegram` | `1.2` |
+| `n8n-nodes-base.webhook` | `2` |
+| `n8n-nodes-base.scheduleTrigger` | `1.2` |
+| `n8n-nodes-base.manualTrigger` | `1` |
+| `n8n-nodes-base.httpRequest` | `4.2` |
+| `n8n-nodes-base.code` | `2` |
+| `n8n-nodes-base.set` | `3.4` |
+| `n8n-nodes-base.if` | `2.2` |
+| `n8n-nodes-base.switch` | `3.2` |
+| `n8n-nodes-base.merge` | `3` |
+| `n8n-nodes-base.splitInBatches` | `3` |
+| `n8n-nodes-base.respondToWebhook` | `1.1` |
+| `n8n-nodes-base.filter` | `2` |
+| `n8n-nodes-base.aggregate` | `1` |
+| `n8n-nodes-base.removeDuplicates` | `1.1` |
+| `n8n-nodes-base.wait` | `1.1` |
+| `n8n-nodes-base.errorTrigger` | `1` |
+| `n8n-nodes-base.executeCommand` | `1` |
+| `n8n-nodes-base.stickyNote` | `1` |
+| `n8n-nodes-base.noOp` | `1` |
+| `n8n-nodes-base.slack` | `2.3` |
+| `n8n-nodes-base.gmail` | `2.1` |
+| `n8n-nodes-base.googleSheets` | `4.5` |
+| `n8n-nodes-base.googleDrive` | `3` |
+| `@n8n/n8n-nodes-langchain.agent` | `1.7` |
+| `@n8n/n8n-nodes-langchain.lmOpenAi` | `1.2` |
+| `@n8n/n8n-nodes-langchain.memoryBufferWindow` | `1.3` |
+| `@n8n/n8n-nodes-langchain.calculatorTool` | `1` |
+| `@n8n/n8n-nodes-langchain.toolHttpRequest` | `1.1` |
+| `@n8n/n8n-nodes-langchain.outputParserStructured` | `1.2` |
+| `@n8n/n8n-nodes-langchain.textClassifier` | `1` |
+
+---
+
+## Expression Conventions
+
+```
+$json.fieldName                        — current item field
+$json.message.text                     — nested field
+$node["NodeName"].json.fieldName       — reference another node
+$json.body.fieldName                   — webhook body data
+$now                                   — current timestamp (ISO 8601)
+$items("NodeName")                     — all items from a node
+```
+
+---
+
+## Common Node Configs
+
+Use verbatim — no MCP lookup needed.
+
+### Manual Trigger
+```json
+{
+  "name": "When clicking 'Test workflow'",
+  "type": "n8n-nodes-base.manualTrigger",
+  "typeVersion": 1,
+  "position": [250, 300],
+  "parameters": {}
+}
+```
+
+### Telegram Trigger
+```json
+{
+  "name": "Telegram Trigger",
+  "type": "n8n-nodes-base.telegramTrigger",
+  "typeVersion": 1.2,
+  "position": [250, 300],
+  "parameters": {
+    "updates": ["message"],
+    "additionalFields": {}
+  },
+  "credentials": {
+    "telegramApi": { "id": "1", "name": "Telegram account" }
+  }
+}
+```
+
+### Telegram Send Message
+```json
+{
+  "name": "Send Reply",
+  "type": "n8n-nodes-base.telegram",
+  "typeVersion": 1.2,
+  "position": [500, 300],
+  "parameters": {
+    "resource": "message",
+    "operation": "sendMessage",
+    "chatId": { "__rl": true, "value": "={{ $json.message.chat.id }}", "mode": "expression" },
+    "text": "={{ $json.message.text }}",
+    "additionalFields": {}
+  },
+  "credentials": {
+    "telegramApi": { "id": "1", "name": "Telegram account" }
+  }
+}
+```
+
+### Webhook Trigger (POST, respond manually)
+```json
+{
+  "name": "Webhook",
+  "type": "n8n-nodes-base.webhook",
+  "typeVersion": 2,
+  "position": [250, 300],
+  "parameters": {
+    "httpMethod": "POST",
+    "path": "my-webhook",
+    "responseMode": "responseNode"
+  }
+}
+```
+
+### Schedule Trigger
+```json
+{
+  "name": "Schedule Trigger",
+  "type": "n8n-nodes-base.scheduleTrigger",
+  "typeVersion": 1.2,
+  "position": [250, 300],
+  "parameters": {
+    "rule": {
+      "interval": [{ "field": "hours", "hoursInterval": 1 }]
+    }
+  }
+}
+```
+
+### Error Trigger
+```json
+{
+  "name": "Error Trigger",
+  "type": "n8n-nodes-base.errorTrigger",
+  "typeVersion": 1,
+  "position": [250, 300],
+  "parameters": {}
+}
+```
+Production error-handler ID: `vQKuXqX6mzCEGmaE`. Set `settings.errorWorkflow` on production workflows to point to it.
+
+### HTTP Request
+```json
+{
+  "name": "HTTP Request",
+  "type": "n8n-nodes-base.httpRequest",
+  "typeVersion": 4.2,
+  "position": [500, 300],
+  "parameters": {
+    "method": "GET",
+    "url": "https://api.example.com/endpoint",
+    "authentication": "none"
+  }
+}
+```
+
+### Code Node (JavaScript)
+```json
+{
+  "name": "Code",
+  "type": "n8n-nodes-base.code",
+  "typeVersion": 2,
+  "position": [500, 300],
+  "parameters": {
+    "jsCode": "return items.map(item => ({ json: { ...item.json } }));"
+  }
+}
+```
+JS patterns:
+```js
+return [{ json: { result: value } }];                                  // single output
+return items.map(item => ({ json: { ...item.json, newField: val } })); // transform all
+const data = $input.first().json;                                      // access input
+```
+
+### Filter
+```json
+{
+  "name": "Filter",
+  "type": "n8n-nodes-base.filter",
+  "typeVersion": 2,
+  "position": [500, 300],
+  "parameters": {
+    "conditions": {
+      "options": { "caseSensitive": true, "leftValue": "" },
+      "conditions": [
+        {
+          "id": "condition_0",
+          "leftValue": "={{ $json.status }}",
+          "rightValue": "active",
+          "operator": { "type": "string", "operation": "equals" }
+        }
+      ],
+      "combinator": "and"
+    },
+    "options": {}
+  }
+}
+```
+One output — items that fail are dropped (unlike IF which has two outputs).
+
+### Aggregate
+```json
+{
+  "name": "Aggregate",
+  "type": "n8n-nodes-base.aggregate",
+  "typeVersion": 1,
+  "position": [700, 300],
+  "parameters": {
+    "aggregate": "aggregateAllItemData",
+    "destinationFieldName": "data",
+    "options": {}
+  }
+}
+```
+Modes: `aggregateAllItemData`, `aggregateIndividualFields` (add `fieldsToAggregate`).
+
+### Remove Duplicates
+```json
+{
+  "name": "Remove Duplicates",
+  "type": "n8n-nodes-base.removeDuplicates",
+  "typeVersion": 1.1,
+  "position": [700, 300],
+  "parameters": {
+    "compare": "allFields",
+    "options": {}
+  }
+}
+```
+`compare`: `"allFields"` or `"selectedFields"` (add `"fieldsToCompare": { "fields": [{ "fieldName": "id" }] }`).
+
+### Edit Fields (Set)
+```json
+{
+  "name": "Edit Fields",
+  "type": "n8n-nodes-base.set",
+  "typeVersion": 3.4,
+  "position": [500, 300],
+  "parameters": {
+    "mode": "manual",
+    "fields": {
+      "values": [
+        { "name": "newField", "stringValue": "={{ $json.existingField }}" },
+        { "name": "staticField", "stringValue": "hello" }
+      ]
+    },
+    "options": {}
+  }
+}
+```
+
+### IF
+```json
+{
+  "name": "IF",
+  "type": "n8n-nodes-base.if",
+  "typeVersion": 2.2,
+  "position": [500, 300],
+  "parameters": {
+    "conditions": {
+      "options": { "caseSensitive": true, "leftValue": "" },
+      "conditions": [
+        {
+          "id": "condition_0",
+          "leftValue": "={{ $json.field }}",
+          "rightValue": "expected",
+          "operator": { "type": "string", "operation": "equals" }
+        }
+      ],
+      "combinator": "and"
+    },
+    "options": {}
+  }
+}
+```
+Output 0 = true, Output 1 = false.
+
+### Switch
+```json
+{
+  "name": "Switch",
+  "type": "n8n-nodes-base.switch",
+  "typeVersion": 3.2,
+  "position": [500, 300],
+  "parameters": {
+    "rules": {
+      "values": [
+        {
+          "outputKey": "Route 0",
+          "conditions": {
+            "options": { "caseSensitive": true, "leftValue": "" },
+            "conditions": [
+              {
+                "leftValue": "={{ $json.type }}",
+                "rightValue": "typeA",
+                "operator": { "type": "string", "operation": "equals" }
+              }
+            ],
+            "combinator": "and"
+          }
+        }
+      ]
+    },
+    "options": {}
+  }
+}
+```
+Each rule → output index (0, 1, 2…). Fallback = last index.
+
+### Merge
+```json
+{
+  "name": "Merge",
+  "type": "n8n-nodes-base.merge",
+  "typeVersion": 3,
+  "position": [700, 300],
+  "parameters": {
+    "mode": "combine",
+    "combinationMode": "mergeByPosition",
+    "options": {}
+  }
+}
+```
+Modes: `append`, `combine` (`mergeByPosition`/`mergeByFields`), `chooseBranch`.
+
+### Wait
+```json
+{
+  "name": "Wait",
+  "type": "n8n-nodes-base.wait",
+  "typeVersion": 1.1,
+  "position": [700, 300],
+  "parameters": {
+    "resume": "timeInterval",
+    "amount": 5,
+    "unit": "seconds",
+    "options": {}
+  }
+}
+```
+`resume`: `"timeInterval"`, `"webhook"`, `"form"`. `unit`: `"seconds"`, `"minutes"`, `"hours"`, `"days"`.
+
+### Respond to Webhook
+```json
+{
+  "name": "Respond to Webhook",
+  "type": "n8n-nodes-base.respondToWebhook",
+  "typeVersion": 1.1,
+  "position": [900, 300],
+  "parameters": {
+    "respondWith": "json",
+    "responseBody": "={{ $json }}",
+    "options": {}
+  }
+}
+```
+Use with Webhook trigger `"responseMode": "responseNode"`. `respondWith`: `json`, `text`, `noData`, `redirect`.
+
+### Split In Batches
+```json
+{
+  "name": "Split In Batches",
+  "type": "n8n-nodes-base.splitInBatches",
+  "typeVersion": 3,
+  "position": [500, 300],
+  "parameters": {
+    "batchSize": 10,
+    "options": {}
+  }
+}
+```
+Output 0 = loop body, Output 1 = done.
+
+### NoOp
+```json
+{
+  "name": "No Operation",
+  "type": "n8n-nodes-base.noOp",
+  "typeVersion": 1,
+  "position": [700, 500],
+  "parameters": {}
+}
+```
+
+### Slack — Send Message
+```json
+{
+  "name": "Slack",
+  "type": "n8n-nodes-base.slack",
+  "typeVersion": 2.3,
+  "position": [700, 300],
+  "parameters": {
+    "resource": "message",
+    "operation": "post",
+    "channel": { "__rl": true, "value": "#general", "mode": "name" },
+    "text": "={{ $json.message }}",
+    "otherOptions": {}
+  },
+  "credentials": {
+    "slackApi": { "id": "1", "name": "Slack account" }
+  }
+}
+```
+`channel` modes: `"name"` (`#channel`), `"id"`, `"expression"`. OAuth2: use `slackOAuth2Api`.
+
+### Gmail — Send Email
+```json
+{
+  "name": "Gmail",
+  "type": "n8n-nodes-base.gmail",
+  "typeVersion": 2.1,
+  "position": [700, 300],
+  "parameters": {
+    "resource": "message",
+    "operation": "send",
+    "sendTo": { "__rl": true, "value": "={{ $json.email }}", "mode": "expression" },
+    "subject": "={{ $json.subject }}",
+    "emailType": "text",
+    "message": "={{ $json.body }}",
+    "options": {}
+  },
+  "credentials": {
+    "gmailOAuth2": { "id": "1", "name": "Gmail account" }
+  }
+}
+```
+`emailType`: `"text"` or `"html"` (change `message` key to `html` for HTML).
+
+### Google Sheets — Append Row
+```json
+{
+  "name": "Google Sheets",
+  "type": "n8n-nodes-base.googleSheets",
+  "typeVersion": 4.5,
+  "position": [700, 300],
+  "parameters": {
+    "resource": "sheet",
+    "operation": "append",
+    "documentId": { "__rl": true, "value": "SPREADSHEET_ID", "mode": "id" },
+    "sheetName": { "__rl": true, "value": "gid=0", "mode": "list", "cachedResultName": "Sheet1" },
+    "columns": {
+      "mappingMode": "autoMapInputData",
+      "value": {},
+      "matchingColumns": [],
+      "schema": []
+    },
+    "options": {}
+  },
+  "credentials": {
+    "googleSheetsOAuth2Api": { "id": "1", "name": "Google Sheets account" }
+  }
+}
+```
+Read: `operation: "read"` + `"filtersUI": { "values": [] }`. Update: `operation: "update"` + `matchingColumns`.
+
+### AI Agent (LangChain)
+```json
+{
+  "name": "AI Agent",
+  "type": "@n8n/n8n-nodes-langchain.agent",
+  "typeVersion": 1.7,
+  "position": [500, 300],
+  "parameters": {
+    "text": "={{ $json.message }}",
+    "options": {}
+  }
+}
+```
+
+### OpenAI Chat Model (sub-node)
+```json
+{
+  "name": "OpenAI Chat Model",
+  "type": "@n8n/n8n-nodes-langchain.lmOpenAi",
+  "typeVersion": 1.2,
+  "position": [500, 500],
+  "parameters": {
+    "model": "gpt-4o-mini",
+    "options": {}
+  },
+  "credentials": {
+    "openAiApi": { "id": "1", "name": "OpenAI account" }
+  }
+}
+```
+Connect via `ai_languageModel`. Models: `"gpt-4o"`, `"gpt-4o-mini"`, `"gpt-4-turbo"`.
+
+### Window Buffer Memory (sub-node)
+```json
+{
+  "name": "Window Buffer Memory",
+  "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+  "typeVersion": 1.3,
+  "position": [700, 500],
+  "parameters": {
+    "sessionKey": "={{ $json.sessionId }}",
+    "contextWindowLength": 10
+  }
+}
+```
+Connect via `ai_memory`.
+
+### Calculator Tool (sub-node)
+```json
+{
+  "name": "Calculator",
+  "type": "@n8n/n8n-nodes-langchain.calculatorTool",
+  "typeVersion": 1,
+  "position": [300, 500],
+  "parameters": {}
+}
+```
+Connect via `ai_tool`.
+
+### HTTP Request Tool (sub-node)
+```json
+{
+  "name": "HTTP Request Tool",
+  "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+  "typeVersion": 1.1,
+  "position": [500, 500],
+  "parameters": {
+    "name": "search_api",
+    "description": "Search an external API. Input should be a search query string.",
+    "method": "GET",
+    "url": "https://api.example.com/search",
+    "sendQuery": true,
+    "parametersQuery": {
+      "values": [{ "name": "q", "valueProvider": "fieldValue", "value": "" }]
+    }
+  }
+}
+```
+Connect via `ai_tool`.
+
+### Structured Output Parser (sub-node)
+```json
+{
+  "name": "Structured Output Parser",
+  "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+  "typeVersion": 1.2,
+  "position": [700, 500],
+  "parameters": {
+    "schema": {
+      "type": "object",
+      "properties": {
+        "result": { "type": "string", "description": "The main result" },
+        "confidence": { "type": "number", "description": "Confidence score 0-1" }
+      },
+      "required": ["result"]
+    }
+  }
+}
+```
+Connect via `ai_outputParser`.
+
+### Notion — Create Database Item
+```json
+{
+  "name": "Notion Create Item",
+  "type": "n8n-nodes-base.notion",
+  "typeVersion": 2.2,
+  "position": [500, 300],
+  "parameters": {
+    "resource": "databasePage",
+    "operation": "create",
+    "databaseId": { "__rl": true, "value": "YOUR_DATABASE_ID", "mode": "id" },
+    "propertiesUi": {
+      "propertyValues": [
+        { "key": "Name", "type": "title", "titleValue": "={{ $json.name }}" }
+      ]
+    },
+    "options": {}
+  },
+  "credentials": {
+    "notionApi": { "id": "1", "name": "Notion account" }
+  }
+}
+```
+`type` must match Notion property type: `title`, `richText`, `number`, `select`, `date`, etc.
+
+---
+
+## Connections Reference
+
+### Linear Chain (A → B → C)
+```json
+{
+  "NodeA": { "main": [[{ "node": "NodeB", "type": "main", "index": 0 }]] },
+  "NodeB": { "main": [[{ "node": "NodeC", "type": "main", "index": 0 }]] }
+}
+```
+
+### IF Branch (true / false)
+```json
+{
+  "IF": {
+    "main": [
+      [{ "node": "True Branch", "type": "main", "index": 0 }],
+      [{ "node": "False Branch", "type": "main", "index": 0 }]
+    ]
+  }
+}
+```
+
+### Switch (multiple outputs)
+```json
+{
+  "Switch": {
+    "main": [
+      [{ "node": "Route A", "type": "main", "index": 0 }],
+      [{ "node": "Route B", "type": "main", "index": 0 }],
+      [{ "node": "Fallback", "type": "main", "index": 0 }]
+    ]
+  }
+}
+```
+
+### Merge (two inputs — critical: index 0 and 1)
+```json
+{
+  "Branch A": { "main": [[{ "node": "Merge", "type": "main", "index": 0 }]] },
+  "Branch B": { "main": [[{ "node": "Merge", "type": "main", "index": 1 }]] }
+}
+```
+
+### AI Agent with Sub-Nodes
+```json
+{
+  "Trigger":              { "main":              [[{ "node": "AI Agent", "type": "main",              "index": 0 }]] },
+  "OpenAI Chat Model":   { "ai_languageModel":  [[{ "node": "AI Agent", "type": "ai_languageModel", "index": 0 }]] },
+  "Calculator":          { "ai_tool":           [[{ "node": "AI Agent", "type": "ai_tool",          "index": 0 }]] },
+  "Window Buffer Memory":{ "ai_memory":         [[{ "node": "AI Agent", "type": "ai_memory",        "index": 0 }]] },
+  "Structured Output Parser": { "ai_outputParser": [[{ "node": "AI Agent", "type": "ai_outputParser", "index": 0 }]] }
+}
+```
+
+### Loop (Split In Batches)
+```json
+{
+  "Split In Batches": {
+    "main": [
+      [{ "node": "Process Item", "type": "main", "index": 0 }],
+      [{ "node": "Done Handler", "type": "main", "index": 0 }]
+    ]
+  },
+  "Process Item": { "main": [[{ "node": "Split In Batches", "type": "main", "index": 0 }]] }
+}
+```
+
+### Error Output (continueErrorOutput)
+Add `"onError": "continueErrorOutput"` to the node. `main[0]` = success, `main[1]` = error.
+```json
+{
+  "HTTP Request": {
+    "main": [
+      [{ "node": "Success Handler", "type": "main", "index": 0 }],
+      [{ "node": "Error Handler",   "type": "main", "index": 0 }]
+    ]
+  }
+}
+```
+
+---
+
+## Workflow Settings
+
+```json
+{
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true,
+    "executionTimeout": 300,
+    "timezone": "America/New_York",
+    "errorWorkflow": "vQKuXqX6mzCEGmaE"
+  }
+}
+```
+
+| Setting | Default | When to set |
+|---------|---------|-------------|
+| `executionOrder` | `"v1"` | Always `"v1"` |
+| `executionTimeout` | `-1` | Set for workflows hitting external APIs that may hang |
+| `saveExecutionProgress` | `false` | Set `true` for long/complex workflows |
+| `timezone` | Instance default | When Schedule Trigger needs a specific timezone |
+| `errorWorkflow` | none | Set to error-handler workflow ID for production |
+
+---
+
+## Credential Keys
+
+Credential IDs (`"id": "1"`) are placeholders — user maps real credentials in the n8n UI.
+
+| Node | Credential key |
+|------|----------------|
+| Telegram / Telegram Trigger | `telegramApi` |
+| Slack (API token) | `slackApi` |
+| Slack (OAuth2) | `slackOAuth2Api` |
+| Gmail | `gmailOAuth2` |
+| Google Sheets | `googleSheetsOAuth2Api` |
+| Google Drive | `googleDriveOAuth2Api` |
+| YouTube | `youTubeOAuth2Api` |
+| Google Calendar | `googleCalendarOAuth2Api` |
+| Google Docs | `googleDocsOAuth2Api` |
+| Notion | `notionApi` |
+| Airtable | `airtableTokenApi` |
+| OpenAI (LangChain) | `openAiApi` |
+| Anthropic / Claude | `anthropicApi` |
+| GitHub | `githubApi` |
+| GitLab | `gitlabApi` |
+| Jira (Cloud) | `jiraSoftwareCloudApi` |
+| HubSpot | `hubspotAppToken` |
+| Salesforce | `salesforceOAuth2Api` |
+| Stripe | `stripeApi` |
+| Twilio | `twilioApi` |
+| Discord (Bot) | `discordBotApi` |
+| Discord (Webhook) | `discordWebhookApi` |
+| WhatsApp Business | `whatsAppBusinessCloudApi` |
+| MySQL | `mySql` |
+| PostgreSQL | `postgres` |
+| MongoDB | `mongoDb` |
+| Redis | `redis` |
+| Dropbox | `dropboxApi` |
+| AWS | `aws` |
+| Mailchimp | `mailchimpApi` |
+| SendGrid | `sendGridApi` |
+| HTTP Request (Header Auth) | `httpHeaderAuth` |
+| HTTP Request (Bearer) | `httpBearerAuth` |
+| HTTP Request (Basic Auth) | `httpBasicAuth` |
+
+When in doubt: `get_node("nodes-base.<name>", detail: "standard")` → check `credentials` field.
+
+---
+
+## Testing After Activation
+
+**Manual trigger:** `execute_workflow({ workflowId: "ID" })` — verify `finished: true`.
+
+**Webhook:**
+- Test URL (editor open): `https://professionalaiassistants.com/n8n/webhook-test/{path}`
+- Prod URL (active): `https://professionalaiassistants.com/n8n/webhook/{path}`
+
+**Schedule:** Temporarily set to every minute, activate, wait one execution, restore.
+
+**Interpreting results:**
+- `finished: true` + no error → success
+- `finished: false` + `data.resultData.error` → check the failed node
+- Empty node output → upstream IF/Filter condition didn't match

@@ -106,6 +106,8 @@ validate_node(nodeType, config, profile: "runtime")
           → validate again (max 3 attempts total)
 ```
 
+After configuring all nodes, run `n8n_validate_workflow({ workflowId: "ID", profile: "runtime" })` to confirm zero errors before activating.
+
 ---
 
 ## What CLAUDE.md Already Covers

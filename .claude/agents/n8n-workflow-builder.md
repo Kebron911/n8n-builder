@@ -50,10 +50,12 @@ If the request is ambiguous, ask one clarifying question before proceeding.
 
 ## Step 2: Source Node Configs
 
+**Invoke the `n8n-node-configs` skill before building** — it has all Tier 1 templates, typeVersions, credential keys, connections patterns, and testing info in one place.
+
 Use this decision tree for EVERY node needed:
 
 **Tier 1 — Use directly (no lookup):**
-The following nodes have known-good configs in CLAUDE.md — use them verbatim:
+The following nodes have ready-to-use configs in the `n8n-node-configs` skill:
 - Manual Trigger, Telegram Trigger, Telegram Send, Webhook, Schedule Trigger, Error Trigger
 - HTTP Request, Code (JS), Filter, Aggregate, Remove Duplicates
 - Edit Fields (Set), IF, Switch, Merge, Wait, Respond to Webhook, Split In Batches, NoOp
@@ -180,13 +182,13 @@ Always include ALL of the following:
 
 ## typeVersion Reference
 
-See CLAUDE.md → `## typeVersion Reference` for the complete version table.
+See `n8n-node-configs` skill → `## typeVersion Reference` for the complete version table.
 
 ---
 
 ## Credential Key Reference
 
-See CLAUDE.md → `## Credential Handling` for the complete credential key table.
+See `n8n-node-configs` skill → `## Credential Keys` for the complete table.
 
 Always use placeholder `"id": "1"` — user maps real credentials in the n8n UI after creation.
 
