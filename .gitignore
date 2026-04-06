@@ -1,0 +1,11 @@
+# Skill development workspaces (iteration artifacts, not part of the plugin)
+.claude/skills/*-workspace/
+
+# Node config test output files
+node-config-test-*.json
+
+# Local Claude settings (contains API keys)
+.claude/settings.local.json
+
+# MCP server config (instance-specific, credentials via env vars)
+.mcp.json

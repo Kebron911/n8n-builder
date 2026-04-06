@@ -1,13 +1,49 @@
 {
-  "mcpServers": {
-    "n8n-mcp": {
-      "command": "npx",
-      "args": ["-y", "n8n-mcp"],
-      "env": {
-        "MCP_MODE": "stdio",
-        "N8N_API_URL": "https://professionalaiassistants.com/n8n",
-        "N8N_API_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzYjE0ODJiMy0zY2RhLTRmOGUtOTZjNy0yOGNlZDVmZjc0MzMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiOWQ4ZjE1OTgtMDU2MC00MWZlLWIyMmQtNWNkNmQwNDExNTM5IiwiaWF0IjoxNzc0NDU1MzY4LCJleHAiOjE3NzcwMDMyMDB9.AeOiDce3uNQhhidZ0ObHqbcYMgnCJDZDToZDZYTSzBg"
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/Kebron/.claude/plugins/marketplaces/claude-plugins-official/plugins/skill-creator/**)",
+      "Read(//c/Users/Kebron/.claude/plugins/**)",
+      "Edit(/.claude/skills/n8n-json-checker-workspace/**)",
+      "Edit(/.claude/skills/n8n-mcp-tools-expert-workspace/**)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\Kebron\\Documents\\GitHub\\n8n-builder\\.claude\\skills\\n8n-json-checker-workspace\\iteration-1\\eval-1-telegram-errors\\with_skill",
+      "c:\\Users\\Kebron\\Documents\\GitHub\\n8n-builder\\.claude\\skills\\n8n-mcp-tools-expert-workspace\\iteration-1\\eval-1-tool-sequence-slack\\with_skill"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "mcp__claude_ai_n8n__n8n_create_workflow",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"try{const r=JSON.parse(process.env.CLAUDE_TOOL_RESULT||'{}');const id=r.id||'<id>';process.stdout.write('VALIDATION REQUIRED: Workflow '+id+' was just created. You MUST call n8n_validate_workflow({ workflowId: \\\"'+id+'\\\", profile: \\\"runtime\\\" }) NOW before activating. Do not skip.');}catch(e){process.stdout.write('VALIDATION REQUIRED: Workflow created. Run n8n_validate_workflow(workflowId, profile=runtime) before activating.');}\"",
+            "timeout": 5000
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__claude_ai_n8n__n8n_validate_workflow",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"try{const r=JSON.parse(process.env.CLAUDE_TOOL_RESULT||'{}');const errs=(r.errors||[]).length;const warns=(r.warnings||[]).length;if(errs>0){process.stdout.write('LEARNING FLAG: Validation found '+errs+' error(s). After fixing, use the n8n-capture-learning skill to record: which node/field failed, what the root cause was, and the correct config. This grows the knowledge base for future builds.');}else{process.stdout.write('Validation clean ('+warns+' warning(s)). Workflow ready to activate.');}}catch(e){}\"",
+            "timeout": 5000
+          }
+        ]
       }
-    }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"SESSION CHECKPOINT: Before this session ends — did you discover any new node configs, credential keys, error patterns, or workflow patterns? If yes, use the n8n-capture-learning skill to write them to memory now. Even one sentence per finding compounds into a better knowledge base over time.\"",
+            "timeout": 5000
+          }
+        ]
+      }
+    ]
   }
 }

@@ -1,42 +1,43 @@
 ---
 name: n8n-json-checker
 description: >
-  Pre-flight validation of n8n workflow JSON BEFORE it reaches the instance.
-  Use this skill when the user pastes or shares raw workflow JSON for review,
-  says "check this n8n json", "validate this workflow", "any issues with this
-  workflow", "review n8n workflow", "n8n json issues", or shares a workflow
-  JSON file path. Also trigger when the user asks "does this workflow look
-  right?" or "will this work?" and there is workflow JSON in context.
-  USE THIS FIRST — static analysis catches structural errors (wrong node types,
-  missing __rl fields, bad wiring) faster than running the MCP validator.
-  After reporting issues, ask if the user wants to apply fixes.
-  Do NOT use for errors on workflows already live on the instance — use
-  n8n-validation-expert to interpret those MCP errors instead.
+  Pre-flight validation of n8n workflow JSON BEFORE deploying to the instance.
+  Trigger when user pastes workflow JSON, asks "check this n8n json", "does this
+  workflow look right", "validate this workflow", or "will this work?" with JSON
+  in context. Do NOT use for live MCP validator errors — use n8n-validation-expert.
 ---
 
 # n8n JSON Checker
 
-Validate n8n workflow JSON through two passes: static analysis (fast, no tools
-needed) then MCP runtime validation. Combine both into a single clear report.
+Pre-flight static analysis + MCP validation for n8n workflow JSON. Catches structural errors before deployment.
+
+## When to Use This Skill vs n8n-validation-expert
+
+| Situation | Use |
+|-----------|-----|
+| User pastes workflow JSON for review | **This skill** |
+| "Does this workflow look right?" / "Will this work?" | **This skill** |
+| Reviewing a workflow file before deploying | **This skill** |
+| MCP validator returned errors after create/update | **n8n-validation-expert** |
+| Workflow is live but broken | **n8n-validation-expert** |
 
 ---
 
 ## Step 1: Get the JSON
 
-- If workflow JSON is pasted in the user's message, use it directly.
-- If a file path is given, read that file.
-- If neither, ask: "Please paste the workflow JSON or provide a file path."
+Use JSON from the message directly, or read from a file path. If neither, ask for it.
 
 ---
 
-## Step 2: Static Analysis
+## Step 2: Static Analysis Checklist
 
-Read through the JSON and check each category below. Record every finding
-before moving to the next step — you'll need them for the final report.
+Run every check below. Record ALL findings before moving to Step 3.
+
+---
 
 ### 2.1 nodeType Format
 
-Every node has a `type` field. Three valid formats exist:
+Three valid prefixes:
 
 | Node category | Type format | Example |
 |---------------|-------------|---------|
@@ -44,25 +45,19 @@ Every node has a `type` field. Three valid formats exist:
 | LangChain | `@n8n/n8n-nodes-langchain.<name>` | `@n8n/n8n-nodes-langchain.agent` |
 | Community | `<npm-package-name>.<NodeName>` | `n8n-nodes-evolution-api.EvolutionApi` |
 
-**Error if you see:** `nodes-base.telegram` — missing the `n8n-` prefix.
+**Error:** `nodes-base.telegram` — missing the `n8n-` prefix.
 
-**Grouping rule:** If multiple nodes share the same prefix error, report them as a single finding listing all affected nodes (e.g., "Nodes 'Telegram Trigger', 'Send Reply' — wrong prefix `nodes-base.` should be `n8n-nodes-base.`"). One error entry, multiple nodes named.
+**NEVER validate the suffix** — only the prefix matters. `lmChatOpenAi`, `lmChatAnthropic`, `toolCode`, `toolWorkflow` are all valid suffixes. Do NOT flag them as wrong node types.
 
-**Do NOT validate node names:** Only check that the prefix is correct. Do not flag `@n8n/n8n-nodes-langchain.lmChatOpenAi`, `@n8n/n8n-nodes-langchain.lmOpenAi`, or any other node name as invalid based on whether you recognize the specific suffix. The name after the dot is outside the scope of this check — many valid node variants exist and your knowledge of specific node names may be incomplete or outdated.
+Example: `@n8n/n8n-nodes-langchain.lmChatOpenAi` is valid — prefix `@n8n/n8n-nodes-langchain.` is correct. Never flag the `.lmChatOpenAi` part.
 
-**Community node identification:** If a `type` field doesn't start with
-`n8n-nodes-base.` or `@n8n/n8n-nodes-langchain.`, it's a community node
-(installed from npm). Flag these with a **warning** noting:
-- The node must be installed on the n8n instance before the workflow runs
-- If running Docker, the `~/.n8n/nodes` directory must be persisted or
-  `N8N_REINSTALL_MISSING_PACKAGES=true` must be set, or the node won't load
-  after container recreation
-- Community node developers can introduce breaking changes between versions —
-  note the `typeVersion` for reference
+**Community node:** anything not matching the first two patterns → flag as warning (see 2.11).
+
+---
 
 ### 2.2 Resource Locator Fields (`__rl`)
 
-These fields **must** use the `__rl` object format, not a plain string.
+These fields **must** use the `__rl` object — a plain string silently breaks at runtime.
 
 Three valid modes:
 ```json
@@ -71,254 +66,258 @@ Three valid modes:
 { "__rl": true, "value": "gid=0", "mode": "list", "cachedResultName": "Sheet1", "cachedResultUrl": "..." }
 ```
 
-The `"list"` mode is common in Google nodes — it stores a cached display name and URL alongside the value. All three modes are valid; do not flag `"list"` mode as an error.
+**Complete `__rl` field table — check all of these:**
 
-| Node | Fields that need `__rl` |
+| Node | Fields requiring `__rl` |
 |------|------------------------|
 | `n8n-nodes-base.telegram` | `chatId` |
 | `n8n-nodes-base.slack` | `channel`, `user` |
-| `n8n-nodes-base.gmail` | `sendTo`, `messageId`, `labelIds` |
+| `n8n-nodes-base.gmail` | `sendTo`, `messageId`, `labelIds`, `threadId` |
 | `n8n-nodes-base.googleSheets` | `documentId`, `sheetName` |
 | `n8n-nodes-base.googleDrive` | `driveId`, `folderId`, `fileId` |
-| `n8n-nodes-base.notion` | `pageId`, `databaseId` |
+| `n8n-nodes-base.googleCalendar` | `calendarId`, `eventId` |
+| `n8n-nodes-base.notion` | `pageId`, `databaseId`, `blockId` |
 | `n8n-nodes-base.airtable` | `baseId`, `tableId` |
+| `n8n-nodes-base.hubspot` | `contactId`, `companyId`, `dealId` |
+| `n8n-nodes-base.pipedrive` | `dealId`, `personId`, `organizationId` |
+| `n8n-nodes-base.salesforce` | `recordId` |
+| `n8n-nodes-base.googleDocs` | `documentId` |
+| `n8n-nodes-base.jira` | `issueId`, `projectId` |
+| `n8n-nodes-base.github` | `owner`, `repository`, `issueNumber` |
+| `n8n-nodes-base.microsoftTeams` | `channelId`, `teamId` |
+| `n8n-nodes-base.clickUp` | `listId`, `taskId` |
+| `n8n-nodes-base.asana` | `taskId`, `projectId` |
+| `n8n-nodes-base.zendesk` | `ticketId` |
+| `n8n-nodes-base.freshdesk` | `ticketId` |
+| `n8n-nodes-base.executeWorkflow` | `workflowId` |
 
-**Error if:** the field is a plain string like `"chatId": "12345"` instead of an `__rl` object.
+**Error** if the field is a plain string. For each error, show the corrected JSON:
+```json
+// WRONG
+"chatId": "{{ $json.message.chat.id }}"
 
-### 2.3 Required Fields Per Node
+// CORRECT
+"chatId": { "__rl": true, "value": "={{ $json.message.chat.id }}", "mode": "expression" }
+```
 
-Check that nodes have their essential fields:
+---
+
+### 2.3 Required Fields Per Node Type
 
 | Node type | Required fields |
 |-----------|----------------|
-| `n8n-nodes-base.telegram` | `chatId`, `text` (for sendMessage) |
+| `n8n-nodes-base.telegram` (sendMessage) | `chatId` (__rl), `text` |
+| `n8n-nodes-base.slack` (post message) | `channel` (__rl), `text` |
+| `n8n-nodes-base.gmail` (send) | `sendTo` (__rl), `subject`, `message` |
 | `n8n-nodes-base.httpRequest` | `url` |
-| `n8n-nodes-base.code` | `jsCode` (JS mode) or `pythonCode` (Python mode) |
+| `n8n-nodes-base.code` | `jsCode` (JS) or `pythonCode` (Python) |
 | `n8n-nodes-base.set` | `fields.values` array |
 | `n8n-nodes-base.if` | `conditions.conditions` array (non-empty) |
 | `n8n-nodes-base.switch` | `rules.values` array (non-empty) |
+| `n8n-nodes-base.webhook` | `path`, `httpMethod` |
+| `n8n-nodes-base.scheduleTrigger` | `rule.interval` array |
+| `n8n-nodes-base.googleSheets` (append/appendOrUpdate/read/update/upsert) | `documentId` (__rl), `sheetName` (__rl) |
+| `@n8n/n8n-nodes-langchain.agent` | connected language model via `ai_languageModel` |
+| `@n8n/n8n-nodes-langchain.lmOpenAi` | credentials block with `openAiApi` |
 
-### 2.3a Code Node Content Checks
+---
 
-For any `n8n-nodes-base.code` node, scan the `jsCode` value for these issues:
+### 2.3a JavaScript Code Node Checks
+
+> **Source of truth:** `n8n-code-javascript` skill. Update that skill first, then mirror error/warning entries here.
+
+For `n8n-nodes-base.code` nodes with `jsCode`:
+
+**Errors (will break execution):**
+- `import ` or `export ` keywords — not supported in Code node sandbox. Fix: use `require('module-name')` instead. Example: `import { parse } from 'json5'` → `const { parse } = require('json5')`.
+- `this.getCredentials(` — silently fails. Fix: use HTTP Request node with credentials.
+- `$itemIndex`, `$secrets`, `$version` inside `jsCode` — expression-only variables, not available in code context.
+
+**Warnings (likely runtime errors):**
+- `return` returning a plain object: `return { result }` → should be `return [{ json: { result } }]`
+- `json:` key followed by `[` — `json` must be an object, not array
+- No `return` statement at all
+- `.toDate()`, `.isEmail()`, `.toTitleCase()` — expression helpers that don't work in jsCode
+
+---
+
+### 2.3b Python Code Node Checks
+
+For `n8n-nodes-base.code` nodes with `pythonCode`:
 
 **Errors:**
-- **ES6 imports** — `import ` or `export ` keywords are not supported in the Code node sandbox. Use `require()` instead. Flag as error.
-- **Credentials access** — `this.getCredentials(` silently fails in Code nodes. Use the HTTP Request node with credentials instead. Flag as error.
-- **Unavailable variables** — `$itemIndex`, `$secrets`, `$version` are not available in the Code node context (only in expressions). Flag as error if found in `jsCode`.
+- `import pandas`, `import numpy`, `import requests` — only standard library available. Fix: use HTTP Request node for HTTP calls.
+- Bare `return` with no value (just `return` on its own at module level) — use `return [{"json": {...}}]` or `return_value = [{"json": {...}}]` instead.
+
+> **Valid Python return patterns in n8n:** Both `return [{"json": {...}}]` and `return_value = [{"json": {...}}]` are correct. Do NOT flag `return [{"json": row} for row in data]` or any `return [...]` as an error — these are correct syntax.
 
 **Warnings:**
-- **Return format** — The Code node must return an array of `{ json: {...} }` objects. If the code contains a `return` statement that returns a plain object (e.g., `return { result: value }`) rather than an array, flag as warning — it will cause a runtime error.
-- **`json` value is array** — `return [{ json: [1, 2, 3] }]` is wrong. The `json` key must be an object, not an array. Correct: `return [{ json: { items: [1, 2, 3] } }]`. Flag as warning if `json:` is followed by `[`.
-- **Missing return** — If `jsCode` has no `return` statement at all, flag as warning.
-- **Data transformation functions** — Methods like `.toDate()`, `.isEmail()`, `.toTitleCase()` are expression-only and won't work inside `jsCode`. Flag as warning if found.
+- Using `datetime` without `from datetime import datetime`.
+- `json.loads` on `_input.first().json` — `.json` is already a dict in Python, not a string.
+
+---
+
+### 2.3c AI Agent Node Checks
+
+For `@n8n/n8n-nodes-langchain.agent`:
+
+1. **Language model wired?** — Check `connections` for an entry connecting to this agent via `ai_languageModel`. **Error** if none.
+2. **System prompt present?** — Check `parameters.options.systemMessage`. **Warning** if absent.
+
+For `@n8n/n8n-nodes-langchain.memoryBufferWindow`:
+- **Warning** (NEVER Error) if `sessionKey` is a hardcoded static string — all executions share the same memory context. Fix: `"sessionKey": "={{ $json.sessionId }}"`. **Even if the workflow is a multi-user bot, this is still only a Warning — do not promote it to Error.**
+
+---
 
 ### 2.4 typeVersion Checks
 
-Compare `typeVersion` against the known-good versions:
+See CLAUDE.md → `## typeVersion Reference` for the complete version table. **Warning** (not error) if a version is older — workflow may still work but miss features/fixes.
 
-| Node type | Expected typeVersion |
-|-----------|---------------------|
-| `n8n-nodes-base.telegram` / `telegramTrigger` | `1.2` |
-| `n8n-nodes-base.webhook` | `2` |
-| `n8n-nodes-base.scheduleTrigger` | `1.2` |
-| `n8n-nodes-base.manualTrigger` | `1` |
-| `n8n-nodes-base.httpRequest` | `4.2` |
-| `n8n-nodes-base.code` | `2` |
-| `n8n-nodes-base.set` | `3.4` |
-| `n8n-nodes-base.if` | `2.2` |
-| `n8n-nodes-base.switch` | `3.2` |
-| `n8n-nodes-base.merge` | `3` |
-| `n8n-nodes-base.splitInBatches` | `3` |
-| `n8n-nodes-base.respondToWebhook` | `1.1` |
-| `n8n-nodes-base.googleSheets` | `4.5` |
-| `n8n-nodes-base.googleDrive` | `3` |
-| `n8n-nodes-base.wait` | `1.1` |
-| `n8n-nodes-base.executeCommand` | `1` |
-| `n8n-nodes-base.stickyNote` | `1` |
-| `@n8n/n8n-nodes-langchain.agent` | `1.7` |
-
-**Warning** (not error) if a version is older than expected — the workflow may
-still work but could be missing newer features or fixes.
+---
 
 ### 2.5 Credential Key Names
 
-Check that credential keys match what the node actually expects:
+**Warning** (NOT Error) for misspellings (e.g., `slackAPI`, `gmailOauth2`, `openaiApi`). See CLAUDE.md → `## Credential Handling` for the complete credential key table.
 
-| Node | Correct credential key |
-|------|----------------------|
-| Telegram / TelegramTrigger | `telegramApi` |
-| Slack | `slackApi` or `slackOAuth2Api` |
-| Gmail | `gmailOAuth2` |
-| Google Sheets | `googleSheetsOAuth2Api` |
-| Google Drive | `googleDriveOAuth2Api` |
-| YouTube | `youTubeOAuth2Api` |
-| Notion | `notionApi` |
-| OpenAI (LangChain) | `openAiApi` |
-| HTTP Request (header) | `httpHeaderAuth` |
-| HTTP Request (bearer) | `httpBearerAuth` |
+**HTTP Request with `predefinedCredentialType`:** Must have both `nodeCredentialType` set AND a matching `credentials` block. **Error** if either is missing.
 
-**Warning** if a key looks misspelled (e.g., `slackAPI`, `gmailOauth2`).
-
-**HTTP Request with `predefinedCredentialType`:** When an HTTP Request node uses
-`"authentication": "predefinedCredentialType"`, it must also have both
-`nodeCredentialType` (e.g., `"youTubeOAuth2Api"`) and a matching `credentials`
-block. Flag as **error** if either is missing.
+---
 
 ### 2.6 Expression Syntax
 
-Scan all string values for expression patterns:
+Scan all string values:
 
 - **Error** if `={{` has no closing `}}` — unbalanced braces
-- **Error** if `$node[` references a node name that doesn't appear in the
-  `nodes` array (misspelled node reference)
-- **Warning** if a bare `$json.field` appears outside of `={{ ... }}` — it
-  won't be evaluated
-- **Warning** for deeply nested paths like `={{ $json.a.b.c }}` — if any
-  intermediate key is absent at runtime, the expression silently returns
-  `undefined`. Suggest null-safe access or an IF check upstream.
+- **Error** if `$node[` references a node name not in the workflow — misspelled node reference
+- **Warning** if bare `$json.field` appears outside `={{ ... }}` — will not be evaluated
+- **Warning** for paths with 4+ levels of nesting like `={{ $json.a.b.c.d }}` — silent `undefined` if any intermediate key is absent. Suggest null-safe access or upstream IF check. **Do NOT warn on 2–3 level paths** like `$json.message.chat.id` or `$json.body.data.id` — these are normal structured-data access patterns common in Telegram, webhook, and API payloads.
+- **Error** if `$fromAI(` appears with fewer than 1 argument or more than 3 — signature is `$fromAI('paramName', 'description', 'type')`. Type must be `'string'`, `'number'`, `'boolean'`, or `'json'`. **Warning** if `$fromAI(` appears outside an AI tool node — it has no effect in regular nodes.
 
-### 2.7 Connection Structure
+---
 
-Inspect the `connections` object:
+### 2.7 Duplicate Node Names
 
-**Merge node inputs:**
-A Merge node needs two inputs wired to indices 0 and 1. Error if both
-connections point to `"index": 0`, or if only one input is wired.
+n8n requires unique node names. **Error** if two or more nodes share the same `name` value — causes silent connection failures since connections reference nodes by name.
 
-**AI Agent sub-nodes:**
-LangChain sub-nodes (OpenAI Chat Model, memory, tools) must use the
-sub-node connection type as the key, not `main`. Error if a sub-node connects
-via `main` instead of `ai_languageModel`, `ai_tool`, `ai_memory`, etc.
+---
+
+### 2.8 Connection Structure
+
+**Orphaned nodes:** Any non-trigger node that does not appear as a target in any connection AND is not a LangChain sub-node → **Warning**: "Node '[name]' is not connected — it will never execute."
+
+LangChain sub-nodes (lmOpenAi, memoryBufferWindow, calculatorTool, toolHttpRequest, outputParserStructured, etc.) are exempt — they connect via typed channels, not `main`.
+
+**Missing trigger:** No node with type ending in `Trigger`/`trigger`, AND no `webhook` node → **Warning**.
+
+**Merge node inputs:** Needs connections to both `index: 0` AND `index: 1`. **Error** if only one input is wired.
+
+**AI Agent sub-nodes:** LangChain sub-nodes must connect via typed channels — NOT `main`. **Error** if a sub-node is connected via `main`.
+
+| Connection type | Used by |
+|-----------------|---------|
+| `ai_languageModel` | `lmOpenAi`, `lmAnthropic`, `lmOllama`, `lmGroq`, etc. |
+| `ai_tool` | `calculatorTool`, `toolHttpRequest`, `toolCode`, `toolWorkflow`, etc. |
+| `ai_memory` | `memoryBufferWindow`, `memoryRedis`, `memoryChatDynamo`, etc. |
+| `ai_outputParser` | `outputParserStructured`, `outputParserAutoFix`, etc. |
+| `ai_vectorStore` | `vectorStoreInMemory`, `vectorStorePinecone`, `vectorStoreSupabase`, etc. |
+| `ai_document` | `documentDefaultDataLoader`, `documentBinaryInputLoader`, etc. |
+| `ai_textSplitter` | `textSplitterCharacterTextSplitter`, `textSplitterTokenSplitter`, etc. |
+| `ai_embedding` | `embeddingsOpenAi`, `embeddingsHuggingFace`, etc. |
+| `ai_retriever` | `retrieverVectorStore`, `retrieverMultiQuery`, etc. |
 
 **IF / Switch output count:**
-Count the number of rule conditions in an IF/Switch node and compare to the
-number of output arrays in `connections["<node-name>"].main`.
+- IF node: must have exactly 2 output arrays (true + false). **Error** if only 1.
+- Switch node: output count must equal number of rules (+ 1 if fallback enabled). **Error** if mismatch.
 
-- IF node: should have exactly 2 outputs (true + false)
-- Switch node: output count should equal number of rules (+ 1 if fallback is
-  enabled)
+**Broken references:** Any connection targeting a node name not in the workflow → **Error**.
 
-**Error** if the counts don't match.
+---
 
-### 2.8 SplitInBatches Loop Wiring
+### Checks 2.9–2.16 (Node-Specific Edge Cases)
 
-If the workflow contains a `splitInBatches` node, check that its `main[0]`
-(batch output) eventually connects back to the same `splitInBatches` node —
-forming a loop. If `main[0]` leads only to terminal nodes with no path back,
-flag it as a **warning** (the batch will only run once).
-
-### 2.9 Webhook Checks
-
-**Respond pairing:** If a `webhook` node has `"responseMode": "responseNode"`,
-there should be a `respondToWebhook` node somewhere downstream. **Warning** if
-none exists.
-
-**Duplicate paths:** If the workflow has multiple `webhook` or `webhookTrigger`
-nodes with the same `path` + `httpMethod` combination, only one will work —
-flag as **error**. (n8n only allows one webhook per path/method pair.)
-
-**Cloud timeout note:** If `responseMode` is `"responseNode"` and the workflow
-appears designed for long-running operations (AI agents, multi-step chains),
-add a **warning** that n8n Cloud enforces a 100-second timeout — requests
-exceeding this get a Cloudflare 524 error. For long processes, use two separate
-webhooks: one to kick off the job and one to poll for results.
-
-### 2.10 Community Node Deployment Risks
-
-For any node identified as a community node (see 2.1):
-
-1. **Missing package warning** — Add a note that if the workflow fails to load
-   with an error like *"Missing packages"*, the fix is either:
-   - Persist `~/.n8n/nodes` in Docker (recommended)
-   - Set env var `N8N_REINSTALL_MISSING_PACKAGES=true` (slower startup, may
-     fail health checks)
-   - On n8n Cloud: if the instance crashes on startup due to a bad community
-     node, disable all community nodes via Cloud Admin Panel → Manage →
-     "Disable all community nodes"
-
-2. **Breaking changes warning** — Community nodes can introduce breaking
-   changes between versions. If the workflow breaks after a node upgrade,
-   downgrade by uninstalling and reinstalling the previous version
-   (`n8n-nodes-<package>@<version>`).
-
-3. **Security note** — Community nodes have unrestricted machine access.
-   Only install from trusted sources or n8n-verified packages.
-
-Skip this section entirely if the workflow contains only built-in and
-LangChain nodes.
-
-### 2.11 Credential Portability
-
-**Error check only:** If any HTTP Request node has authentication set to something other than `"none"` but has no `credentials` block, flag as **error** — the node will fail silently on auth.
-
-Skip the generic "credential IDs are instance-specific" advisory — it applies to every workflow with credentials and doesn't describe a real defect in the JSON being reviewed. Omit it unless the user explicitly asks about portability.
-
-### 2.12 Error Handling
-
-For workflows with 5 or more nodes that have no `errorTrigger` node, add a
-**warning**:
-
-> No error trigger node found. Failed executions will be lost silently. For
-> production workflows, add an "Error Trigger" node connected to a
-> notification (email, Slack, etc.) to catch failures.
+If the workflow contains `splitInBatches`, community nodes, `httpRequest` with auth, `executeWorkflow`, `formTrigger`, hardcoded secrets, or 5+ nodes with no error handler — read [EDGE_CASE_CHECKS.md] for checks 2.9–2.16.
 
 ---
 
 ## Step 3: MCP Validation
 
-After completing static analysis, call the MCP validator with the full workflow
-JSON. Pass the JSON exactly as-is — do not modify it before validation.
+After static analysis, call:
 
 ```
 n8n_validate_workflow({
-  workflow: <the full workflow JSON object>,
+  workflow: <full workflow JSON object>,
   profile: "runtime"
 })
 ```
 
-Collect any errors and warnings returned. These are the runtime-level issues
-that static analysis can't always catch (missing required params deep in node
-schemas, expression evaluation errors, etc.).
-
-**Community nodes:** The MCP validator may not have schemas for community
-nodes and will likely skip or warn about them. If MCP returns a "node type
-unknown" or "schema not found" error for a community node, that's expected —
-note it as informational, not a blocking error.
-
-**De-duplicate:** If an MCP error describes the same issue already found in
-static analysis, don't list it twice. Merge them into one finding.
+De-duplicate against static findings. Merge into one report.
 
 ---
 
 ## Step 4: Report
 
-Present findings in this structure:
-
 ```
 ## n8n Workflow Check
 
 ### Errors (must fix before activating)
-1. [Node name] — [issue description] — [what to change]
-2. ...
+1. [Node name] — [issue] — [exact corrected JSON snippet]
 
 ### Warnings (review, may be acceptable)
-1. [Node name] — [issue description] — [suggestion]
-2. ...
+1. [Node name] — [issue] — [suggestion]
 
 ### Clean ✓
 [category] — no issues found
 ```
 
-If there are zero errors AND zero warnings, output:
+**For every error, include the corrected JSON** — show exact before/after.
 
-```
-## n8n Workflow Check
-✓ No issues found. Workflow looks good to activate.
+If zero errors AND zero warnings: `✓ No issues found. Workflow looks good to activate.`
+
+---
+
+## Step 5: Offer Fixes and Test Payload
+
+**Always include this block** at the end of every report — do not skip it even if the workflow looks mostly clean:
+
+> Would you like me to:
+> - **Apply fixes** — output the corrected workflow JSON with all errors resolved?
+> - **Generate a test payload** — produce sample input data to test the trigger?
+
+After the user responds:
+- **Apply fixes?** → If yes, output the complete corrected workflow JSON.
+- **Generate test payload?** → If yes, produce based on trigger type:
+
+**Webhook trigger:**
+```json
+// POST https://professionalaiassistants.com/n8n/webhook-test/{path}
+{
+  "body": { ...fields inferred from how $json.body.* is used downstream... },
+  "headers": { "Content-Type": "application/json" }
+}
 ```
 
-**After the report**, if there are errors, ask the user: "Want me to apply
-these fixes directly to the workflow?"
+**Telegram trigger:**
+```json
+{
+  "message": {
+    "message_id": 1,
+    "from": { "id": 123456789, "first_name": "Test", "username": "testuser" },
+    "chat": { "id": 123456789, "type": "private" },
+    "date": 1700000000,
+    "text": "Hello test message"
+  }
+}
+```
+
+**Manual trigger:** No payload — call `execute_workflow({ workflowId: "ID" })`.
+
+**Schedule trigger:** Temporarily set to every 1 minute, activate, wait for one execution, then restore.
+
+---
+
+## Step 6: Capture New Patterns
+
+After completing the check — if you found an `__rl` field, credential key, typeVersion, or error pattern not covered above, use `n8n-capture-learning` to add it. This is how the checker stays current.
 
 ---
 
@@ -329,6 +328,4 @@ these fixes directly to the workflow?"
 | Error | Will cause activation failure or silent runtime breakage |
 | Warning | Workflow may activate but could behave unexpectedly |
 
-Operator structure issues (missing `singleValue`, IF conditions metadata) are
-auto-fixed by n8n on save — don't report these as errors unless the MCP
-validator explicitly flags them after a save operation.
+Operator structure issues (missing `singleValue`, IF conditions metadata) are auto-fixed by n8n on save — don't report these as errors.

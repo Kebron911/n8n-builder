@@ -15,7 +15,7 @@
         "The output does NOT suggest changing the operation as the fix",
         "The output explains the validation loop pattern (validate → fix → validate again)",
         "The output recommends re-running n8n_validate_workflow after applying the fix",
-        "The output does NOT suggest the channel value itself needs to use __rl format (that is a separate node config concern)"
+        "The output does NOT pivot away from the missing_required fix to lecture exclusively about __rl format — the primary fix is adding the channel field; __rl format is secondary detail"
       ]
     },
     {

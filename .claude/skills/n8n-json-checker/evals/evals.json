@@ -16,6 +16,7 @@
         "The output reports the typeVersion 1.1 mismatch on Telegram Trigger (expected 1.2)",
         "The output classifies the typeVersion mismatch as a Warning (not an Error)",
         "The output reports the misspelled credential key 'telegramAPI' (should be 'telegramApi')",
+        "The output classifies the misspelled credential key as a Warning (wrong case causes runtime auth failure but JSON is structurally valid)",
         "The output offers to apply fixes after presenting the report",
         "The output identifies exactly 4 issues (not more, not fewer)",
         "The output does NOT flag the connections object as having any issues",
@@ -54,7 +55,7 @@
         "The output either says the workflow is clean/looks good or lists only informational warnings",
         "The output does NOT flag correct typeVersions (1.2, 4.2, 2) as problems",
         "The output explicitly states the workflow passed or has no errors — not just omits errors by silence",
-        "The output does NOT suggest adding respondToWebhook (Webhook uses 'onReceived' mode, not 'responseNode')"
+        "The output does NOT flag the absence of credentials on any node as an error (Schedule Trigger and Code require none; HTTP Request uses authentication: none which is explicit)"
       ]
     },
     {
@@ -74,6 +75,77 @@
         "The output offers to apply fixes after listing the errors",
         "The output does NOT flag the 'appendOrUpdate' operation name as invalid",
         "The output does NOT flag the missing 'columns' parameter as a critical error (it's optional)"
+      ]
+    }
+  ,
+    {
+      "id": 5,
+      "prompt": "Check this workflow for issues:\n\n```json\n{\n  \"name\": \"OpenAI Data Processor\",\n  \"nodes\": [\n    {\n      \"name\": \"Webhook\",\n      \"type\": \"n8n-nodes-base.webhook\",\n      \"typeVersion\": 2,\n      \"position\": [250, 300],\n      \"parameters\": {\n        \"httpMethod\": \"POST\",\n        \"path\": \"process\",\n        \"responseMode\": \"onReceived\"\n      }\n    },\n    {\n      \"name\": \"Call OpenAI\",\n      \"type\": \"n8n-nodes-base.httpRequest\",\n      \"typeVersion\": 4.2,\n      \"position\": [500, 300],\n      \"parameters\": {\n        \"method\": \"POST\",\n        \"url\": \"https://api.openai.com/v1/chat/completions\",\n        \"authentication\": \"none\",\n        \"sendHeaders\": true,\n        \"headerParameters\": {\n          \"values\": [\n            { \"name\": \"Authorization\", \"value\": \"Bearer sk-proj-abc123XYZrealKeyHere9876543210abcdefg\" }\n          ]\n        },\n        \"sendBody\": true,\n        \"bodyParameters\": {\n          \"values\": [\n            { \"name\": \"model\", \"value\": \"gpt-4o\" }\n          ]\n        }\n      }\n    },\n    {\n      \"name\": \"Process Result\",\n      \"type\": \"n8n-nodes-base.code\",\n      \"typeVersion\": 2,\n      \"position\": [750, 300],\n      \"parameters\": {\n        \"jsCode\": \"import { parse } from 'json5';\\nconst data = $input.first().json;\\nreturn { result: data.choices[0].message.content };\"\n      }\n    }\n  ],\n  \"connections\": {\n    \"Webhook\": {\n      \"main\": [[{ \"node\": \"Call OpenAI\", \"type\": \"main\", \"index\": 0 }]]\n    },\n    \"Call OpenAI\": {\n      \"main\": [[{ \"node\": \"Process Result\", \"type\": \"main\", \"index\": 0 }]]\n    }\n  }\n}\n```",
+      "expected_output": "Should find: (1) hardcoded Bearer token in 'Call OpenAI' Authorization header is a security risk, (2) Code node uses 'import' statement which is not supported in the Code node sandbox, (3) Code node returns a plain object instead of array of {json} objects",
+      "files": [],
+      "expectations": [
+        "The output flags the hardcoded Bearer token value in the Authorization header as a security warning",
+        "The output classifies the hardcoded secret as a Warning (not a blocking Error)",
+        "The output recommends moving the API key to n8n credentials or an expression",
+        "The output flags the 'import' statement in jsCode as an Error",
+        "The output states that import/export are not supported in the Code node sandbox",
+        "The output suggests using require() instead of import",
+        "The output flags the return statement returning a plain object instead of [{json: {...}}] as an Error (Code node crashes at runtime — it does not produce wrong output, it produces NO output)",
+        "The output does NOT flag the httpRequest URL or method as issues",
+        "The output does NOT falsely flag the Webhook node or its configuration",
+        "The output does NOT flag authentication:none as an error (the auth is done via headers manually)"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Any problems with this workflow JSON?\n\n```json\n{\n  \"name\": \"Lead Processor\",\n  \"nodes\": [\n    {\n      \"name\": \"Webhook\",\n      \"type\": \"n8n-nodes-base.webhook\",\n      \"typeVersion\": 2,\n      \"position\": [250, 300],\n      \"parameters\": {\n        \"httpMethod\": \"POST\",\n        \"path\": \"leads\",\n        \"responseMode\": \"onReceived\"\n      }\n    },\n    {\n      \"name\": \"Validate Lead\",\n      \"type\": \"n8n-nodes-base.if\",\n      \"typeVersion\": 2.2,\n      \"position\": [500, 300],\n      \"parameters\": {\n        \"conditions\": {\n          \"options\": { \"caseSensitive\": true, \"leftValue\": \"\" },\n          \"conditions\": [\n            {\n              \"id\": \"cond_0\",\n              \"leftValue\": \"={{ $json.body.email }}\",\n              \"rightValue\": \"\",\n              \"operator\": { \"type\": \"string\", \"operation\": \"notEmpty\", \"singleValue\": true }\n            }\n          ],\n          \"combinator\": \"and\"\n        },\n        \"options\": {}\n      }\n    },\n    {\n      \"name\": \"Save to Sheets\",\n      \"type\": \"n8n-nodes-base.googleSheets\",\n      \"typeVersion\": 4.5,\n      \"position\": [750, 200],\n      \"parameters\": {\n        \"resource\": \"sheet\",\n        \"operation\": \"append\",\n        \"documentId\": { \"__rl\": true, \"value\": \"abc123spreadsheetId\", \"mode\": \"id\" },\n        \"sheetName\": { \"__rl\": true, \"value\": \"gid=0\", \"mode\": \"list\", \"cachedResultName\": \"Sheet1\" },\n        \"columns\": { \"mappingMode\": \"autoMapInputData\", \"value\": {}, \"matchingColumns\": [], \"schema\": [] },\n        \"options\": {}\n      },\n      \"credentials\": {\n        \"googleSheetsOAuth2Api\": { \"id\": \"1\", \"name\": \"Google Sheets\" }\n      }\n    },\n    {\n      \"name\": \"Save to Sheets\",\n      \"type\": \"n8n-nodes-base.noOp\",\n      \"typeVersion\": 1,\n      \"position\": [750, 400],\n      \"parameters\": {}\n    }\n  ],\n  \"connections\": {\n    \"Webhook\": {\n      \"main\": [[{ \"node\": \"Validate Lead\", \"type\": \"main\", \"index\": 0 }]]\n    },\n    \"Validate Lead\": {\n      \"main\": [\n        [{ \"node\": \"Save to Sheets\", \"type\": \"main\", \"index\": 0 }]\n      ]\n    }\n  }\n}\n```",
+      "expected_output": "Should find: (1) two nodes share the name 'Save to Sheets' — duplicate node names cause silent connection failures, (2) IF node only has 1 output wired (true branch) — false branch is missing/unwired",
+      "files": [],
+      "expectations": [
+        "The output identifies the duplicate node name 'Save to Sheets' as an error",
+        "The output classifies the duplicate node name as an Error",
+        "The output explains that duplicate names cause connection failures since connections reference nodes by name",
+        "The output identifies that the IF node's false branch (output index 1) is not wired",
+        "The output classifies the missing IF false branch as an Error",
+        "The output does NOT flag the googleSheets __rl fields as issues (they are correctly formatted)",
+        "The output does NOT flag the googleSheets typeVersion 4.5 as an issue",
+        "The output does NOT flag the IF node condition structure as an error"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Review this n8n workflow JSON:\n\n```json\n{\n  \"name\": \"Customer Support Bot\",\n  \"nodes\": [\n    {\n      \"name\": \"Telegram Trigger\",\n      \"type\": \"n8n-nodes-base.telegramTrigger\",\n      \"typeVersion\": 1.2,\n      \"position\": [250, 300],\n      \"parameters\": { \"updates\": [\"message\"], \"additionalFields\": {} },\n      \"credentials\": { \"telegramApi\": { \"id\": \"1\", \"name\": \"Telegram\" } }\n    },\n    {\n      \"name\": \"AI Agent\",\n      \"type\": \"@n8n/n8n-nodes-langchain.agent\",\n      \"typeVersion\": 1.7,\n      \"position\": [500, 300],\n      \"parameters\": {\n        \"text\": \"={{ $json.message.text }}\",\n        \"options\": {}\n      }\n    },\n    {\n      \"name\": \"OpenAI Chat Model\",\n      \"type\": \"@n8n/n8n-nodes-langchain.lmOpenAi\",\n      \"typeVersion\": 1.2,\n      \"position\": [500, 500],\n      \"parameters\": { \"model\": \"gpt-4o-mini\", \"options\": {} },\n      \"credentials\": { \"openAiApi\": { \"id\": \"1\", \"name\": \"OpenAI\" } }\n    },\n    {\n      \"name\": \"Memory\",\n      \"type\": \"@n8n/n8n-nodes-langchain.memoryBufferWindow\",\n      \"typeVersion\": 1.3,\n      \"position\": [700, 500],\n      \"parameters\": {\n        \"sessionKey\": \"support_session\",\n        \"contextWindowLength\": 10\n      }\n    },\n    {\n      \"name\": \"Send Reply\",\n      \"type\": \"n8n-nodes-base.telegram\",\n      \"typeVersion\": 1.2,\n      \"position\": [750, 300],\n      \"parameters\": {\n        \"resource\": \"message\",\n        \"operation\": \"sendMessage\",\n        \"chatId\": { \"__rl\": true, \"value\": \"={{ $json.message.chat.id }}\", \"mode\": \"expression\" },\n        \"text\": \"={{ $json.output }}\",\n        \"additionalFields\": {}\n      },\n      \"credentials\": { \"telegramApi\": { \"id\": \"1\", \"name\": \"Telegram\" } }\n    }\n  ],\n  \"connections\": {\n    \"Telegram Trigger\": {\n      \"main\": [[{ \"node\": \"AI Agent\", \"type\": \"main\", \"index\": 0 }]]\n    },\n    \"OpenAI Chat Model\": {\n      \"ai_languageModel\": [[{ \"node\": \"AI Agent\", \"type\": \"ai_languageModel\", \"index\": 0 }]]\n    },\n    \"Memory\": {\n      \"ai_memory\": [[{ \"node\": \"AI Agent\", \"type\": \"ai_memory\", \"index\": 0 }]]\n    },\n    \"AI Agent\": {\n      \"main\": [[{ \"node\": \"Send Reply\", \"type\": \"main\", \"index\": 0 }]]\n    }\n  }\n}\n```",
+      "expected_output": "Should find one warning: Memory node has a hardcoded static sessionKey 'support_session' — all users will share the same memory context. Should NOT flag correct ai_languageModel and ai_memory connection types as errors. Should NOT flag the overall structure.",
+      "files": [],
+      "expectations": [
+        "The output warns about the static/hardcoded sessionKey 'support_session' on the Memory node",
+        "The output explains that a static session key causes all executions to share the same memory context",
+        "The output suggests using an expression like ={{ $json.message.chat.id }} as the session key instead",
+        "The output classifies the static sessionKey as a Warning (not an Error)",
+        "The output does NOT flag the ai_languageModel connection as an error",
+        "The output does NOT flag the ai_memory connection as an error",
+        "The output does NOT flag the overall AI Agent wiring as incorrect",
+        "The output does NOT flag the lmOpenAi typeVersion 1.2 as incorrect",
+        "The output does NOT flag any __rl fields as issues (chatId is correctly formatted)",
+        "The output does NOT flag the absence of a system prompt as a blocking error"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "Check this workflow:\n\n```json\n{\n  \"name\": \"Python Data Transformer\",\n  \"nodes\": [\n    {\n      \"name\": \"Manual Trigger\",\n      \"type\": \"n8n-nodes-base.manualTrigger\",\n      \"typeVersion\": 1,\n      \"position\": [250, 300],\n      \"parameters\": {}\n    },\n    {\n      \"name\": \"Fetch Data\",\n      \"type\": \"n8n-nodes-base.httpRequest\",\n      \"typeVersion\": 4.2,\n      \"position\": [500, 300],\n      \"parameters\": {\n        \"method\": \"GET\",\n        \"url\": \"https://api.example.com/records\",\n        \"authentication\": \"predefinedCredentialType\",\n        \"nodeCredentialType\": \"httpBasicAuth\"\n      }\n    },\n    {\n      \"name\": \"Transform\",\n      \"type\": \"n8n-nodes-base.code\",\n      \"typeVersion\": 2,\n      \"position\": [750, 300],\n      \"parameters\": {\n        \"language\": \"python\",\n        \"pythonCode\": \"import pandas as pd\\nimport requests\\n\\ndata = _input.first().json\\ndf = pd.DataFrame(data['records'])\\nreturn [{'json': row} for row in df.to_dict('records')]\"\n      }\n    }\n  ],\n  \"connections\": {\n    \"Manual Trigger\": {\n      \"main\": [[{ \"node\": \"Fetch Data\", \"type\": \"main\", \"index\": 0 }]]\n    },\n    \"Fetch Data\": {\n      \"main\": [[{ \"node\": \"Transform\", \"type\": \"main\", \"index\": 0 }]]\n    }\n  }\n}\n```",
+      "expected_output": "Should find: (1) HTTP Request uses predefinedCredentialType but has no credentials block — will fail silently on auth, (2) Python Code node imports pandas which is not available in n8n's Python sandbox, (3) Python Code node imports requests which is also not available.",
+      "files": [],
+      "expectations": [
+        "The output flags that the 'Fetch Data' HTTP Request node has authentication set to predefinedCredentialType but is missing a credentials block",
+        "The output classifies the missing credentials block as an Error",
+        "The output flags the 'import pandas' statement in the Python code as an Error",
+        "The output states that pandas is not available in n8n's Python sandbox",
+        "The output flags the 'import requests' statement in the Python code as an Error",
+        "The output states that requests is not available and suggests using the HTTP Request node instead",
+        "The output does NOT flag the _input.first().json syntax as an error (this is correct Python syntax in n8n)",
+        "The output does NOT flag the return format [{'json': row}] as incorrect",
+        "The output does NOT flag the manualTrigger typeVersion 1 as an issue",
+        "The output does NOT flag the httpRequest typeVersion 4.2 as an issue"
       ]
     }
   ]

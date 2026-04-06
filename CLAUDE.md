@@ -237,6 +237,9 @@ Use these verbatim — no lookup needed. All use `typeVersion` matching the curr
 
 Use this as the start of a dedicated error-handling workflow. Set `settings.errorWorkflow` on production workflows to point to this workflow's ID.
 
+**Production error-handler is live:** ID `vQKuXqX6mzCEGmaE` — [https://professionalaiassistants.com/n8n/workflow/vQKuXqX6mzCEGmaE](https://professionalaiassistants.com/n8n/workflow/vQKuXqX6mzCEGmaE)
+Sends Telegram alerts on failure. Requires: Telegram credential + update `chatId` in "Send Telegram Alert" node with your numeric chat ID.
+
 ### HTTP Request
 
 ```json
@@ -930,7 +933,7 @@ Optional `settings` object at the workflow level — include when relevant:
     "saveExecutionProgress": true,
     "executionTimeout": 300,
     "timezone": "America/New_York",
-    "errorWorkflow": "WORKFLOW_ID_OF_ERROR_HANDLER"
+    "errorWorkflow": "vQKuXqX6mzCEGmaE"
   }
 }
 ```
@@ -974,12 +977,35 @@ Include `settings` in the top-level workflow object alongside `nodes` and `conne
 | Google Sheets | `googleSheetsOAuth2Api` |
 | Google Drive | `googleDriveOAuth2Api` |
 | YouTube | `youTubeOAuth2Api` |
+| Google Calendar | `googleCalendarOAuth2Api` |
+| Google Docs | `googleDocsOAuth2Api` |
 | Notion | `notionApi` |
 | Airtable | `airtableTokenApi` |
 | OpenAI (LangChain) | `openAiApi` |
+| Anthropic / Claude | `anthropicApi` |
+| GitHub | `githubApi` |
+| GitLab | `gitlabApi` |
+| Jira (Cloud) | `jiraSoftwareCloudApi` |
+| HubSpot | `hubspotAppToken` |
+| Salesforce | `salesforceOAuth2Api` |
+| Stripe | `stripeApi` |
+| Twilio | `twilioApi` |
+| Discord (Bot) | `discordBotApi` |
+| Discord (Webhook) | `discordWebhookApi` |
+| WhatsApp Business | `whatsAppBusinessCloudApi` |
+| MySQL | `mySql` |
+| PostgreSQL | `postgres` |
+| MongoDB | `mongoDb` |
+| Redis | `redis` |
+| Dropbox | `dropboxApi` |
+| AWS (S3, Lambda, etc.) | `aws` |
+| Mailchimp | `mailchimpApi` |
+| SendGrid | `sendGridApi` |
 | HTTP Request (Header Auth) | `httpHeaderAuth` |
 | HTTP Request (Bearer) | `httpBearerAuth` |
 | HTTP Request (Basic Auth) | `httpBasicAuth` |
+
+> **When in doubt:** Run `get_node("nodes-base.<nodeName>", detail: "standard")` and check the `credentials` field — it lists the exact key the node expects.
 
 ### Reporting credentials to the user
 
@@ -988,6 +1014,53 @@ In the **Report** step, list every credential the user needs to connect:
 > **Credentials to configure in n8n UI:**
 > 1. Telegram Bot API → "Telegram account" (nodes: Telegram Trigger, Send Reply)
 > 2. OpenAI API Key → "OpenAI account" (nodes: OpenAI Chat Model)
+
+---
+
+## Known Failure Patterns
+
+Real failures captured from builds. Each entry here prevented the same error in future workflows.
+
+### __rl fields on plain strings
+The most common silent failure. Any field in the __rl table below passed as a plain string (`"chatId": "123"`) will pass JSON validation but fail at runtime. Always use the object format.
+
+### LangChain sub-nodes connected via `main`
+If an OpenAI Chat Model, memory, or tool node is connected to an AI Agent via `main` instead of `ai_languageModel` / `ai_tool` / `ai_memory`, the sub-node is silently ignored — the agent runs with no model or no tools.
+
+### Wrong nodeType prefix in workflow JSON
+Using `nodes-base.telegram` (the search/get_node format) inside `n8n_create_workflow` JSON causes the node to be created with an invalid type. Always use `n8n-nodes-base.telegram` in workflow JSON.
+
+### Code node returning a plain object
+`return { result: value }` in a Code node crashes at runtime. Must be `return [{ json: { result: value } }]`.
+
+### Memory node with static sessionKey
+`"sessionKey": "conversation"` (static string) causes all workflow executions to share the same memory context. Use `"sessionKey": "={{ $json.sessionId }}"` or another per-user identifier.
+
+---
+
+_Add new entries here via the `n8n-capture-learning` skill._
+
+---
+
+## Keeping Node Configs Current
+
+The `typeVersion` table and Common Node Configs in this file are pinned to n8n **v1.76**.
+
+When the n8n instance is upgraded, run the validation script to detect stale versions:
+
+```bash
+N8N_URL=https://professionalaiassistants.com/n8n \
+N8N_API_KEY=<api_key> \
+node scripts/test-node-configs.js
+```
+
+Any node that fails the version check needs its `typeVersion` updated in:
+1. The **typeVersion Reference** table above
+2. The **Common Node Configs** section
+3. The agent file `.claude/agents/n8n-workflow-builder.md` (has its own copy)
+4. The skill `.claude/skills/n8n-json-checker/SKILL.md` (has its own typeVersion table)
+
+Run this script after every n8n instance upgrade before building new workflows.
 
 ---
 

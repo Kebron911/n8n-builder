@@ -6,7 +6,7 @@ Proven architectural patterns for building n8n workflows.
 
 ## Purpose
 
-Teaches architectural patterns for building n8n workflows. Provides structure, best practices, and proven approaches for common use cases.
+Covers n8n-specific workflow behaviors that Claude gets wrong without this skill. Generic patterns (linear/branching/parallel flows, when to use which trigger type, general API/DB best practices) are excluded — those Claude knows. This skill covers only what n8n does differently from what Claude would naturally assume.
 
 ## Activates On
 

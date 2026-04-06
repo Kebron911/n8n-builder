@@ -3,19 +3,18 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "I want to build an n8n workflow that sends a Slack message. What's the correct sequence of MCP tools I should use to find the node, understand its config, and deploy the workflow?",
-      "expected_output": "search_nodes({query: 'slack'}) → get_node({nodeType: 'nodes-base.slack'}) → configure → validate_node({nodeType: 'nodes-base.slack', config, profile: 'runtime'}) → n8n_create_workflow with n8n-nodes-base.slack → validate → activate.",
+      "prompt": "I'm configuring an httpRequest node and I want to understand what authentication options it supports. I don't need the full node schema — just the auth-related properties. What's the most efficient way to look this up with n8n-mcp tools?",
+      "expected_output": "get_node({ nodeType: 'nodes-base.httpRequest', mode: 'search_properties', propertyQuery: 'authentication' }) — targeted property search, avoids loading the full schema.",
       "files": [],
       "expectations": [
-        "The output recommends search_nodes as the first step with a relevant query",
-        "The output uses 'nodes-base.slack' format (short prefix) for get_node and validate_node",
-        "The output uses 'n8n-nodes-base.slack' format (full prefix) for n8n_create_workflow",
-        "The output specifies detail: 'standard' or notes it is the default for get_node",
-        "The output includes validate_node with profile: 'runtime'",
-        "The output ends with workflow activation via n8n_update_partial_workflow with activateWorkflow type",
-        "The output presents the sequence in order: search → get_node → configure → validate → create → validate → activate",
-        "The output mentions search_templates as an alternative or supplement to search_nodes for complex nodes",
-        "The output does NOT place validation after activation in the sequence"
+        "The output recommends get_node with mode: 'search_properties'",
+        "The output uses propertyQuery: 'authentication' or a closely related query string",
+        "The output uses 'nodes-base.httpRequest' (short prefix) for get_node",
+        "The output explains that search_properties is more token-efficient than loading the full schema",
+        "The output does NOT recommend using detail: 'full' as the primary approach to find auth properties",
+        "The output does NOT suggest loading the full standard schema just to find one property group",
+        "The output mentions that search_properties returns only property paths matching the query",
+        "The output does NOT suggest using search_nodes as the way to find node properties"
       ]
     },
     {
@@ -36,18 +35,18 @@
     },
     {
       "id": 3,
-      "prompt": "How do I activate a workflow after building and validating it with n8n-mcp tools?",
-      "expected_output": "Use n8n_update_partial_workflow with operations: [{type: 'activateWorkflow'}]. Must run AFTER n8n_validate_workflow returns zero errors. Not a separate tool — it's an operation type inside update.",
+      "prompt": "Before I apply a batch of changes to my live workflow using n8n_update_partial_workflow, I want to preview what the call would do without actually making any changes. Is there a dry-run mode?",
+      "expected_output": "Yes — use validateOnly: true on n8n_update_partial_workflow. It previews all operations and returns what would happen without applying any changes.",
       "files": [],
       "expectations": [
-        "The output shows n8n_update_partial_workflow with operations containing type: 'activateWorkflow'",
-        "The output specifies that activation should happen AFTER validation passes with zero errors",
-        "The output includes the workflow id parameter",
-        "The output does NOT suggest there is a separate n8n_activate_workflow tool",
-        "The output recommends using n8n_validate_workflow before activating",
-        "The output does NOT say to validate after activation as a required step",
-        "The output shows the workflowId parameter in the n8n_update_partial_workflow call",
-        "The output does NOT show a separate n8n_activate_workflow function call"
+        "The output mentions validateOnly: true as the dry-run parameter on n8n_update_partial_workflow",
+        "The output explains that validateOnly previews operations without applying them",
+        "The output shows validateOnly: true in a n8n_update_partial_workflow call example",
+        "The output includes the workflow id parameter in the example",
+        "The output does NOT say there is no dry-run capability",
+        "The output does NOT suggest creating a copy of the workflow as the way to preview changes",
+        "The output does NOT confuse validateOnly with n8n_validate_workflow (which validates workflow structure, not partial update operations)",
+        "The output correctly places validateOnly as a top-level parameter (not inside the operations array)"
       ]
     },
     {

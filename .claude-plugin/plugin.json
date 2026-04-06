@@ -1,0 +1,13 @@
+{
+  "name": "n8n-builder",
+  "version": "1.0.0",
+  "description": "Ultimate n8n plugin — build, analyze, fix, and monitor n8n workflows using Claude Code. Covers the full workflow lifecycle: plan → create → validate → activate → monitor → learn.",
+  "author": {
+    "name": "ProfessionalAIAssistants",
+    "url": "https://professionalaiassistants.com"
+  },
+  "keywords": ["n8n", "workflow", "automation", "no-code", "integration"],
+  "commands": "./commands",
+  "agents": "./.claude/agents",
+  "skills": "./.claude/skills"
+}

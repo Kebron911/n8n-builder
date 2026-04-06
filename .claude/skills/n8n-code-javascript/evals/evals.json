@@ -66,7 +66,7 @@
         "The output does NOT suggest using require('axios') or require('node-fetch') — they are not available",
         "The output does NOT suggest using require('https') directly",
         "The output includes or recommends a try-catch for error handling",
-        "The output does NOT suggest using fetch() as an alternative (it may not be available in all n8n versions)",
+        "The output does NOT suggest require('axios') or require('node-fetch') as they are not installed in the n8n sandbox",
         "The output shows the result stored in a variable before returning it"
       ]
     },

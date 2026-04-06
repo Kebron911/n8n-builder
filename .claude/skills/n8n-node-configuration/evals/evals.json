@@ -31,7 +31,6 @@
         "The output includes a content field inside body for the event and data fields",
         "The output explains or demonstrates that body only becomes required when sendBody is true (property dependency)",
         "The output sets authentication to 'none' or explains available auth options",
-        "The output explains or demonstrates that body only becomes required when sendBody is true (property dependency)",
         "The output specifies the typeVersion for httpRequest (4.2)"
       ]
     },
@@ -83,8 +82,7 @@
         "The output explains that the required fields differ by operation (operation-aware configuration)",
         "The output does NOT include channel as mandatory (it's optional or not needed for update)",
         "The output recommends using get_node to discover operation-specific fields",
-        "The output explicitly states 'channel is NOT required for update' (not just omits it from config)",
-        "The output does NOT include channel as mandatory (it's optional or not needed for update)"
+        "The output explicitly states 'channel is NOT required for update' (not just omits it from config)"
       ]
     }
   ]
