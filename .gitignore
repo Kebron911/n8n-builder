@@ -1,5 +1,5 @@
 # Skill development workspaces (iteration artifacts, not part of the plugin)
-.claude/skills/*-workspace/
+**/*-workspace/
 
 # Node config test output files
 node-config-test-*.json
