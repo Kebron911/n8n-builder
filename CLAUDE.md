@@ -25,6 +25,7 @@ Then follow this sequence:
 1. **Identify nodes** — Determine trigger + action nodes from the request
 2. **Source node configs** using this decision tree:
    - **In `n8n-node-configs` skill?** → use directly, no MCP lookup needed (covers ~20 common nodes)
+   - **Need a real parameter example?** → `Grep` in `unique_node_configs.jsonl` (repo root) — 195 unique node types scraped from live workflows
    - **Complex/unfamiliar integration?** → `search_templates` first — 34,000+ real configs
    - **Not found in templates?** → `search_nodes` → `get_node` (detail: `"standard"`)
 3. **Create** — `n8n_create_workflow` with full correct config in one call

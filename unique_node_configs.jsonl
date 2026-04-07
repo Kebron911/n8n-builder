@@ -1,0 +1,3209 @@
+# Unique n8n Node Configs (195 types)
+# One example config per node type — stripped of position/id/webhookId
+# Source: scraped from live instance workflows
+
+// @n8n/n8n-nodes-langchain.agent
+{
+  "type": "@n8n/n8n-nodes-langchain.agent",
+  "typeVersion": 1.7,
+  "parameters": {
+    "text": "={{ $('When chat message received').item.json.chatInput }}",
+    "options": {
+      "systemMessage": "=## ROLE \nYou are a friendly, attentive, and helpful AI assistant. Your primary goal is to assist the user while maintaining a personalized and engaging interaction. \n\n---\n\n## RULES \n\n1. **Memory Management**: \n - When the user sends a new message, evaluate whether it contains noteworthy or personal information (e.g., preferences, habits, goals, or important events). \n - If such information is identified, use the **Save Memory** tool to store this data in memory. \n - Always send a meaningful response back to the user, even if your primary action was saving information. This response should not reveal that information was stored but should acknowledge or engage with the user’s input naturally. \n\n2. **Note Management**: \n - If the user provides information that is intended to be stored as a note (e.g., specific instructions, reminders, or standalone pieces of information), use the **Save Note** tool. \n - Notes should not be stored in memory using the **Save Memory** tool. \n - Ensure that notes are clear, concise, and accurately reflect the user’s input. \n\n3. **Context Awareness**: \n - Use stored memories and notes to provide contextually relevant and personalized responses. \n - Always consider the **date and time** when a memory or note was collected to ensure your responses are up-to-date and accurate.\n\n4. **User-Centric Responses**: \n - Tailor your responses based on the user's preferences and past interactions. \n - Be proactive in recalling relevant details from memory or notes when appropriate but avoid overwhelming the user with unnecessary information.\n\n5. **Privacy and Sensitivity**: \n - Handle all user data with care and sensitivity. Avoid making assumptions or sharing stored information unless it directly enhances the conversation or task at hand.\n - Never store passwords or usernames.\n\n6. **Fallback Responses**: \n - **IMPORTANT** If no specific task or question arises from the user’s message (e.g., when only saving information), respond in a way that keeps the conversation flowing naturally. For example: \n - Acknowledge their input: “Thanks for sharing that!” \n - Provide a friendly follow-up: “Is there anything else I can help you with today?” \n - DO NOT tell jokes as a fallback response.\n\n---\n\n## TOOLS \n\n### Save Memory \n- Use this tool to store summarized, concise, and meaningful information about the user. \n- Extract key details from user messages that could enhance future interactions (e.g., likes/dislikes, important dates, hobbies). \n- Ensure that the summary is clear and devoid of unnecessary details.\n\n### Save Note \n- Use this tool to store specific instructions, reminders, or standalone pieces of information provided by the user. \n- Notes should not include general personal preferences or habits meant for long-term memory storage. \n- Ensure that notes are concise and accurately reflect what the user wants to store.\n\n---\n\n## MEMORIES \n\n### Recent Noteworthy Memories \nHere are the most recent memories collected from the user, including their date and time of collection: \n\n**{{ $json.data[0].content }}**\n\n### Guidelines for Using Memories: \n- Prioritize recent memories but do not disregard older ones if they remain relevant. \n- Cross-reference memories to maintain consistency in your responses. For example, if a user shares conflicting preferences over time, clarify or adapt accordingly.\n\n---\n\n## NOTES \n\n### Recent Notes Collected from User: \nHere are the most recent notes collected from the user: \n\n**{{ $json.data[1].content }}**\n\n### Guidelines for Using Notes: \n- Use notes for tasks requiring specific instructions or reminders.\n- Do not mix note content with general memory content; keep them distinct.\n\n---\n\n## ADDITIONAL INSTRUCTIONS \n\n- Think critically before responding to ensure your answers are thoughtful and accurate. \n- Strive to build trust with the user by being consistent, reliable, and personable in your interactions. \n- Avoid robotic or overly formal language; aim for a conversational tone that aligns with being \"friendly and helpful.\" \n"
+    },
+    "promptType": "define"
+  }
+}
+
+// @n8n/n8n-nodes-langchain.chainLlm
+{
+  "type": "@n8n/n8n-nodes-langchain.chainLlm",
+  "typeVersion": 1.5,
+  "parameters": {
+    "text": "=User Query: {{ $('Chat Message Trigger').item.json.chatInput }}",
+    "messages": {
+      "messageValues": [
+        {
+          "message": "=You are an expert research assistant. Given a user's query, generate up to four distinct, precise search queries that would help gather comprehensive information on the topic. Return only a JSON list of strings, for example: ['query1', 'query2', 'query3']."
+        }
+      ]
+    },
+    "promptType": "define"
+  }
+}
+
+// @n8n/n8n-nodes-langchain.chainRetrievalQa
+{
+  "type": "@n8n/n8n-nodes-langchain.chainRetrievalQa",
+  "typeVersion": 1.3,
+  "parameters": {
+    "options": {}
+  }
+}
+
+// @n8n/n8n-nodes-langchain.chainSummarization
+{
+  "type": "@n8n/n8n-nodes-langchain.chainSummarization",
+  "typeVersion": 2,
+  "parameters": {
+    "options": {
+      "summarizationMethodAndPrompts": {
+        "values": {
+          "prompt": "=Write a concise summary of the following:\n\nCity: {{ $json.output.city }}\nBirthdate: {{ $json.output.birthdate }}\nEducational qualification: {{ $json.output[\"Educational qualification\"] }}\nJob History: {{ $json.output[\"Job History\"] }}\nSkills: {{ $json.output.Skills }}\n\nUse 100 words or less. Be concise and conversational.",
+          "combineMapPrompt": "=Write a concise summary of the following:\n\nCity: {{ $json.output.city }}\nBirthdate: {{ $json.output.birthdate }}\nEducational qualification: {{ $json.output[\"Educational qualification\"] }}\nJob History: {{ $json.output[\"Job History\"] }}\nSkills: {{ $json.output.Skills }}\n\nUse 100 words or less. Be concise and conversational."
+        }
+      }
+    }
+  }
+}
+
+// @n8n/n8n-nodes-langchain.chatTrigger
+{
+  "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+  "typeVersion": 1.1,
+  "parameters": {
+    "options": {}
+  }
+}
+
+// @n8n/n8n-nodes-langchain.code
+{
+  "type": "@n8n/n8n-nodes-langchain.code",
+  "typeVersion": 1,
+  "parameters": {
+    "code": {
+      "supplyData": {
+        "code": "console.log('Custom Wikipedia Node runs');\nconst { WikipediaQueryRun } = require('langchain/tools');\nreturn new WikipediaQueryRun();"
+      }
+    },
+    "outputs": {
+      "output": [
+        {
+          "type": "ai_tool"
+        }
+      ]
+    }
+  }
+}
+
+// @n8n/n8n-nodes-langchain.documentBinaryInputLoader
+{
+  "type": "@n8n/n8n-nodes-langchain.documentBinaryInputLoader",
+  "typeVersion": 1,
+  "parameters": {
+    "loader": "pdfLoader",
+    "options": {}
+  }
+}
+
+// @n8n/n8n-nodes-langchain.documentDefaultDataLoader
+{
+  "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+  "typeVersion": 1,
+  "parameters": {
+    "options": {},
+    "dataType": "binary"
+  }
+}
+
+// @n8n/n8n-nodes-langchain.documentJsonInputLoader
+{
+  "type": "@n8n/n8n-nodes-langchain.documentJsonInputLoader",
+  "typeVersion": 1,
+  "parameters": {
+    "pointers": "/transcript"
+  }
+}
+
+// @n8n/n8n-nodes-langchain.embeddingsGoogleGemini
+{
+  "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+  "typeVersion": 1,
+  "parameters": {
+    "modelName": "models/text-embedding-004"
+  }
+}
+
+// @n8n/n8n-nodes-langchain.embeddingsMistralCloud
+{
+  "type": "@n8n/n8n-nodes-langchain.embeddingsMistralCloud",
+  "typeVersion": 1,
+  "parameters": {
+    "options": {}
+  }
+}
+
+// @n8n/n8n-nodes-langchain.embeddingsOpenAi
+{
+  "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+  "typeVersion": 1.1,
+  "parameters": {
+    "options": {}
+  }
+}
+
+// @n8n/n8n-nodes-langchain.informationExtractor
+{
+  "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+  "typeVersion": 1,
+  "parameters": {
+    "text": "={{ $json.text }}",
+    "options": {
+      "systemPromptTemplate": "You are an expert extraction algorithm.\nOnly extract relevant information from the text.\nIf you do not know the value of an attribute asked to extract, you may omit the attribute's value."
+    },
+    "attributes": {
+      "attributes": [
+        {
+          "name": "Educational qualification",
+          "required": true,
+          "description": "Summary of your academic career. Focus on your high school and university studies. Summarize in 100 words maximum and also include your grade if applicable."
+        },
+        {
+          "name": "Job History",
+          "required": true,
+          "description": "Work history summary. Focus on your most recent work experiences. Summarize in 100 words maximum"
+        },
+        {
+          "name": "Skills",
+          "required": true,
+          "description": "Extract the candidate’s technical skills. What software and frameworks they are proficient in. Make a bulleted list."
+        }
+      ]
+    }
+  }
+}
+
+// @n8n/n8n-nodes-langchain.lmChatAnthropic
+{
+  "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+  "typeVersion": 1.2,
+  "parameters": {
+    "options": {}
+  }
+}
+
+// @n8n/n8n-nodes-langchain.lmChatDeepSeek
+{
+  "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+  "typeVersion": 1,
+  "parameters": {
+    "options": {}
+  }
+}
+
+// @n8n/n8n-nodes-langchain.lmChatGoogleGemini
+{
+  "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+  "typeVersion": 1,
+  "parameters": {
+    "options": {},
+    "modelName": "models/gemini-2.0-flash-exp"
+  }
+}
+
+// @n8n/n8n-nodes-langchain.lmChatGroq
+{
+  "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+  "typeVersion": 1,
+  "parameters": {
+    "model": "llama-3.2-90b-text-preview",
+    "options": {}
+  }
+}
+
+// @n8n/n8n-nodes-langchain.lmChatMistralCloud
+{
+  "type": "@n8n/n8n-nodes-langchain.lmChatMistralCloud",
+  "typeVersion": 1,
+  "parameters": {
+    "model": "open-mixtral-8x7b",
+    "options": {}
+  }
+}
+
+// @n8n/n8n-nodes-langchain.lmChatOllama
+{
+  "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+  "typeVersion": 1,
+  "parameters": {
+    "model": "deepseek-r1:14b",
+    "options": {
+      "format": "default",
+      "numCtx": 16384,
+      "temperature": 0.6
+    }
+  }
+}
+
+// @n8n/n8n-nodes-langchain.lmChatOpenAi
+{
+  "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+  "typeVersion": 1.1,
+  "parameters": {
+    "options": {}
+  }
+}
+
+// @n8n/n8n-nodes-langchain.lmChatOpenRouter
+{
+  "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+  "typeVersion": 1,
+  "parameters": {
+    "model": "google/gemini-2.0-flash-001",
+    "options": {}
+  }
+}
+
+// @n8n/n8n-nodes-langchain.lmOllama
+{
+  "type": "@n8n/n8n-nodes-langchain.lmOllama",
+  "typeVersion": 1,
+  "parameters": {
+    "model": "llama3.2:latest",
+    "options": {}
+  }
+}
+
+// @n8n/n8n-nodes-langchain.lmOpenAi
+{
+  "type": "@n8n/n8n-nodes-langchain.lmOpenAi",
+  "typeVersion": 1,
+  "parameters": {
+    "model": {
+      "__rl": true,
+      "mode": "list",
+      "value": "gpt-3.5-turbo-1106",
+      "cachedResultName": "gpt-3.5-turbo-1106"
+    },
+    "options": {
+      "temperature": 0
+    }
+  }
+}
+
+// @n8n/n8n-nodes-langchain.manualChatTrigger
+{
+  "type": "@n8n/n8n-nodes-langchain.manualChatTrigger",
+  "typeVersion": 1,
+  "parameters": {}
+}
+
+// @n8n/n8n-nodes-langchain.memoryBufferWindow
+{
+  "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+  "typeVersion": 1.3,
+  "parameters": {
+    "sessionKey": "={{ $('When chat message received').item.json.sessionId }}",
+    "sessionIdType": "customKey",
+    "contextWindowLength": 50
+  }
+}
+
+// @n8n/n8n-nodes-langchain.memoryManager
+{
+  "type": "@n8n/n8n-nodes-langchain.memoryManager",
+  "typeVersion": 1.1,
+  "parameters": {
+    "mode": "delete",
+    "deleteMode": "all"
+  }
+}
+
+// @n8n/n8n-nodes-langchain.memoryPostgresChat
+{
+  "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+  "typeVersion": 1.3,
+  "parameters": {
+    "sessionKey": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+    "sessionIdType": "customKey"
+  }
+}
+
+// @n8n/n8n-nodes-langchain.openAi
+{
+  "type": "@n8n/n8n-nodes-langchain.openAi",
+  "typeVersion": 1,
+  "parameters": {
+    "options": {},
+    "resource": "audio",
+    "operation": "transcribe"
+  }
+}
+
+// @n8n/n8n-nodes-langchain.openAiAssistant
+{
+  "type": "@n8n/n8n-nodes-langchain.openAiAssistant",
+  "typeVersion": 1,
+  "parameters": {
+    "text": "=## Our Previous Conversation:\n{{ $json[\"messages\"].map(m => `\nHuman: ${m.human}\nAI Assistant: ${m.ai}\n`) }}\n## Current message:\n{{ $('Chat Trigger').item.json.chatInput }}",
+    "options": {},
+    "assistantId": "asst_HDSAnzsp4WqY4UC1iI9auH5z"
+  }
+}
+
+// @n8n/n8n-nodes-langchain.outputParserAutofixing
+{
+  "type": "@n8n/n8n-nodes-langchain.outputParserAutofixing",
+  "typeVersion": 1,
+  "parameters": {
+    "options": {
+      "prompt": "Instructions:\n--------------\n{instructions}\n--------------\nCompletion:\n--------------\n{completion}\n--------------\n\nAbove, the Completion did not satisfy the constraints given in the Instructions.\nError:\n--------------\n{error}\n--------------\n\nPlease try again. Please only respond with an answer that satisfies the constraints laid out in the Instructions:"
+    }
+  }
+}
+
+// @n8n/n8n-nodes-langchain.outputParserItemList
+{
+  "type": "@n8n/n8n-nodes-langchain.outputParserItemList",
+  "typeVersion": 1,
+  "parameters": {
+    "options": {}
+  }
+}
+
+// @n8n/n8n-nodes-langchain.outputParserStructured
+{
+  "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+  "typeVersion": 1.2,
+  "parameters": {
+    "schemaType": "manual",
+    "inputSchema": "{\n\t\"type\": \"object\",\n\t\"properties\": {\n\t\t\"vote\": {\n\t\t\t\"type\": \"string\"\n\t\t},\n\t\t\"consideration\": {\n\t\t\t\"type\": \"string\"\n\t\t}\n\t}\n}"
+  }
+}
+
+// @n8n/n8n-nodes-langchain.retrieverVectorStore
+{
+  "type": "@n8n/n8n-nodes-langchain.retrieverVectorStore",
+  "typeVersion": 1,
+  "parameters": {}
+}
+
+// @n8n/n8n-nodes-langchain.retrieverWorkflow
+{
+  "type": "@n8n/n8n-nodes-langchain.retrieverWorkflow",
+  "typeVersion": 1,
+  "parameters": {
+    "workflowId": "QacfBRBnf1xOyckC"
+  }
+}
+
+// @n8n/n8n-nodes-langchain.sentimentAnalysis
+{
+  "type": "@n8n/n8n-nodes-langchain.sentimentAnalysis",
+  "typeVersion": 1,
+  "parameters": {
+    "options": {
+      "categories": "Positive, Neutral, Negative",
+      "systemPromptTemplate": "You are highly intelligent and accurate sentiment analyzer. Analyze the sentiment of the provided text. Categorize it into one of the following: {categories}. Use the provided formatting instructions. Only output the JSON."
+    },
+    "inputText": "={{ $json.output.testo }}"
+  }
+}
+
+// @n8n/n8n-nodes-langchain.textClassifier
+{
+  "type": "@n8n/n8n-nodes-langchain.textClassifier",
+  "typeVersion": 1,
+  "parameters": {
+    "options": {
+      "systemPromptTemplate": "Please classify the text provided by the user into one of the following categories: {categories}, and use the provided formatting instructions below. Don't explain, and only output the json."
+    },
+    "inputText": "={{ $json.data.text }}",
+    "categories": {
+      "categories": [
+        {
+          "category": "Approved",
+          "description": "The email has been reviewed and accepted as-is. The human explicitly or implicity express approva, indicating that no changes ar needed.\n\nExample:\n\"Ok\",\n\"Approvato\",\n\"Invia\""
+        },
+        {
+          "category": "Declined",
+          "description": "The email has been reviewd, but the human request modifications before it sent link tweaks, removing parts, rewording etc... This could include suggested edits, rewording or major revision."
+        }
+      ]
+    }
+  }
+}
+
+// @n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter
+{
+  "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+  "typeVersion": 1,
+  "parameters": {
+    "options": {},
+    "chunkSize": 100000
+  }
+}
+
+// @n8n/n8n-nodes-langchain.textSplitterTokenSplitter
+{
+  "type": "@n8n/n8n-nodes-langchain.textSplitterTokenSplitter",
+  "typeVersion": 1,
+  "parameters": {
+    "chunkSize": 300,
+    "chunkOverlap": 30
+  }
+}
+
+// @n8n/n8n-nodes-langchain.toolCalculator
+{
+  "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+  "typeVersion": 1,
+  "parameters": {}
+}
+
+// @n8n/n8n-nodes-langchain.toolCode
+{
+  "type": "@n8n/n8n-nodes-langchain.toolCode",
+  "typeVersion": 1.1,
+  "parameters": {
+    "name": "query_workflow_credentials_database",
+    "language": "python",
+    "pythonCode": "import json\nimport sqlite3\ncon = sqlite3.connect(\"n8n_workflow_credentials.db\")\n\ncur = con.cursor()\nres = cur.execute(query);\n\noutput = json.dumps(res.fetchall())\n\ncon.close()\nreturn output;",
+    "description": "Call this tool to query the workflow credentials database. The database is already set. The available tables are as follows:\n* n8n_workflow_credentials (workflow_id TEXT PRIMARY KEY, workflow_name TEXT, credentials TEXT);\n * n8n_workflow_credentials.credentials are stored as json string and the app name may be obscured. Prefer querying using the %LIKE% operation for best results.\n\nPass a SQL SELECT query to this tool for the available tables."
+  }
+}
+
+// @n8n/n8n-nodes-langchain.toolHttpRequest
+{
+  "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+  "typeVersion": 1.1,
+  "parameters": {
+    "url": "https://graph.microsoft.com/v1.0/me/events",
+    "method": "POST",
+    "jsonBody": "{\n \"subject\": \"Meetings with <name> at <company>\",\n \"start\": {\n \"dateTime\": \"{dateStartTime}\",\n \"timeZone\": \"Europe/London\"\n },\n \"end\": {\n \"dateTime\": \"{dateEndTime}\",\n \"timeZone\": \"Europe/London\"\n },\n \"body\": {\n \"contentType\": \"HTML\",\n \"content\": \"{reason}\"\n },\n \"attendees\": [\n {\n \"emailAddress\": {\n \"address\": \"{email}\",\n \"name\": \"{name}\"\n },\n \"type\": \"required\"\n }\n ],\n \"location\": {\n \"displayName\": \"Online Meeting\"\n },\n \"isOnlineMeeting\": true,\n \"onlineMeetingProvider\": \"teamsForBusiness\",\n \"showAs\": \"busy\",\n \"categories\": [\n \"Meeting\"\n ]\n}",
+    "sendBody": true,
+    "sendQuery": true,
+    "specifyBody": "json",
+    "authentication": "predefinedCredentialType",
+    "parametersQuery": {
+      "values": [
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "valueProvider": "fieldValue"
+        }
+      ]
+    },
+    "toolDescription": "Call this tool to make the appointment, ensure you send the user email, name, company, reason for the meeting and the appointment start time and the date in ISO String format with timezone for <timezone>. When creating an appointment, always send JSON.",
+    "nodeCredentialType": "microsoftOutlookOAuth2Api",
+    "placeholderDefinitions": {
+      "values": [
+        {
+          "name": "dateStartTime",
+          "type": "string",
+          "description": "The date and start time of the appointment in toISOString format with timezone for Europe/London"
+        },
+        {
+          "name": "dateEndTime",
+          "type": "string",
+          "description": "The date and end time of the appointment in toISOString format, always 30 minutes after the dateStartTime, format with timezone for Europe/London"
+        },
+        {
+          "name": "reason",
+          "type": "string",
+          "description": "Detailed description of the meeting, will be sent to us and the customer"
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "description": "The customers email address."
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "description": "The customers full name, must be second and last name"
+        }
+      ]
+    }
+  }
+}
+
+// @n8n/n8n-nodes-langchain.toolSerpApi
+{
+  "type": "@n8n/n8n-nodes-langchain.toolSerpApi",
+  "typeVersion": 1,
+  "parameters": {
+    "options": {}
+  }
+}
+
+// @n8n/n8n-nodes-langchain.toolVectorStore
+{
+  "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+  "typeVersion": 1,
+  "parameters": {
+    "name": "company",
+    "description": "Risponde alle domande relative a ciò che ti viene chiesto"
+  }
+}
+
+// @n8n/n8n-nodes-langchain.toolWikipedia
+{
+  "type": "@n8n/n8n-nodes-langchain.toolWikipedia",
+  "typeVersion": 1,
+  "parameters": {}
+}
+
+// @n8n/n8n-nodes-langchain.toolWorkflow
+{
+  "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+  "typeVersion": 1.2,
+  "parameters": {
+    "name": "Get_availability",
+    "fields": {
+      "values": [
+        {
+          "name": "route",
+          "stringValue": "availability"
+        }
+      ]
+    },
+    "workflowId": {
+      "__rl": true,
+      "mode": "list",
+      "value": "KD21RG8VeXYDS2Vf",
+      "cachedResultName": "Website Chatbot"
+    },
+    "description": "Call this tool to check my calendar for availability before booking an appointment. This will result in all events for the next 2 weeks. Review all events and do not double book."
+  }
+}
+
+// @n8n/n8n-nodes-langchain.vectorStoreInMemory
+{
+  "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+  "typeVersion": 1,
+  "parameters": {
+    "memoryKey": "whatsapp-75"
+  }
+}
+
+// @n8n/n8n-nodes-langchain.vectorStorePGVector
+{
+  "type": "@n8n/n8n-nodes-langchain.vectorStorePGVector",
+  "typeVersion": 1,
+  "parameters": {
+    "mode": "insert",
+    "options": {}
+  }
+}
+
+// @n8n/n8n-nodes-langchain.vectorStorePinecone
+{
+  "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+  "typeVersion": 1,
+  "parameters": {
+    "mode": "insert",
+    "options": {},
+    "pineconeIndex": {
+      "__rl": true,
+      "mode": "list",
+      "value": "context-rag-test",
+      "cachedResultName": "context-rag-test"
+    }
+  }
+}
+
+// @n8n/n8n-nodes-langchain.vectorStoreQdrant
+{
+  "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+  "typeVersion": 1,
+  "parameters": {
+    "options": {},
+    "qdrantCollection": {
+      "__rl": true,
+      "mode": "id",
+      "value": "=COLLECTION"
+    }
+  }
+}
+
+// @n8n/n8n-nodes-langchain.vectorStoreSupabase
+{
+  "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+  "typeVersion": 1,
+  "parameters": {
+    "mode": "insert",
+    "options": {
+      "queryName": "match_documents"
+    },
+    "tableName": {
+      "__rl": true,
+      "mode": "list",
+      "value": "documents",
+      "cachedResultName": "documents"
+    }
+  }
+}
+
+// n8n-nodes-base.aggregate
+{
+  "type": "n8n-nodes-base.aggregate",
+  "typeVersion": 1,
+  "parameters": {
+    "options": {},
+    "aggregate": "aggregateAllItemData"
+  }
+}
+
+// n8n-nodes-base.airtable
+{
+  "type": "n8n-nodes-base.airtable",
+  "typeVersion": 2.1,
+  "parameters": {
+    "base": {
+      "__rl": true,
+      "mode": "list",
+      "value": "appfsNi1QEhw6WvXK",
+      "cachedResultUrl": "https://airtable.com/appfsNi1QEhw6WvXK",
+      "cachedResultName": "Pinterest_Metrics"
+    },
+    "table": {
+      "__rl": true,
+      "mode": "list",
+      "value": "tbl9Dxdrwx5QZGFnp",
+      "cachedResultUrl": "https://airtable.com/appfsNi1QEhw6WvXK/tbl9Dxdrwx5QZGFnp",
+      "cachedResultName": "Pinterest_Organic_Data"
+    },
+    "columns": {
+      "value": {
+        "link": "={{ $json.link }}",
+        "type": "={{ $json.type }}",
+        "title": "={{ $json.title }}",
+        "pin_id": "={{ $json.id }}",
+        "created_at": "={{ $json.created_at }}",
+        "description": "={{ $json.description }}"
+      },
+      "schema": [
+        {
+          "id": "id",
+          "type": "string",
+          "display": true,
+          "removed": false,
+          "readOnly": true,
+          "required": false,
+          "displayName": "id",
+          "defaultMatch": true
+        },
+        {
+          "id": "pin_id",
+          "type": "string",
+          "display": true,
+          "removed": false,
+          "readOnly": false,
+          "required": false,
+          "displayName": "pin_id",
+          "defaultMatch": false,
+          "canBeUsedToMatch": true
+        },
+        {
+          "id": "created_at",
+          "type": "string",
+          "display": true,
+          "removed": false,
+          "readOnly": false,
+          "required": false,
+          "displayName": "created_at",
+          "defaultMatch": false,
+          "canBeUsedToMatch": true
+        },
+        {
+          "id": "title",
+          "type": "string",
+          "display": true,
+          "removed": false,
+          "readOnly": false,
+          "required": false,
+          "displayName": "title",
+          "defaultMatch": false,
+          "canBeUsedToMatch": true
+        },
+        {
+          "id": "description",
+          "type": "string",
+          "display": true,
+          "removed": false,
+          "readOnly": false,
+          "required": false,
+          "displayName": "description",
+          "defaultMatch": false,
+          "canBeUsedToMatch": true
+        },
+        {
+          "id": "link",
+          "type": "string",
+          "display": true,
+          "removed": false,
+          "readOnly": false,
+          "required": false,
+          "displayName": "link",
+          "defaultMatch": false,
+          "canBeUsedToMatch": true
+        },
+        {
+          "id": "type",
+          "type": "string",
+          "display": true,
+          "removed": false,
+          "readOnly": false,
+          "required": false,
+          "displayName": "type",
+          "defaultMatch": false,
+          "canBeUsedToMatch": true
+        },
+        {
+          "id": "active7DayUsers",
+          "type": "string",
+          "display": true,
+          "removed": true,
+          "readOnly": false,
+          "required": false,
+          "displayName": "active7DayUsers",
+          "defaultMatch": false,
+          "canBeUsedToMatch": true
+        },
+        {
+          "id": "sessions",
+          "type": "string",
+          "display": true,
+          "removed": true,
+          "readOnly": false,
+          "required": false,
+          "displayName": "sessions",
+          "defaultMatch": false,
+          "canBeUsedToMatch": true
+        },
+        {
+          "id": "userEngagementDuration",
+          "type": "string",
+          "display": true,
+          "removed": true,
+          "readOnly": false,
+          "required": false,
+          "displayName": "userEngagementDuration",
+          "defaultMatch": false,
+          "canBeUsedToMatch": true
+        }
+      ],
+      "mappingMode": "defineBelow",
+      "matchingColumns": [
+        "id"
+      ],
+      "attemptToConvertTypes": false,
+      "convertFieldsToString": false
+    },
+    "options": {},
+    "operation": "upsert"
+  }
+}
+
+// n8n-nodes-base.airtableTool
+{
+  "type": "n8n-nodes-base.airtableTool",
+  "typeVersion": 2.1,
+  "parameters": {
+    "id": "=",
+    "base": {
+      "__rl": true,
+      "mode": "list",
+      "value": "appfsNi1QEhw6WvXK",
+      "cachedResultUrl": "https://airtable.com/appfsNi1QEhw6WvXK",
+      "cachedResultName": "Pinterest_Metrics"
+    },
+    "table": {
+      "__rl": true,
+      "mode": "list",
+      "value": "tbl9Dxdrwx5QZGFnp",
+      "cachedResultUrl": "https://airtable.com/appfsNi1QEhw6WvXK/tbl9Dxdrwx5QZGFnp",
+      "cachedResultName": "Pinterest_Organic_Data"
+    },
+    "options": {}
+  }
+}
+
+// n8n-nodes-base.airtableTrigger
+{
+  "type": "n8n-nodes-base.airtableTrigger",
+  "typeVersion": 1,
+  "parameters": {
+    "baseId": {
+      "__rl": true,
+      "mode": "id",
+      "value": "appXvZviYORVbPEaS"
+    },
+    "tableId": {
+      "__rl": true,
+      "mode": "id",
+      "value": "tblxsKj5PtumCR9um"
+    },
+    "pollTimes": {
+      "item": [
+        {
+          "mode": "everyMinute"
+        }
+      ]
+    },
+    "triggerField": "created_at",
+    "authentication": "airtableTokenApi",
+    "additionalFields": {}
+  }
+}
+
+// n8n-nodes-base.awsComprehend
+{
+  "type": "n8n-nodes-base.awsComprehend",
+  "typeVersion": 1,
+  "parameters": {
+    "text": "={{$json[\"What did you think about the event?\"]}}",
+    "operation": "detectSentiment"
+  }
+}
+
+// n8n-nodes-base.bambooHr
+{
+  "type": "n8n-nodes-base.bambooHr",
+  "typeVersion": 1,
+  "parameters": {
+    "resource": "file",
+    "operation": "getAll",
+    "returnAll": true,
+    "simplifyOutput": false
+  }
+}
+
+// n8n-nodes-base.bannerbear
+{
+  "type": "n8n-nodes-base.bannerbear",
+  "typeVersion": 1,
+  "parameters": {
+    "templateId": "={{ $('Set Parameters').item.json.template_id }}",
+    "modificationsUi": {
+      "modificationsValues": [
+        {
+          "name": "placeholder_image",
+          "text": "=",
+          "imageUrl": "={{ $json.secure_url.replace('upload/','upload/f_auto,q_auto/') }}"
+        },
+        {
+          "name": "placeholder_text",
+          "text": "={{ $('Set Parameters').item.json.title }}"
+        },
+        {
+          "name": "placeholder_location",
+          "text": "={{ $('Set Parameters').item.json.location }}"
+        },
+        {
+          "name": "placeholder_date",
+          "text": "={{ $('Set Parameters').item.json.date }}"
+        }
+      ]
+    },
+    "additionalFields": {
+      "waitForImage": true,
+      "waitForImageMaxTries": 10
+    }
+  }
+}
+
+// n8n-nodes-base.baserow
+{
+  "type": "n8n-nodes-base.baserow",
+  "typeVersion": 1,
+  "parameters": {
+    "tableId": 601,
+    "fieldsUi": {
+      "fieldValues": [
+        {
+          "fieldId": 5833,
+          "fieldValue": "Name of your blog"
+        },
+        {
+          "fieldId": 5831,
+          "fieldValue": "={{ $('Send page data to A.I.').item.json.choices[0].message.content }}"
+        },
+        {
+          "fieldId": 5830,
+          "fieldValue": "={{ $('Send page Search data to A.I.').item.json.choices[0].message.content }}"
+        },
+        {
+          "fieldId": 5832,
+          "fieldValue": "={{ $json.choices[0].message.content }}"
+        },
+        {
+          "fieldId": 5829,
+          "fieldValue": "={{ DateTime.now() }}"
+        }
+      ]
+    },
+    "operation": "create",
+    "databaseId": 121
+  }
+}
+
+// n8n-nodes-base.baserowTool
+{
+  "type": "n8n-nodes-base.baserowTool",
+  "typeVersion": 1,
+  "parameters": {
+    "tableId": 372174,
+    "databaseId": 146496,
+    "additionalOptions": {}
+  }
+}
+
+// n8n-nodes-base.clickUp
+{
+  "type": "n8n-nodes-base.clickUp",
+  "typeVersion": 1,
+  "parameters": {
+    "list": "901207046581",
+    "name": "={{ $json.name }}",
+    "team": "9012366821",
+    "space": "90122025710",
+    "folder": "90123813376",
+    "authentication": "oAuth2",
+    "additionalFields": {
+      "content": "={{ $json.description }}",
+      "dueDate": "={{ $json.due_date }}"
+    }
+  }
+}
+
+// n8n-nodes-base.code
+{
+  "type": "n8n-nodes-base.code",
+  "typeVersion": 2,
+  "parameters": {
+    "jsCode": "// Parse the input JSON string and split it into four chunks\nconst rawText = $json.text;\n\n// Remove Markdown JSON code blocks if present\nconst cleanedText = rawText.replace(/```json|```/g, '').trim();\n\ntry {\n const jsonArray = JSON.parse(cleanedText);\n if (!Array.isArray(jsonArray)) {\n throw new Error('The JSON is not an array.');\n }\n const chunkSize = Math.ceil(jsonArray.length / 4);\n const chunks = [];\n for (let i = 0; i < jsonArray.length; i += chunkSize) {\n chunks.push(jsonArray.slice(i, i + chunkSize));\n }\n return chunks.map(chunk => ({ json: { chunk } }));\n} catch (error) {\n return [{ json: { error: error.message } }];\n}\n"
+  }
+}
+
+// n8n-nodes-base.compression
+{
+  "type": "n8n-nodes-base.compression",
+  "typeVersion": 1.1,
+  "parameters": {}
+}
+
+// n8n-nodes-base.convertToFile
+{
+  "type": "n8n-nodes-base.convertToFile",
+  "typeVersion": 1.1,
+  "parameters": {
+    "options": {
+      "fileName": "={{ $json.result.file_path }}"
+    },
+    "operation": "toBinary",
+    "sourceProperty": "data"
+  }
+}
+
+// n8n-nodes-base.cron
+{
+  "type": "n8n-nodes-base.cron",
+  "typeVersion": 1,
+  "parameters": {
+    "triggerTimes": {
+      "item": [
+        {}
+      ]
+    }
+  }
+}
+
+// n8n-nodes-base.crypto
+{
+  "type": "n8n-nodes-base.crypto",
+  "typeVersion": 1,
+  "parameters": {
+    "action": "generate"
+  }
+}
+
+// n8n-nodes-base.dateTime
+{
+  "type": "n8n-nodes-base.dateTime",
+  "typeVersion": 2,
+  "parameters": {
+    "options": {},
+    "duration": 30,
+    "timeUnit": "seconds",
+    "magnitude": "={{ $json.timestamp }}",
+    "operation": "subtractFromDate",
+    "outputFieldName": "last_execution_date"
+  }
+}
+
+// n8n-nodes-base.dhl
+{
+  "type": "n8n-nodes-base.dhl",
+  "typeVersion": 1,
+  "parameters": {
+    "options": {},
+    "trackingNumber": "={{ $json.tracking_number }}"
+  }
+}
+
+// n8n-nodes-base.discord
+{
+  "type": "n8n-nodes-base.discord",
+  "typeVersion": 2,
+  "parameters": {
+    "content": "=Daily Cartoon ({{ $('param').item.json.year }}/{{ $('param').item.json.month }}/{{ $('param').item.json.day }})\n{{ $('Information Extractor').item.json.output.cartoon_image }}\n\n{{ $json.content }}\n",
+    "options": {},
+    "authentication": "webhook"
+  }
+}
+
+// n8n-nodes-base.dropbox
+{
+  "type": "n8n-nodes-base.dropbox",
+  "typeVersion": 1,
+  "parameters": {}
+}
+
+// n8n-nodes-base.editImage
+{
+  "type": "n8n-nodes-base.editImage",
+  "typeVersion": 1,
+  "parameters": {
+    "operation": "information"
+  }
+}
+
+// n8n-nodes-base.elasticsearch
+{
+  "type": "n8n-nodes-base.elasticsearch",
+  "typeVersion": 1,
+  "parameters": {
+    "indexId": "={{ $('Set Variables').item.json.elasticsearch_index }}",
+    "options": {},
+    "fieldsUi": {
+      "fieldValues": [
+        {
+          "fieldId": "image_url",
+          "fieldValue": "={{ $json.secure_url.replace('upload','upload/f_auto,q_auto') }}"
+        },
+        {
+          "fieldId": "source_image_url",
+          "fieldValue": "={{ $('Set Variables').item.json.source_image }}"
+        },
+        {
+          "fieldId": "label",
+          "fieldValue": "={{ $('Crop Object From Image').item.json.label }}"
+        },
+        {
+          "fieldId": "metadata",
+          "fieldValue": "={{ JSON.stringify(Object.assign($('Crop Object From Image').item.json, { filename: $json.original_filename })) }}"
+        }
+      ]
+    },
+    "operation": "create",
+    "additionalFields": {}
+  }
+}
+
+// n8n-nodes-base.emailReadImap
+{
+  "type": "n8n-nodes-base.emailReadImap",
+  "typeVersion": 2,
+  "parameters": {
+    "options": {}
+  }
+}
+
+// n8n-nodes-base.emailSend
+{
+  "type": "n8n-nodes-base.emailSend",
+  "typeVersion": 2.1,
+  "parameters": {
+    "html": "={{ $('Edit Fields').item.json.email }}",
+    "options": {},
+    "subject": "=Re: {{ $('Email Trigger (IMAP)').item.json.subject }}",
+    "toEmail": "={{ $('Email Trigger (IMAP)').item.json.from }}",
+    "fromEmail": "={{ $('Email Trigger (IMAP)').item.json.to }}"
+  }
+}
+
+// n8n-nodes-base.erpNext
+{
+  "type": "n8n-nodes-base.erpNext",
+  "typeVersion": 1,
+  "parameters": {
+    "docType": "Job%20Applicant",
+    "operation": "update",
+    "properties": {
+      "customProperty": [
+        {
+          "field": "status",
+          "value": "Rejected"
+        }
+      ]
+    },
+    "documentName": "={{ $('ApplicantData').item.json.body.name }}"
+  }
+}
+
+// n8n-nodes-base.errorTrigger
+{
+  "type": "n8n-nodes-base.errorTrigger",
+  "typeVersion": 1,
+  "parameters": {}
+}
+
+// n8n-nodes-base.executeCommand
+{
+  "type": "n8n-nodes-base.executeCommand",
+  "typeVersion": 1,
+  "parameters": {
+    "command": "=mkdir -p {{$('CONFIG').first().json.project_path}}"
+  }
+}
+
+// n8n-nodes-base.executeWorkflow
+{
+  "type": "n8n-nodes-base.executeWorkflow",
+  "typeVersion": 1.1,
+  "parameters": {
+    "mode": "each",
+    "options": {},
+    "workflowId": {
+      "__rl": true,
+      "mode": "id",
+      "value": "siXUnQhJpCJ9rHzu"
+    }
+  }
+}
+
+// n8n-nodes-base.executeWorkflowTrigger
+{
+  "type": "n8n-nodes-base.executeWorkflowTrigger",
+  "typeVersion": 1,
+  "parameters": {}
+}
+
+// n8n-nodes-base.executionData
+{
+  "type": "n8n-nodes-base.executionData",
+  "typeVersion": 1,
+  "parameters": {
+    "dataToSave": {
+      "values": [
+        {
+          "key": "eventType",
+          "value": "={{ $json.eventType }}"
+        },
+        {
+          "key": "executedById",
+          "value": "={{ $json.executedById }}"
+        },
+        {
+          "key": "service",
+          "value": "={{ $json.data.service }}"
+        }
+      ]
+    }
+  }
+}
+
+// n8n-nodes-base.extractFromFile
+{
+  "type": "n8n-nodes-base.extractFromFile",
+  "typeVersion": 1,
+  "parameters": {
+    "options": {},
+    "operation": "pdf",
+    "binaryPropertyName": "CV"
+  }
+}
+
+// n8n-nodes-base.facebookGraphApi
+{
+  "type": "n8n-nodes-base.facebookGraphApi",
+  "typeVersion": 1,
+  "parameters": {
+    "edge": "media",
+    "node": "={{ $('Instagram params').item.json.instagram_business_account_id }}",
+    "options": {
+      "queryParameters": {
+        "parameter": [
+          {
+            "name": "image_url",
+            "value": "={{ $json.output[0] }}"
+          },
+          {
+            "name": "caption",
+            "value": "={{ $('Analyze Content And Generate Instagram Caption').item.json.message.content }}"
+          }
+        ]
+      }
+    },
+    "graphApiVersion": "v20.0",
+    "httpRequestMethod": "POST"
+  }
+}
+
+// n8n-nodes-base.filter
+{
+  "type": "n8n-nodes-base.filter",
+  "typeVersion": 2.2,
+  "parameters": {
+    "options": {},
+    "conditions": {
+      "options": {
+        "version": 2,
+        "leftValue": "",
+        "caseSensitive": true,
+        "typeValidation": "strict"
+      },
+      "combinator": "and",
+      "conditions": [
+        {
+          "id": "20a4ffd6-0dd0-44f9-97bc-7d891f689f4d",
+          "operator": {
+            "name": "filter.operator.equals",
+            "type": "string",
+            "operation": "equals"
+          },
+          "leftValue": "={{ $json.text }}",
+          "rightValue": "No"
+        }
+      ]
+    }
+  }
+}
+
+// n8n-nodes-base.form
+{
+  "type": "n8n-nodes-base.form",
+  "typeVersion": 1,
+  "parameters": {
+    "options": {
+      "formTitle": ""
+    },
+    "operation": "completion",
+    "completionTitle": "Extracted information:",
+    "completionMessage": "={{ $json.text }}"
+  }
+}
+
+// n8n-nodes-base.formTrigger
+{
+  "type": "n8n-nodes-base.formTrigger",
+  "typeVersion": 2.2,
+  "parameters": {
+    "options": {},
+    "formTitle": "Send CV",
+    "formFields": {
+      "values": [
+        {
+          "fieldLabel": "Name",
+          "placeholder": "Name",
+          "requiredField": true
+        },
+        {
+          "fieldType": "email",
+          "fieldLabel": "Email",
+          "placeholder": "Email",
+          "requiredField": true
+        },
+        {
+          "fieldType": "file",
+          "fieldLabel": "CV",
+          "requiredField": true,
+          "acceptFileTypes": ".pdf"
+        }
+      ]
+    }
+  }
+}
+
+// n8n-nodes-base.function
+{
+  "type": "n8n-nodes-base.function",
+  "typeVersion": 1,
+  "parameters": {
+    "functionCode": "// Process Message Node\nconst items = $input.all();\nconst item = items[0];\n\n// Get message data from the correct path\nconst message = item.json.body['data[PARAMS][MESSAGE]'];\nconst dialogId = item.json.body['data[PARAMS][DIALOG_ID]'];\n\n// Get auth data\nconst auth = {\n access_token: item.json.access_token,\n domain: item.json.domain\n};\n\nif (message.toLowerCase() === \"what's hot\") {\n return {\n json: {\n DIALOG_ID: dialogId,\n MESSAGE: \"Hi! I am an example-bot.\\nI repeat what you say\",\n AUTH: auth.access_token,\n DOMAIN: auth.domain\n }\n };\n} else {\n return {\n json: {\n DIALOG_ID: dialogId,\n MESSAGE: `You said:\\n${message}`,\n AUTH: auth.access_token,\n DOMAIN: auth.domain\n }\n };\n}"
+  }
+}
+
+// n8n-nodes-base.functionItem
+{
+  "type": "n8n-nodes-base.functionItem",
+  "typeVersion": 1,
+  "parameters": {
+    "functionCode": "// hashtag list\nconst Hashtags = [\n \"#techtwitter\",\n \"#n8n\"\n];\n\n// random output function\nconst randomHashtag = Hashtags[Math.floor(Math.random() * Hashtags.length)];\nitem.hashtag = randomHashtag;\nreturn item;"
+  }
+}
+
+// n8n-nodes-base.github
+{
+  "type": "n8n-nodes-base.github",
+  "typeVersion": 1,
+  "parameters": {
+    "owner": {
+      "__rl": true,
+      "mode": "name",
+      "value": "={{ $json.Account }}"
+    },
+    "filePath": "={{ $json.path }}{{ $json.prompt }}",
+    "resource": "file",
+    "operation": "get",
+    "repository": {
+      "__rl": true,
+      "mode": "name",
+      "value": "={{ $json.repo }}"
+    },
+    "additionalParameters": {}
+  }
+}
+
+// n8n-nodes-base.gmail
+{
+  "type": "n8n-nodes-base.gmail",
+  "typeVersion": 2.1,
+  "parameters": {
+    "sendTo": "info@n3w.it",
+    "message": "=<h3>MESSAGE</h3>\n{{ $('Email Trigger (IMAP)').item.json.textHtml }}\n\n<h3>AI RESPONSE</h3>\n{{ $json.email }}",
+    "options": {},
+    "subject": "=[Approval Required] {{ $('Email Trigger (IMAP)').item.json.subject }}",
+    "operation": "sendAndWait",
+    "responseType": "freeText"
+  }
+}
+
+// n8n-nodes-base.gmailTool
+{
+  "type": "n8n-nodes-base.gmailTool",
+  "typeVersion": 2.1,
+  "parameters": {
+    "resource": "label",
+    "returnAll": true,
+    "descriptionType": "manual",
+    "toolDescription": "Tool to read all existing gmail labels"
+  }
+}
+
+// n8n-nodes-base.gmailTrigger
+{
+  "type": "n8n-nodes-base.gmailTrigger",
+  "typeVersion": 1.2,
+  "parameters": {
+    "filters": {},
+    "pollTimes": {
+      "item": [
+        {
+          "mode": "everyMinute"
+        }
+      ]
+    }
+  }
+}
+
+// n8n-nodes-base.googleAnalytics
+{
+  "type": "n8n-nodes-base.googleAnalytics",
+  "typeVersion": 2,
+  "parameters": {
+    "metricsGA4": {
+      "metricValues": [
+        {
+          "listName": "screenPageViews"
+        },
+        {},
+        {
+          "listName": "sessions"
+        },
+        {
+          "listName": "sessionsPerUser"
+        },
+        {
+          "name": "averageSessionDuration",
+          "listName": "other"
+        },
+        {
+          "name": "ecommercePurchases",
+          "listName": "other"
+        },
+        {
+          "name": "averagePurchaseRevenue",
+          "listName": "other"
+        },
+        {
+          "name": "purchaseRevenue",
+          "listName": "other"
+        }
+      ]
+    },
+    "propertyId": {
+      "__rl": true,
+      "mode": "list",
+      "value": "345060083",
+      "cachedResultUrl": "https://analytics.google.com/analytics/web/#/p345060083/",
+      "cachedResultName": "https://www.ep-reisen.de  – GA4"
+    },
+    "dimensionsGA4": {
+      "dimensionValues": [
+        {}
+      ]
+    },
+    "additionalFields": {}
+  }
+}
+
+// n8n-nodes-base.googleAnalyticsTool
+{
+  "type": "n8n-nodes-base.googleAnalyticsTool",
+  "typeVersion": 2,
+  "parameters": {
+    "metricsGA4": {
+      "metricValues": [
+        {
+          "listName": "sessions"
+        }
+      ]
+    },
+    "propertyId": {
+      "__rl": true,
+      "mode": "list",
+      "value": "404306108",
+      "cachedResultUrl": "https://analytics.google.com/analytics/web/#/p404306108/",
+      "cachedResultName": "East Coast Concrete Coating"
+    },
+    "dimensionsGA4": {
+      "dimensionValues": [
+        {},
+        {
+          "listName": "sourceMedium"
+        }
+      ]
+    },
+    "additionalFields": {}
+  }
+}
+
+// n8n-nodes-base.googleCalendar
+{
+  "type": "n8n-nodes-base.googleCalendar",
+  "typeVersion": 1.2,
+  "parameters": {
+    "end": "={{ DateTime.fromISO($('Execute Workflow Trigger').first().json.dateTime).plus(30, 'minute').toISO() }}",
+    "start": "={{ $('Execute Workflow Trigger').first().json.dateTime }}",
+    "calendar": {
+      "__rl": true,
+      "mode": "list",
+      "value": "c_5792bdf04bc395cbcbc6f7b754268245a33779d36640cc80a357711aa2f09a0a@group.calendar.google.com",
+      "cachedResultName": "n8n-events"
+    },
+    "additionalFields": {
+      "summary": "=Appointment Scheduled - {{ $('Execute Workflow Trigger').item.json.name }} & Jim",
+      "attendees": [
+        "={{ $('Execute Workflow Trigger').item.json.email }}"
+      ],
+      "description": "={{ $('Summarise Enquiry').first().json.text }}\n\nOriginal message:\n> {{ $('Execute Workflow Trigger').item.json.enquiry }}",
+      "conferenceDataUi": {
+        "conferenceDataValues": {
+          "conferenceSolution": "hangoutsMeet"
+        }
+      }
+    }
+  }
+}
+
+// n8n-nodes-base.googleCalendarTool
+{
+  "type": "n8n-nodes-base.googleCalendarTool",
+  "typeVersion": 1.2,
+  "parameters": {
+    "options": {
+      "timeMax": "={{ $fromAI('end_date') }}",
+      "timeMin": "={{ $fromAI('start_date') }}"
+    },
+    "calendar": {
+      "__rl": true,
+      "mode": "list",
+      "value": "",
+      "cachedResultName": ""
+    },
+    "operation": "getAll",
+    "descriptionType": "manual",
+    "toolDescription": "Use this tool when you’re asked to retrieve events data."
+  }
+}
+
+// n8n-nodes-base.googleCloudNaturalLanguage
+{
+  "type": "n8n-nodes-base.googleCloudNaturalLanguage",
+  "typeVersion": 1,
+  "parameters": {
+    "content": "={{$json[\"Content\"]}}",
+    "options": {}
+  }
+}
+
+// n8n-nodes-base.googleCloudStorage
+{
+  "type": "n8n-nodes-base.googleCloudStorage",
+  "typeVersion": 1,
+  "parameters": {
+    "resource": "object",
+    "returnAll": true,
+    "bucketName": "n8n-qdrant-demo",
+    "listFilters": {
+      "prefix": "agricultural-crops"
+    },
+    "requestOptions": {}
+  }
+}
+
+// n8n-nodes-base.googleDocs
+{
+  "type": "n8n-nodes-base.googleDocs",
+  "typeVersion": 2,
+  "parameters": {
+    "operation": "get",
+    "documentURL": "[Google Doc ID]"
+  }
+}
+
+// n8n-nodes-base.googleDocsTool
+{
+  "type": "n8n-nodes-base.googleDocsTool",
+  "typeVersion": 2,
+  "parameters": {
+    "actionsUi": {
+      "actionFields": [
+        {
+          "text": "={ \n \"memory\": \"{{ $fromAI('memory') }}\",\n \"date\": \"{{ $now }}\"\n}",
+          "action": "insert"
+        }
+      ]
+    },
+    "operation": "update",
+    "documentURL": "[Google Doc ID]",
+    "descriptionType": "manual",
+    "toolDescription": "Save Memory"
+  }
+}
+
+// n8n-nodes-base.googleDrive
+{
+  "type": "n8n-nodes-base.googleDrive",
+  "typeVersion": 1,
+  "parameters": {
+    "fileId": {
+      "__rl": true,
+      "mode": "",
+      "value": "={{ $json.id || $json.data[0].id }}"
+    },
+    "options": {},
+    "operation": "download",
+    "authentication": "oAuth2"
+  }
+}
+
+// n8n-nodes-base.googleDriveTrigger
+{
+  "type": "n8n-nodes-base.googleDriveTrigger",
+  "typeVersion": 1,
+  "parameters": {
+    "event": "fileCreated",
+    "options": {},
+    "pollTimes": {
+      "item": [
+        {
+          "mode": "everyMinute"
+        }
+      ]
+    },
+    "triggerOn": "specificFolder",
+    "folderToWatch": {
+      "__rl": true,
+      "mode": "list",
+      "value": "18m0i341QLQuyWuHv_FBdz8-r-QDtofYm",
+      "cachedResultUrl": "https://drive.google.com/drive/folders/18m0i341QLQuyWuHv_FBdz8-r-QDtofYm",
+      "cachedResultName": "Influencersde"
+    }
+  }
+}
+
+// n8n-nodes-base.googleSheets
+{
+  "type": "n8n-nodes-base.googleSheets",
+  "typeVersion": 4.5,
+  "parameters": {
+    "columns": {
+      "value": {
+        "CITY": "={{ $('Merge').item.json.output.city }}",
+        "DATA": "={{ $now.format('dd/LL/yyyy') }}",
+        "NAME": "={{ $('On form submission').item.json.Nome }}",
+        "VOTE": "={{ $json.output.vote }}",
+        "EMAIL": "={{ $('On form submission').item.json.Email }}",
+        "SKILLS": "={{ $('Merge').item.json.output.Skills }}",
+        "TELEFONO": "={{ $('Merge').item.json.output.telephone }}",
+        "SUMMARIZE": "={{ $('Summarization Chain').item.json.response.text }}",
+        "EDUCATIONAL": "={{ $('Merge').item.json.output[\"Educational qualification\"] }}",
+        "JOB HISTORY": "={{ $('Merge').item.json.output[\"Job History\"] }}",
+        "DATA NASCITA": "={{ $('Merge').item.json.output.birthdate }}",
+        "CONSIDERATION": "={{ $json.output.consideration }}"
+      },
+      "schema": [
+        {
+          "id": "DATA",
+          "type": "string",
+          "display": true,
+          "required": false,
+          "displayName": "DATA",
+          "defaultMatch": false,
+          "canBeUsedToMatch": true
+        },
+        {
+          "id": "NAME",
+          "type": "string",
+          "display": true,
+          "required": false,
+          "displayName": "NAME",
+          "defaultMatch": false,
+          "canBeUsedToMatch": true
+        },
+        {
+          "id": "PHONE",
+          "type": "string",
+          "display": true,
+          "removed": false,
+          "required": false,
+          "displayName": "PHONE",
+          "defaultMatch": false,
+          "canBeUsedToMatch": true
+        },
+        {
+          "id": "CITY",
+          "type": "string",
+          "display": true,
+          "required": false,
+          "displayName": "CITY",
+          "defaultMatch": false,
+          "canBeUsedToMatch": true
+        },
+        {
+          "id": "EMAIL",
+          "type": "string",
+          "display": true,
+          "required": false,
+          "displayName": "EMAIL",
+          "defaultMatch": false,
+          "canBeUsedToMatch": true
+        },
+        {
+          "id": "DATA NASCITA",
+          "type": "string",
+          "display": true,
+          "required": false,
+          "displayName": "DATA NASCITA",
+          "defaultMatch": false,
+          "canBeUsedToMatch": true
+        },
+        {
+          "id": "EDUCATIONAL",
+          "type": "string",
+          "display": true,
+          "required": false,
+          "displayName": "EDUCATIONAL",
+          "defaultMatch": false,
+          "canBeUsedToMatch": true
+        },
+        {
+          "id": "JOB HISTORY",
+          "type": "string",
+          "display": true,
+          "required": false,
+          "displayName": "JOB HISTORY",
+          "defaultMatch": false,
+          "canBeUsedToMatch": true
+        },
+        {
+          "id": "SKILLS",
+          "type": "string",
+          "display": true,
+          "required": false,
+          "displayName": "SKILLS",
+          "defaultMatch": false,
+          "canBeUsedToMatch": true
+        },
+        {
+          "id": "SUMMARIZE",
+          "type": "string",
+          "display": true,
+          "required": false,
+          "displayName": "SUMMARIZE",
+          "defaultMatch": false,
+          "canBeUsedToMatch": true
+        },
+        {
+          "id": "VOTE",
+          "type": "string",
+          "display": true,
+          "removed": false,
+          "required": false,
+          "displayName": "VOTE",
+          "defaultMatch": false,
+          "canBeUsedToMatch": true
+        },
+        {
+          "id": "CONSIDERATION",
+          "type": "string",
+          "display": true,
+          "required": false,
+          "displayName": "CONSIDERATION",
+          "defaultMatch": false,
+          "canBeUsedToMatch": true
+        }
+      ],
+      "mappingMode": "defineBelow",
+      "matchingColumns": [],
+      "attemptToConvertTypes": false,
+      "convertFieldsToString": false
+    },
+    "options": {},
+    "operation": "append",
+    "sheetName": {
+      "__rl": true,
+      "mode": "list",
+      "value": "gid=0",
+      "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ssz5RvN1Hr20Q31pnYnbjCLu1MGBvoLttBAjXunMRQE/edit#gid=0",
+      "cachedResultName": "Foglio1"
+    },
+    "documentId": {
+      "__rl": true,
+      "mode": "list",
+      "value": "1ssz5RvN1Hr20Q31pnYnbjCLu1MGBvoLttBAjXunMRQE",
+      "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ssz5RvN1Hr20Q31pnYnbjCLu1MGBvoLttBAjXunMRQE/edit?usp=drivesdk",
+      "cachedResultName": "Ricerca WebDev"
+    }
+  }
+}
+
+// n8n-nodes-base.googleSheetsTrigger
+{
+  "type": "n8n-nodes-base.googleSheetsTrigger",
+  "typeVersion": 1,
+  "parameters": {
+    "options": {
+      "dataLocationOnSheet": {
+        "values": {
+          "rangeDefinition": "specifyRange"
+        }
+      }
+    },
+    "pollTimes": {
+      "item": [
+        {
+          "mode": "everyMinute"
+        }
+      ]
+    },
+    "sheetName": {
+      "__rl": true,
+      "mode": "list",
+      "value": "gid=0",
+      "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IcvbbG_WScVNyutXhzqyE9NxdxNbY90Dd63R8Y1UrAw/edit#gid=0",
+      "cachedResultName": "Sheet1"
+    },
+    "documentId": {
+      "__rl": true,
+      "mode": "list",
+      "value": "1IcvbbG_WScVNyutXhzqyE9NxdxNbY90Dd63R8Y1UrAw",
+      "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IcvbbG_WScVNyutXhzqyE9NxdxNbY90Dd63R8Y1UrAw/edit?usp=drivesdk",
+      "cachedResultName": "Analyze social media of a lead"
+    }
+  }
+}
+
+// n8n-nodes-base.graphql
+{
+  "type": "n8n-nodes-base.graphql",
+  "typeVersion": 1,
+  "parameters": {
+    "query": "=query (\n $filter: IssueFilter\n) {\n issues(\n filter: $filter\n ) {\n nodes {\n id\n identifier\n title\n description\n url\n createdAt\n updatedAt\n assignee {\n name\n }\n comments {\n nodes {\n id\n createdAt\n user {\n displayName\n }\n body\n }\n }\n }\n }\n}",
+    "endpoint": "https://api.linear.app/graphql",
+    "variables": "={{\n{\n \"filter\": {\n updatedAt: { gte: $now.minus(30, 'minutes').toISO() }\n }\n}\n}}",
+    "requestFormat": "json",
+    "authentication": "headerAuth"
+  }
+}
+
+// n8n-nodes-base.hackerNews
+{
+  "type": "n8n-nodes-base.hackerNews",
+  "typeVersion": 1,
+  "parameters": {
+    "resource": "all",
+    "additionalFields": {}
+  }
+}
+
+// n8n-nodes-base.html
+{
+  "type": "n8n-nodes-base.html",
+  "typeVersion": 1.2,
+  "parameters": {
+    "options": {},
+    "operation": "extractHtmlContent",
+    "extractionValues": {
+      "values": [
+        {
+          "key": "recensioni",
+          "attribute": "href",
+          "cssSelector": "article section a",
+          "returnArray": true,
+          "returnValue": "attribute"
+        }
+      ]
+    }
+  }
+}
+
+// n8n-nodes-base.httpRequest
+{
+  "type": "n8n-nodes-base.httpRequest",
+  "typeVersion": 4.2,
+  "parameters": {
+    "url": "https://serpapi.com/search",
+    "options": {},
+    "sendQuery": true,
+    "queryParameters": {
+      "parameters": [
+        {
+          "name": "q",
+          "value": "={{ $('Parse and Chunk JSON Data').item.json.chunk }}"
+        },
+        {
+          "name": "api_key",
+          "value": "={{ $credentials.SerpAPI.key }}"
+        },
+        {
+          "name": "engine",
+          "value": "google"
+        }
+      ]
+    }
+  }
+}
+
+// n8n-nodes-base.humanticAi
+{
+  "type": "n8n-nodes-base.humanticAi",
+  "typeVersion": 1,
+  "parameters": {
+    "userId": "https://www.linkedin.com/in/harshil1712/"
+  }
+}
+
+// n8n-nodes-base.if
+{
+  "type": "n8n-nodes-base.if",
+  "typeVersion": 2.2,
+  "parameters": {
+    "options": {},
+    "conditions": {
+      "options": {
+        "version": 2,
+        "leftValue": "",
+        "caseSensitive": true,
+        "typeValidation": "strict"
+      },
+      "combinator": "and",
+      "conditions": [
+        {
+          "id": "5fe3c0d8-bd61-4943-b152-9e6315134520",
+          "operator": {
+            "name": "filter.operator.equals",
+            "type": "string",
+            "operation": "equals"
+          },
+          "leftValue": "={{ $('Listen for Telegram Events').item.json.body.message.from.first_name }}",
+          "rightValue": "={{ $json.first_name }}"
+        },
+        {
+          "id": "98a0ea91-0567-459c-bbce-06abc14a49ce",
+          "operator": {
+            "name": "filter.operator.equals",
+            "type": "string",
+            "operation": "equals"
+          },
+          "leftValue": "={{ $('Listen for Telegram Events').item.json.body.message.from.last_name }}",
+          "rightValue": "={{ $json.last_name }}"
+        },
+        {
+          "id": "18a96c1f-f2a0-4a2a-b789-606763df4423",
+          "operator": {
+            "type": "number",
+            "operation": "equals"
+          },
+          "leftValue": "={{ $('Listen for Telegram Events').item.json.body.message.from.id }}",
+          "rightValue": "={{ $json.id }}"
+        }
+      ]
+    },
+    "looseTypeValidation": "="
+  }
+}
+
+// n8n-nodes-base.interval
+{
+  "type": "n8n-nodes-base.interval",
+  "typeVersion": 1,
+  "parameters": {
+    "unit": "minutes",
+    "interval": 30
+  }
+}
+
+// n8n-nodes-base.itemLists
+{
+  "type": "n8n-nodes-base.itemLists",
+  "typeVersion": 3,
+  "parameters": {
+    "include": "allFieldsExcept",
+    "options": {},
+    "aggregate": "aggregateAllItemData",
+    "operation": "concatenateItems",
+    "fieldsToExclude": "sort",
+    "destinationFieldName": "response"
+  }
+}
+
+// n8n-nodes-base.jira
+{
+  "type": "n8n-nodes-base.jira",
+  "typeVersion": 1,
+  "parameters": {
+    "project": {
+      "__rl": true,
+      "mode": "list",
+      "value": "10001",
+      "cachedResultName": "Support"
+    },
+    "summary": "=Potentially Malicious - Phishing Email Reported: \"{{ $('Set Email Variables').item.json.subject }}\"",
+    "issueType": {
+      "__rl": true,
+      "mode": "list",
+      "value": "10008",
+      "cachedResultName": "Task"
+    },
+    "additionalFields": {
+      "description": "=A phishing email was reported by {{ $('Set Email Variables').item.json.recipient }} with the subject line \"{{ $('Set Email Variables').item.json.subject }}\"\n\\\\\nh2. Here is ChatGPT's analysis of the email:\n{{ $json.message.content.summary }}"
+    }
+  }
+}
+
+// n8n-nodes-base.jiraTool
+{
+  "type": "n8n-nodes-base.jiraTool",
+  "typeVersion": 1,
+  "parameters": {
+    "limit": 4,
+    "options": {
+      "jql": "=text ~ \"{{ $fromAI('title', 'the title of the current issue', 'string', '') }}\" AND status IN (\"In Progress\", \"Done\")"
+    },
+    "operation": "getAll",
+    "descriptionType": "manual",
+    "toolDescription": "Call this tool to search for similar issues in JIRA."
+  }
+}
+
+// n8n-nodes-base.lemlist
+{
+  "type": "n8n-nodes-base.lemlist",
+  "typeVersion": 1,
+  "parameters": {
+    "email": "={{ $json[\"leadEmail\"] }}",
+    "resource": "lead",
+    "operation": "unsubscribe",
+    "campaignId": "={{$json[\"campaignId\"]}}"
+  }
+}
+
+// n8n-nodes-base.lemlistTrigger
+{
+  "type": "n8n-nodes-base.lemlistTrigger",
+  "typeVersion": 1,
+  "parameters": {
+    "event": "emailsReplied",
+    "options": {
+      "isFirst": true
+    }
+  }
+}
+
+// n8n-nodes-base.limit
+{
+  "type": "n8n-nodes-base.limit",
+  "typeVersion": 1,
+  "parameters": {
+    "maxItems": 3
+  }
+}
+
+// n8n-nodes-base.linear
+{
+  "type": "n8n-nodes-base.linear",
+  "typeVersion": 1,
+  "parameters": {
+    "title": "=Visual Regression Report {{ $now.format('yyyy-MM-dd') }}",
+    "teamId": "1c721608-321d-4132-ac32-6e92d04bb487",
+    "additionalFields": {
+      "description": "=Visual Regression Workflow picked up the following changes:\n\n{{\n$json.data.map(row =>\n`### ${row.url}\n${row.output.map(issue =>\n`* **${issue.description}** - expected \"${issue.previous_state}\" but got \"${issue.current_state}\"`\n).join('\\n')}`\n).join('\\n');\n}}"
+    }
+  }
+}
+
+// n8n-nodes-base.linearTrigger
+{
+  "type": "n8n-nodes-base.linearTrigger",
+  "typeVersion": 1,
+  "parameters": {
+    "teamId": "7a330c36-4b39-4bf1-922e-b4ceeb91850a",
+    "resources": [
+      "issue"
+    ],
+    "authentication": "oAuth2"
+  }
+}
+
+// n8n-nodes-base.linkedIn
+{
+  "type": "n8n-nodes-base.linkedIn",
+  "typeVersion": 1,
+  "parameters": {
+    "text": "={{ $('Filter Errored').item.json.message.content.linkedin }}",
+    "person": "afi4Hy9wlI",
+    "additionalFields": {}
+  }
+}
+
+// n8n-nodes-base.localFileTrigger
+{
+  "type": "n8n-nodes-base.localFileTrigger",
+  "typeVersion": 1,
+  "parameters": {
+    "path": "/home/node/storynotes/context",
+    "events": [
+      "add"
+    ],
+    "options": {
+      "usePolling": true,
+      "followSymlinks": true
+    },
+    "triggerOn": "folder"
+  }
+}
+
+// n8n-nodes-base.manualTrigger
+{
+  "type": "n8n-nodes-base.manualTrigger",
+  "typeVersion": 1,
+  "parameters": {}
+}
+
+// n8n-nodes-base.markdown
+{
+  "type": "n8n-nodes-base.markdown",
+  "typeVersion": 1,
+  "parameters": {
+    "html": "={{ $json.textHtml }}",
+    "options": {}
+  }
+}
+
+// n8n-nodes-base.mattermost
+{
+  "type": "n8n-nodes-base.mattermost",
+  "typeVersion": 1,
+  "parameters": {
+    "message": "=You got new feedback with a score of {{$json[\"SentimentScore\"][\"Negative\"]}}. Here is what it says:{{$node[\"Typeform Trigger\"].json[\"What did you think about the event?\"]}}",
+    "channelId": "h7cxrd1cefr13x689enzyw7xhc",
+    "attachments": [],
+    "otherOptions": {}
+  }
+}
+
+// n8n-nodes-base.merge
+{
+  "type": "n8n-nodes-base.merge",
+  "typeVersion": 3,
+  "parameters": {}
+}
+
+// n8n-nodes-base.microsoftOneDrive
+{
+  "type": "n8n-nodes-base.microsoftOneDrive",
+  "typeVersion": 1,
+  "parameters": {}
+}
+
+// n8n-nodes-base.microsoftOutlook
+{
+  "type": "n8n-nodes-base.microsoftOutlook",
+  "typeVersion": 2,
+  "parameters": {
+    "subject": "={{ $('Execute Workflow Trigger').item.json.query.subject }}",
+    "bodyContent": "=<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n <title>New Webchat Customer Enquiry</title>\n <style type=\"text/css\">\n /* Client-specific styles */\n body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }\n table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }\n img { -ms-interpolation-mode: bicubic; }\n\n /* Reset styles */\n body { margin: 0; padding: 0; }\n img { border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }\n table { border-collapse: collapse !important; }\n body { height: 100% !important; margin: 0; padding: 0; width: 100% !important; }\n\n /* iOS BLUE LINKS */\n a[x-apple-data-detectors] {\n color: inherit !important;\n text-decoration: none !important;\n font-size: inherit !important;\n font-family: inherit !important;\n font-weight: inherit !important;\n line-height: inherit !important;\n }\n\n /* Styles for Outlook and other email clients */\n .ExternalClass { width: 100%; }\n .ExternalClass, .ExternalClass p, .ExternalClass span, .ExternalClass font, .ExternalClass td, .ExternalClass div { line-height: 100%; }\n \n /* Responsive styles */\n @media screen and (max-width: 600px) {\n .container { width: 100% !important; }\n .content { padding: 15px !important; }\n .field { padding: 10px !important; }\n .header h1 { font-size: 20px !important; }\n .header p { font-size: 12px !important; }\n }\n </style>\n</head>\n<body style=\"margin: 0; padding: 0; background-color: #f4f4f4;\">\n <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">\n <tr>\n <td>\n <table align=\"center\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"600\" style=\"border-collapse: collapse; background-color: #ffffff;\">\n <tr>\n <td align=\"center\" bgcolor=\"#1a1a1a\" style=\"padding: 30px 0; background: linear-gradient(135deg, #1a1a1a 0%, #2d1f3d 100%);\">\n <h1 style=\"color: #ffffff; font-family: Arial, sans-serif; font-size: 24px; font-weight: 700; margin: 0; text-transform: uppercase; letter-spacing: 1px;\">New Customer Enquiry</h1>\n <p style=\"color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; line-height: 20px; margin: 10px 0 0; opacity: 0.8;\">A potential client has reached out through our webchat</p>\n </td>\n </tr>\n <tr>\n <td style=\"padding: 20px;\">\n <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">\n <tr>\n <td style=\"padding: 15px; background-color: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 8px;\">\n <p style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #6a1b9a; font-weight: bold; margin: 0 0 5px 0;\">FROM</p>\n <p style=\"font-family: Arial, sans-serif; font-size: 16px; line-height: 1.6; color: #333333; margin: 0;\">{{ $('Execute Workflow Trigger').item.json.query.name }}</p>\n </td>\n </tr>\n <tr><td height=\"20\"></td></tr>\n <tr>\n <td style=\"padding: 15px; background-color: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 8px;\">\n <p style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #6a1b9a; font-weight: bold; margin: 0 0 5px 0;\">EMAIL</p>\n <p style=\"font-family: Arial, sans-serif; font-size: 16px; line-height: 1.6; color: #333333; margin: 0;\">{{ $('Execute Workflow Trigger').item.json.query.email }}</p>\n </td>\n </tr>\n <tr><td height=\"20\"></td></tr>\n <tr>\n <td style=\"padding: 15px; background-color: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 8px;\">\n <p style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #6a1b9a; font-weight: bold; margin: 0 0 5px 0;\">COMPANY</p>\n <p style=\"font-family: Arial, sans-serif; font-size: 16px; line-height: 1.6; color: #333333; margin: 0;\">{{ $('Execute Workflow Trigger').item.json.query.company }}</p>\n </td>\n </tr>\n <tr><td height=\"20\"></td></tr>\n <tr>\n <td style=\"padding: 15px; background-color: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 8px;\">\n <p style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #6a1b9a; font-weight: bold; margin: 0 0 5px 0;\">MESSAGE</p>\n <p style=\"font-family: Arial, sans-serif; font-size: 16px; line-height: 1.6; color: #333333; margin: 0;\">{{ $('Execute Workflow Trigger').item.json.query.message }}</p>\n </td>\n </tr>\n </table>\n </td>\n </tr>\n <tr>\n <td align=\"center\" bgcolor=\"#e90ebb\" style=\"padding: 20px; background: linear-gradient(135deg, #e90ebb 0%, #6a1b9a 100%);\">\n <p style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 20px; color: #ffffff; margin: 0;\">This enquiry was automatically generated from our website's chat interface.</p>\n </td>\n </tr>\n </table>\n </td>\n </tr>\n </table>\n</body>\n</html>",
+    "toRecipients": "you@yourdomain.com",
+    "additionalFields": {
+      "importance": "High",
+      "bodyContentType": "html"
+    }
+  }
+}
+
+// n8n-nodes-base.microsoftOutlookTool
+{
+  "type": "n8n-nodes-base.microsoftOutlookTool",
+  "typeVersion": 2,
+  "parameters": {
+    "subject": "={{ $fromAI(\"meeting_name\",\"Meeting name\",\"string\") }}",
+    "resource": "event",
+    "operation": "create",
+    "calendarId": {
+      "__rl": true,
+      "mode": "list",
+      "value": "AQMkADAwATNiZmYAZC1jYjE5LWExMzQtMDACLTAwCgBGAAAD1gD8iHcpKEiYQc0w4fCLUgcA-79r8r8ac0aInYGVxRUqCwAAAgEGAAAA-79r8r8ac0aInYGVxRUqCwAAAkH-AAAA",
+      "cachedResultName": "Calendar"
+    },
+    "endDateTime": "={{ $fromAI(\"end_date_time\",\"Date and time of meeting end\",\"string\") }}",
+    "startDateTime": "={{ $fromAI(\"start_date_time\",\"Date and time of meeting start\",\"string\") }}",
+    "descriptionType": "manual",
+    "toolDescription": "=Use tool to create Outlook Calendar Event. Use this tool only when transcript contains information that call should be scheduled.",
+    "additionalFields": {
+      "timeZone": "Europe/Berlin"
+    }
+  }
+}
+
+// n8n-nodes-base.microsoftOutlookTrigger
+{
+  "type": "n8n-nodes-base.microsoftOutlookTrigger",
+  "typeVersion": 1,
+  "parameters": {
+    "fields": [
+      "body",
+      "toRecipients",
+      "subject",
+      "bodyPreview"
+    ],
+    "output": "fields",
+    "filters": {},
+    "options": {},
+    "pollTimes": {
+      "item": [
+        {
+          "mode": "everyMinute"
+        }
+      ]
+    }
+  }
+}
+
+// n8n-nodes-base.mondayCom
+{
+  "type": "n8n-nodes-base.mondayCom",
+  "typeVersion": 1,
+  "parameters": {
+    "boardId": "1840712625",
+    "groupId": "topics",
+    "resource": "boardItem",
+    "operation": "getAll",
+    "returnAll": true
+  }
+}
+
+// n8n-nodes-base.mongoDb
+{
+  "type": "n8n-nodes-base.mongoDb",
+  "typeVersion": 1,
+  "parameters": {
+    "fields": "text",
+    "options": {},
+    "operation": "insert",
+    "collection": "tweets"
+  }
+}
+
+// n8n-nodes-base.mongoDbTool
+{
+  "type": "n8n-nodes-base.mongoDbTool",
+  "typeVersion": 1.1,
+  "parameters": {
+    "query": "={{ $fromAI(\"pipeline\", \"The MongoDB pipeline to execute\" , \"string\" , [{\"$match\" : { \"rating\" : 5 } }])}}",
+    "operation": "aggregate",
+    "collection": "movies",
+    "descriptionType": "manual",
+    "toolDescription": "Get from AI the MongoDB Aggregation pipeline to get context based on the provided pipeline, the document structure of the documents is : {\n \"plot\": \"A group of bandits stage a brazen train hold-up, only to find a determined posse hot on their heels.\",\n \"genres\": [\n \"Short\",\n \"Western\"\n ],\n \"runtime\": 11,\n \"cast\": [\n \"A.C. Abadie\",\n \"Gilbert M. 'Broncho Billy' Anderson\",\n ...\n ],\n \"poster\": \"...jpg\",\n \"title\": \"The Great Train Robbery\",\n \"fullplot\": \"Among the earliest existing films in American cinema - notable as the ...\",\n \"languages\": [\n \"English\"\n ],\n \"released\": \"date\"\n },\n \"directors\": [\n \"Edwin S. Porter\"\n ],\n \"rated\": \"TV-G\",\n \"awards\": {\n \"wins\": 1,\n \"nominations\": 0,\n \"text\": \"1 win.\"\n },\n \"lastupdated\": \"2015-08-13 00:27:59.177000000\",\n \"year\": 1903,\n \"imdb\": {\n \"rating\": 7.4,"
+  }
+}
+
+// n8n-nodes-base.moveBinaryData
+{
+  "type": "n8n-nodes-base.moveBinaryData",
+  "typeVersion": 1,
+  "parameters": {
+    "options": {
+      "encoding": "utf8",
+      "stripBOM": true,
+      "jsonParse": false,
+      "keepSource": false
+    },
+    "setAllData": false
+  }
+}
+
+// n8n-nodes-base.mySql
+{
+  "type": "n8n-nodes-base.mySql",
+  "typeVersion": 2.4,
+  "parameters": {
+    "query": "SHOW TABLES;",
+    "options": {},
+    "operation": "executeQuery"
+  }
+}
+
+// n8n-nodes-base.mySqlTool
+{
+  "type": "n8n-nodes-base.mySqlTool",
+  "typeVersion": 2.4,
+  "parameters": {
+    "query": "SELECT * \nFROM Products p \nWHERE \n cityQuery = '{{ $fromAI(\"cityQuery\") }}' AND \n state = '{{ $fromAI(\"state\") }}' AND \n modality = 'PME' AND \n removed = 0 AND \n ({{ $fromAI(\"holderCount\") || 1 }} + {{ $fromAI(\"dependentsCount\") || 0 }}) BETWEEN p.minLifeAmount AND p.maxLifeAmount AND\n (CASE\n WHEN {{ $fromAI(\"holderAge\") }} BETWEEN 0 AND 18 THEN priceAtAge0To18\n WHEN {{ $fromAI(\"holderAge\") }} BETWEEN 19 AND 23 THEN priceAtAge19To23\n WHEN {{ $fromAI(\"holderAge\") }} BETWEEN 24 AND 28 THEN priceAtAge24To28\n WHEN {{ $fromAI(\"holderAge\") }} BETWEEN 29 AND 33 THEN priceAtAge29To33\n WHEN {{ $fromAI(\"holderAge\") }} BETWEEN 34 AND 38 THEN priceAtAge34To38\n WHEN {{ $fromAI(\"holderAge\") }} BETWEEN 39 AND 43 THEN priceAtAge39To43\n WHEN {{ $fromAI(\"holderAge\") }} BETWEEN 44 AND 48 THEN priceAtAge44To48\n WHEN {{ $fromAI(\"holderAge\") }} BETWEEN 49 AND 53 THEN priceAtAge49To53\n WHEN {{ $fromAI(\"holderAge\") }} BETWEEN 54 AND 58 THEN priceAtAge54To58\n ELSE priceAtAge59To199\n END) IS NOT NULL\nORDER BY \n (CASE\n WHEN {{ $fromAI(\"holderAge\") }} BETWEEN 0 AND 18 THEN priceAtAge0To18\n WHEN {{ $fromAI(\"holderAge\") }} BETWEEN 19 AND 23 THEN priceAtAge19To23\n WHEN {{ $fromAI(\"holderAge\") }} BETWEEN 24 AND 28 THEN priceAtAge24To28\n WHEN {{ $fromAI(\"holderAge\") }} BETWEEN 29 AND 33 THEN priceAtAge29To33\n WHEN {{ $fromAI(\"holderAge\") }} BETWEEN 34 AND 38 THEN priceAtAge34To38\n WHEN {{ $fromAI(\"holderAge\") }} BETWEEN 39 AND 43 THEN priceAtAge39To43\n WHEN {{ $fromAI(\"holderAge\") }} BETWEEN 44 AND 48 THEN priceAtAge44To48\n WHEN {{ $fromAI(\"holderAge\") }} BETWEEN 49 AND 53 THEN priceAtAge49To53\n WHEN {{ $fromAI(\"holderAge\") }} BETWEEN 54 AND 58 THEN priceAtAge54To58\n ELSE priceAtAge59To199\n END) ASC, \n createdAt DESC\nLIMIT 3;\n",
+    "options": {
+      "detailedOutput": true
+    },
+    "operation": "executeQuery",
+    "descriptionType": "manual",
+    "toolDescription": "// Search for the X product bla bla bla"
+  }
+}
+
+// n8n-nodes-base.n8n
+{
+  "type": "n8n-nodes-base.n8n",
+  "typeVersion": 1,
+  "parameters": {
+    "operation": "get",
+    "workflowId": {
+      "__rl": true,
+      "mode": "id",
+      "value": "={{ $('CONFIG').first().json.params.file.replaceAll('docs_','').split('.md')[0] }}"
+    },
+    "requestOptions": {}
+  }
+}
+
+// n8n-nodes-base.noOp
+{
+  "type": "n8n-nodes-base.noOp",
+  "typeVersion": 1,
+  "parameters": {}
+}
+
+// n8n-nodes-base.nocoDb
+{
+  "type": "n8n-nodes-base.nocoDb",
+  "typeVersion": 2,
+  "parameters": {
+    "table": "mhbalmu9aaqcun6",
+    "fieldsUi": {
+      "fieldValues": [
+        {
+          "fieldName": "=News_Source",
+          "fieldValue": "=Colt"
+        },
+        {
+          "fieldName": "Title",
+          "fieldValue": "={{ $json[\"title\"] }}"
+        },
+        {
+          "fieldName": "Date",
+          "fieldValue": "={{ $json[\"Date\"] }}"
+        },
+        {
+          "fieldName": "Link",
+          "fieldValue": "={{ $json[\"Link\"] }}"
+        },
+        {
+          "fieldName": "Summary",
+          "fieldValue": "={{ $json[\"summary\"] }}"
+        },
+        {
+          "fieldName": "Keywords",
+          "fieldValue": "={{ $json[\"keywords\"] }}"
+        }
+      ]
+    },
+    "operation": "create",
+    "projectId": "prqu4e8bjj4bv1j",
+    "authentication": "nocoDbApiToken"
+  }
+}
+
+// n8n-nodes-base.notion
+{
+  "type": "n8n-nodes-base.notion",
+  "typeVersion": 2.2,
+  "parameters": {
+    "filters": {
+      "conditions": [
+        {
+          "key": "URL|url",
+          "urlValue": "={{ 'https://huggingface.co'+$json.url }}",
+          "condition": "equals"
+        }
+      ]
+    },
+    "options": {},
+    "resource": "databasePage",
+    "operation": "getAll",
+    "databaseId": {
+      "__rl": true,
+      "mode": "list",
+      "value": "17b67aba-1fcc-80ae-baa1-d88ffda7ae83",
+      "cachedResultUrl": "https://www.notion.so/17b67aba1fcc80aebaa1d88ffda7ae83",
+      "cachedResultName": "huggingface-abstract"
+    },
+    "filterType": "manual"
+  }
+}
+
+// n8n-nodes-base.notionTool
+{
+  "type": "n8n-nodes-base.notionTool",
+  "typeVersion": 2.2,
+  "parameters": {
+    "text": "={{ $fromAI('search_terms', 'relevant terms to search for information on the current issue', 'string', '') }}",
+    "limit": 4,
+    "options": {},
+    "operation": "search",
+    "descriptionType": "manual",
+    "toolDescription": "Search the knowledgebase for information relevant to the issue."
+  }
+}
+
+// n8n-nodes-base.notionTrigger
+{
+  "type": "n8n-nodes-base.notionTrigger",
+  "typeVersion": 1,
+  "parameters": {
+    "simple": false,
+    "pollTimes": {
+      "item": [
+        {
+          "mode": "everyMinute"
+        }
+      ]
+    },
+    "databaseId": {
+      "__rl": true,
+      "mode": "list",
+      "value": "17b11930-c10f-8000-a545-ece7cade03f9",
+      "cachedResultUrl": "https://www.notion.so/17b11930c10f8000a545ece7cade03f9",
+      "cachedResultName": "Embeddings"
+    }
+  }
+}
+
+// n8n-nodes-base.openAi
+{
+  "type": "n8n-nodes-base.openAi",
+  "typeVersion": 1,
+  "parameters": {
+    "model": "gpt-4o-mini",
+    "prompt": {
+      "messages": [
+        {
+          "content": "=Summarize the major points of the following podcast: {{ $json.text }}. Start your answer by saying 'This episode focuses on', 'This episode is about', etc. Contain your answer to 3-4 paragraphs max, and focus on only key information. "
+        }
+      ]
+    },
+    "options": {
+      "maxTokens": 500
+    },
+    "resource": "chat",
+    "requestOptions": {}
+  }
+}
+
+// n8n-nodes-base.pipedrive
+{
+  "type": "n8n-nodes-base.pipedrive",
+  "typeVersion": 1,
+  "parameters": {
+    "content": "={{ $json.message.content }}",
+    "resource": "note",
+    "additionalFields": {
+      "org_id": "={{ $('Pipedrive Trigger - An Organization is created').item.json.meta.id }}"
+    }
+  }
+}
+
+// n8n-nodes-base.pipedriveTrigger
+{
+  "type": "n8n-nodes-base.pipedriveTrigger",
+  "typeVersion": 1,
+  "parameters": {
+    "action": "added",
+    "object": "organization"
+  }
+}
+
+// n8n-nodes-base.postgres
+{
+  "type": "n8n-nodes-base.postgres",
+  "typeVersion": 2.5,
+  "parameters": {
+    "table": {
+      "__rl": true,
+      "mode": "list",
+      "value": "top_trends",
+      "cachedResultName": "top_trends"
+    },
+    "where": {
+      "values": [
+        {
+          "value": "={{$json.content_code}}",
+          "column": "code"
+        }
+      ]
+    },
+    "schema": {
+      "__rl": true,
+      "mode": "list",
+      "value": "public",
+      "cachedResultName": "public"
+    },
+    "options": {},
+    "operation": "select"
+  }
+}
+
+// n8n-nodes-base.postgresTool
+{
+  "type": "n8n-nodes-base.postgresTool",
+  "typeVersion": 2.5,
+  "parameters": {
+    "query": "select\n c.column_name,\n c.data_type,\n c.is_nullable,\n c.column_default,\n tc.constraint_type,\n ccu.table_name AS referenced_table,\n ccu.column_name AS referenced_column\nfrom\n information_schema.columns c\nLEFT join\n information_schema.key_column_usage kcu\n ON c.table_name = kcu.table_name\n AND c.column_name = kcu.column_name\nLEFT join\n information_schema.table_constraints tc\n ON kcu.constraint_name = tc.constraint_name\n AND tc.constraint_type = 'FOREIGN KEY'\nLEFT join\n information_schema.constraint_column_usage ccu\n ON tc.constraint_name = ccu.constraint_name\nwhere\n c.table_name = '{{ $fromAI(\"table_name\") }}'\n AND c.table_schema = '{{ $fromAI(\"schema_name\") }}'\norder by\n c.ordinal_position",
+    "options": {},
+    "operation": "executeQuery",
+    "descriptionType": "manual",
+    "toolDescription": "Get table definition to find all columns and types"
+  }
+}
+
+// n8n-nodes-base.quickChart
+{
+  "type": "n8n-nodes-base.quickChart",
+  "typeVersion": 1,
+  "parameters": {
+    "data": "={{ $json.population_analysis.effect_sizes.values() }}",
+    "output": "bar_chart",
+    "labelsMode": "array",
+    "labelsArray": "={{ $json.population_analysis.effect_sizes.keys() }}",
+    "chartOptions": {
+      "format": "png"
+    },
+    "datasetOptions": {
+      "label": "={{ $('SET company_name').item.json.company_name }} Effect Size on Employee Experience"
+    }
+  }
+}
+
+// n8n-nodes-base.readBinaryFile
+{
+  "type": "n8n-nodes-base.readBinaryFile",
+  "typeVersion": 1,
+  "parameters": {
+    "filePath": "={{ $('Read video from Google Drive').item.json.originalFilename.replaceAll(\" \", \"_\") }}",
+    "dataPropertyName": "datavideo"
+  }
+}
+
+// n8n-nodes-base.readBinaryFiles
+{
+  "type": "n8n-nodes-base.readBinaryFiles",
+  "typeVersion": 1,
+  "parameters": {
+    "fileSelector": "/home/node/.n8n/OpenAI-article/Using Science to Stop Your Mirror From Fogging Up.mp3"
+  }
+}
+
+// n8n-nodes-base.readPDF
+{
+  "type": "n8n-nodes-base.readPDF",
+  "typeVersion": 1,
+  "parameters": {}
+}
+
+// n8n-nodes-base.readWriteFile
+{
+  "type": "n8n-nodes-base.readWriteFile",
+  "typeVersion": 1,
+  "parameters": {
+    "options": {},
+    "fileSelector": "={{ $('CONFIG').first().json.project_path }}/{{ $json.params.file }}"
+  }
+}
+
+// n8n-nodes-base.reddit
+{
+  "type": "n8n-nodes-base.reddit",
+  "typeVersion": 1,
+  "parameters": {
+    "keyword": "n8n",
+    "location": "allReddit",
+    "operation": "search",
+    "additionalFields": {
+      "sort": "new"
+    }
+  }
+}
+
+// n8n-nodes-base.redis
+{
+  "type": "n8n-nodes-base.redis",
+  "typeVersion": 1,
+  "parameters": {
+    "key": "=session_{{ $('UUID').item.json.data }}",
+    "ttl": "={{ 60 * 60 * 24 }}",
+    "value": "={{ [] }}",
+    "expire": true,
+    "keyType": "list",
+    "operation": "set"
+  }
+}
+
+// n8n-nodes-base.removeDuplicates
+{
+  "type": "n8n-nodes-base.removeDuplicates",
+  "typeVersion": 2,
+  "parameters": {
+    "compare": "selectedFields",
+    "options": {},
+    "fieldsToCompare": "source.link"
+  }
+}
+
+// n8n-nodes-base.respondToWebhook
+{
+  "type": "n8n-nodes-base.respondToWebhook",
+  "typeVersion": 1.1,
+  "parameters": {
+    "options": {}
+  }
+}
+
+// n8n-nodes-base.rssFeedRead
+{
+  "type": "n8n-nodes-base.rssFeedRead",
+  "typeVersion": 1.1,
+  "parameters": {
+    "url": "={{ $json.rss_feed_url }}",
+    "options": {
+      "ignoreSSL": false
+    }
+  }
+}
+
+// n8n-nodes-base.rssFeedReadTrigger
+{
+  "type": "n8n-nodes-base.rssFeedReadTrigger",
+  "typeVersion": 1,
+  "parameters": {
+    "pollTimes": {
+      "item": [
+        {
+          "mode": "everyMinute"
+        }
+      ]
+    }
+  }
+}
+
+// n8n-nodes-base.s3
+{
+  "type": "n8n-nodes-base.s3",
+  "typeVersion": 1,
+  "parameters": {
+    "operation": "upload",
+    "bucketName": "=",
+    "additionalFields": {
+      "grantRead": true,
+      "parentFolderKey": "="
+    }
+  }
+}
+
+// n8n-nodes-base.scheduleTrigger
+{
+  "type": "n8n-nodes-base.scheduleTrigger",
+  "typeVersion": 1.2,
+  "parameters": {
+    "rule": {
+      "interval": [
+        {
+          "field": "cronExpression",
+          "expression": "5 13,19 * * *"
+        }
+      ]
+    }
+  }
+}
+
+// n8n-nodes-base.set
+{
+  "type": "n8n-nodes-base.set",
+  "typeVersion": 3.4,
+  "parameters": {
+    "options": {},
+    "assignments": {
+      "assignments": [
+        {
+          "id": "d6f68b1c-a6a6-44d4-8686-dc4dcdde4767",
+          "name": "output",
+          "type": "string",
+          "value": "={{ $json.output }}"
+        }
+      ]
+    }
+  }
+}
+
+// n8n-nodes-base.slack
+{
+  "type": "n8n-nodes-base.slack",
+  "typeVersion": 2.3,
+  "parameters": {
+    "text": "={{ $json.text }}",
+    "select": "channel",
+    "channelId": {
+      "__rl": true,
+      "mode": "id",
+      "value": "={{ $('Webhook').item.json.body.channel_id }}"
+    },
+    "otherOptions": {
+      "includeLinkToWorkflow": false
+    }
+  }
+}
+
+// n8n-nodes-base.sort
+{
+  "type": "n8n-nodes-base.sort",
+  "typeVersion": 1,
+  "parameters": {
+    "options": {},
+    "sortFieldsUi": {
+      "sortField": [
+        {
+          "order": "descending",
+          "fieldName": "updatedAt"
+        }
+      ]
+    }
+  }
+}
+
+// n8n-nodes-base.splitInBatches
+{
+  "type": "n8n-nodes-base.splitInBatches",
+  "typeVersion": 3,
+  "parameters": {
+    "options": {}
+  }
+}
+
+// n8n-nodes-base.splitOut
+{
+  "type": "n8n-nodes-base.splitOut",
+  "typeVersion": 1,
+  "parameters": {
+    "options": {},
+    "fieldToSplitOut": "section"
+  }
+}
+
+// n8n-nodes-base.spotify
+{
+  "type": "n8n-nodes-base.spotify",
+  "typeVersion": 1,
+  "parameters": {
+    "limit": 1,
+    "query": "={{ $json.message.content }}",
+    "filters": {},
+    "resource": "track",
+    "operation": "search"
+  }
+}
+
+// n8n-nodes-base.spreadsheetFile
+{
+  "type": "n8n-nodes-base.spreadsheetFile",
+  "typeVersion": 2,
+  "parameters": {
+    "options": {
+      "fileName": "=funny_names_{{ $('Split In Batches').item.json.index+1 }}.{{ $parameter[\"fileFormat\"] }}",
+      "headerRow": true
+    },
+    "operation": "toFile",
+    "fileFormat": "csv"
+  }
+}
+
+// n8n-nodes-base.start
+{
+  "type": "n8n-nodes-base.start",
+  "typeVersion": 1,
+  "parameters": {}
+}
+
+// n8n-nodes-base.stickyNote
+{
+  "type": "n8n-nodes-base.stickyNote",
+  "typeVersion": 1,
+  "parameters": {
+    "color": 4,
+    "width": 340,
+    "height": 380,
+    "content": "## Retrieve Long Term Memories\nGoogle Docs"
+  }
+}
+
+// n8n-nodes-base.stopAndError
+{
+  "type": "n8n-nodes-base.stopAndError",
+  "typeVersion": 1,
+  "parameters": {
+    "errorMessage": "=Missing Prompt Variables : {{ $('Check All Prompt Vars Present').item.json.missingKeys }}\n"
+  }
+}
+
+// n8n-nodes-base.strapi
+{
+  "type": "n8n-nodes-base.strapi",
+  "typeVersion": 1,
+  "parameters": {
+    "operation": "create"
+  }
+}
+
+// n8n-nodes-base.stravaTrigger
+{
+  "type": "n8n-nodes-base.stravaTrigger",
+  "typeVersion": 1,
+  "parameters": {
+    "event": "update",
+    "object": "activity",
+    "options": {}
+  }
+}
+
+// n8n-nodes-base.summarize
+{
+  "type": "n8n-nodes-base.summarize",
+  "typeVersion": 1,
+  "parameters": {
+    "options": {},
+    "fieldsToSummarize": {
+      "values": [
+        {
+          "field": "text",
+          "separateBy": " ",
+          "aggregation": "concatenate"
+        }
+      ]
+    }
+  }
+}
+
+// n8n-nodes-base.supabase
+{
+  "type": "n8n-nodes-base.supabase",
+  "typeVersion": 1,
+  "parameters": {
+    "tableId": "files",
+    "fieldsUi": {
+      "fieldValues": [
+        {
+          "fieldId": "name",
+          "fieldValue": "={{ $('Loop Over Items').item.json.name }}"
+        },
+        {
+          "fieldId": "storage_id",
+          "fieldValue": "={{ $('Loop Over Items').item.json.id }}"
+        }
+      ]
+    }
+  }
+}
+
+// n8n-nodes-base.switch
+{
+  "type": "n8n-nodes-base.switch",
+  "typeVersion": 3.2,
+  "parameters": {
+    "rules": {
+      "values": [
+        {
+          "outputKey": "audio",
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "operator": {
+                  "type": "object",
+                  "operation": "exists",
+                  "singleValue": true
+                },
+                "leftValue": "={{ $json.body.message.voice }}",
+                "rightValue": ""
+              }
+            ]
+          },
+          "renameOutput": true
+        },
+        {
+          "outputKey": "text",
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "342f0883-d959-44a2-b80d-379e39c76218",
+                "operator": {
+                  "type": "string",
+                  "operation": "exists",
+                  "singleValue": true
+                },
+                "leftValue": "={{ $json.body.message.text }}",
+                "rightValue": ""
+              }
+            ]
+          },
+          "renameOutput": true
+        },
+        {
+          "outputKey": "image",
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "ded3a600-f861-413a-8892-3fc5ea935ecb",
+                "operator": {
+                  "type": "array",
+                  "operation": "exists",
+                  "singleValue": true
+                },
+                "leftValue": "={{ $json.body.message.photo }}",
+                "rightValue": ""
+              }
+            ]
+          },
+          "renameOutput": true
+        }
+      ]
+    },
+    "options": {
+      "fallbackOutput": "extra"
+    }
+  }
+}
+
+// n8n-nodes-base.telegram
+{
+  "type": "n8n-nodes-base.telegram",
+  "typeVersion": 1.2,
+  "parameters": {
+    "text": "={{ $json.output }}",
+    "chatId": "=1234567891",
+    "additionalFields": {
+      "parse_mode": "HTML",
+      "appendAttribution": false
+    }
+  }
+}
+
+// n8n-nodes-base.telegramTool
+{
+  "type": "n8n-nodes-base.telegramTool",
+  "typeVersion": 1.2,
+  "parameters": {
+    "file": "={{ $fromAI(\"url\", \"a valid url of an image\", \"string\", \" \") }}",
+    "chatId": "={{ $('Listen for incoming events').first().json.message.from.id }}",
+    "operation": "sendDocument",
+    "additionalFields": {}
+  }
+}
+
+// n8n-nodes-base.telegramTrigger
+{
+  "type": "n8n-nodes-base.telegramTrigger",
+  "typeVersion": 1.1,
+  "parameters": {
+    "updates": [
+      "message"
+    ],
+    "additionalFields": {}
+  }
+}
+
+// n8n-nodes-base.todoist
+{
+  "type": "n8n-nodes-base.todoist",
+  "typeVersion": 2,
+  "parameters": {
+    "taskId": "={{ $('Get inbox tasks').item.json.id }}",
+    "operation": "update",
+    "updateFields": {
+      "priority": "={{ $('Your Projects').first().json.projects[$json.message.content] }}"
+    }
+  }
+}
+
+// n8n-nodes-base.trello
+{
+  "type": "n8n-nodes-base.trello",
+  "typeVersion": 1,
+  "parameters": {
+    "name": "=Score: {{$json[\"documentSentiment\"][\"score\"]}}",
+    "listId": "5fbb9e2eb1d5cc0a8a7ab8ac",
+    "description": "=Score: {{$json[\"documentSentiment\"][\"score\"]}}\nFeedback: {{$node[\"Typeform Trigger\"].json[\"Any suggestions for us? \"]}}\nUser: {{$node[\"Typeform Trigger\"].json[\"Name\"]}}",
+    "additionalFields": {}
+  }
+}
+
+// n8n-nodes-base.twilio
+{
+  "type": "n8n-nodes-base.twilio",
+  "typeVersion": 1,
+  "parameters": {
+    "to": "={{ $('Find Follow-Up Candidates').item.json.session_id }}",
+    "from": "={{ $('Find Follow-Up Candidates').item.json.twilio_service_number }}",
+    "message": "={{ $('Generate Follow Up Message').item.json.text }}\nReply STOP to stop recieving these messages.",
+    "options": {}
+  }
+}
+
+// n8n-nodes-base.twilioTrigger
+{
+  "type": "n8n-nodes-base.twilioTrigger",
+  "typeVersion": 1,
+  "parameters": {
+    "updates": [
+      "com.twilio.messaging.inbound-message.received"
+    ]
+  }
+}
+
+// n8n-nodes-base.twitter
+{
+  "type": "n8n-nodes-base.twitter",
+  "typeVersion": 2,
+  "parameters": {
+    "text": "={{ $('Filter Errored').item.json.message.content.twitter }}",
+    "additionalFields": {}
+  }
+}
+
+// n8n-nodes-base.typeformTrigger
+{
+  "type": "n8n-nodes-base.typeformTrigger",
+  "typeVersion": 1,
+  "parameters": {
+    "formId": "fBYjtY5e"
+  }
+}
+
+// n8n-nodes-base.venafiTlsProtectCloud
+{
+  "type": "n8n-nodes-base.venafiTlsProtectCloud",
+  "typeVersion": 1,
+  "parameters": {
+    "options": {},
+    "commonName": "={{ $('Parse Webhook').item.json.response.view.state.values.domain_name_block.domain_name_input.value.match(/^(\\*\\.)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}$/g).toString() }}",
+    "generateCsr": true,
+    "applicationId": "f3c15c80-7151-11ef-9a22-abeac49f7094",
+    "additionalFields": {
+      "organizationalUnits": [
+        "={{ $json.name }}"
+      ]
+    },
+    "certificateIssuingTemplateId": "d28d82b1-714b-11ef-9026-7bb80b32867a"
+  }
+}
+
+// n8n-nodes-base.wait
+{
+  "type": "n8n-nodes-base.wait",
+  "typeVersion": 1.1,
+  "parameters": {
+    "amount": 1
+  }
+}
+
+// n8n-nodes-base.webflow
+{
+  "type": "n8n-nodes-base.webflow",
+  "typeVersion": 2,
+  "parameters": {
+    "operation": "create"
+  }
+}
+
+// n8n-nodes-base.webhook
+{
+  "type": "n8n-nodes-base.webhook",
+  "typeVersion": 2,
+  "parameters": {
+    "path": "wbot",
+    "options": {
+      "binaryPropertyName": "data"
+    },
+    "httpMethod": "POST"
+  }
+}
+
+// n8n-nodes-base.whatsApp
+{
+  "type": "n8n-nodes-base.whatsApp",
+  "typeVersion": 1,
+  "parameters": {
+    "textBody": "=You can only send text messages",
+    "operation": "send",
+    "phoneNumberId": "470271332838881",
+    "requestOptions": {},
+    "additionalFields": {},
+    "recipientPhoneNumber": "={{ $('Respond').item.json.body.entry[0].changes[0].value.contacts[0].wa_id }}"
+  }
+}
+
+// n8n-nodes-base.whatsAppTrigger
+{
+  "type": "n8n-nodes-base.whatsAppTrigger",
+  "typeVersion": 1,
+  "parameters": {
+    "updates": [
+      "messages"
+    ]
+  }
+}
+
+// n8n-nodes-base.wooCommerce
+{
+  "type": "n8n-nodes-base.wooCommerce",
+  "typeVersion": 1,
+  "parameters": {
+    "limit": 1,
+    "filters": {
+      "email": "={{ $json.email }}"
+    },
+    "resource": "customer",
+    "operation": "getAll"
+  }
+}
+
+// n8n-nodes-base.wooCommerceTool
+{
+  "type": "n8n-nodes-base.wooCommerceTool",
+  "typeVersion": 1,
+  "parameters": {
+    "options": {
+      "sku": "={{ $('Information Extractor').item.json.output.SKU }}",
+      "search": "={{ $('Information Extractor').item.json.output.keyword }}",
+      "maxPrice": "={{ $('Information Extractor').item.json.output.price_max }}",
+      "minPrice": "={{ $('Information Extractor').item.json.output.price_min }}",
+      "stockStatus": "instock"
+    },
+    "operation": "getAll"
+  }
+}
+
+// n8n-nodes-base.wordpress
+{
+  "type": "n8n-nodes-base.wordpress",
+  "typeVersion": 1,
+  "parameters": {
+    "title": "={{ $json.message.content }}",
+    "additionalFields": {
+      "status": "draft",
+      "content": "={{ $('Generate article with DeepSeek').item.json.message.content }}"
+    }
+  }
+}
+
+// n8n-nodes-base.writeBinaryFile
+{
+  "type": "n8n-nodes-base.writeBinaryFile",
+  "typeVersion": 1,
+  "parameters": {
+    "options": {},
+    "fileName": "={{ $json.originalFilename.replaceAll(\" \", \"_\") }}"
+  }
+}
+
+// n8n-nodes-base.youTube
+{
+  "type": "n8n-nodes-base.youTube",
+  "typeVersion": 1,
+  "parameters": {
+    "options": {},
+    "videoId": "={{ $json.videoId }}",
+    "resource": "video",
+    "operation": "get"
+  }
+}
+
+// n8n-nodes-base.zendesk
+{
+  "type": "n8n-nodes-base.zendesk",
+  "typeVersion": 1,
+  "parameters": {
+    "options": {},
+    "operation": "getAll"
+  }
+}
+
+// n8n-nodes-base.zoom
+{
+  "type": "n8n-nodes-base.zoom",
+  "typeVersion": 1,
+  "parameters": {
+    "filters": {
+      "type": "scheduled"
+    },
+    "operation": "getAll",
+    "returnAll": true,
+    "authentication": "oAuth2"
+  }
+}
+
+// n8n-nodes-youtube-transcription.youtubeTranscripter
+{
+  "type": "n8n-nodes-youtube-transcription.youtubeTranscripter",
+  "typeVersion": 1,
+  "parameters": {}
+}
+
