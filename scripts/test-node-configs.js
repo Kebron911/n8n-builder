@@ -9,6 +9,12 @@
  *
  *   Or with CLI args:
  *   node scripts/test-node-configs.js --url https://your-instance.com --key your-key
+ *
+ * Debug mode (prints raw HTTP request + response for every API call):
+ *   node scripts/test-node-configs.js --url ... --key ... --debug
+ *
+ * Single-node debug (test one node type and print full raw exchange):
+ *   node scripts/test-node-configs.js --url ... --key ... --debug --node n8n-nodes-base.slack
  */
 
 const https = require('https');
@@ -22,15 +28,24 @@ const getArg = (flag) => {
   const i = args.indexOf(flag);
   return i !== -1 ? args[i + 1] : null;
 };
+const hasFlag = (flag) => args.includes(flag);
 
 const N8N_URL = (getArg('--url') || process.env.N8N_URL || '').replace(/\/$/, '');
 const N8N_API_KEY = getArg('--key') || process.env.N8N_API_KEY || '';
+const DEBUG = hasFlag('--debug');
+const DEBUG_NODE = getArg('--node') || null; // filter to one node type when --debug
 
 if (!N8N_URL || !N8N_API_KEY) {
   console.error('Error: N8N_URL and N8N_API_KEY are required.');
   console.error('  N8N_URL=https://... N8N_API_KEY=... node scripts/test-node-configs.js');
   console.error('  node scripts/test-node-configs.js --url https://... --key ...');
   process.exit(1);
+}
+
+if (DEBUG) {
+  console.log('\n  [DEBUG MODE ON] — raw HTTP request + response will be printed for every API call.');
+  if (DEBUG_NODE) console.log(`  [DEBUG NODE FILTER] — only testing node type: ${DEBUG_NODE}`);
+  console.log('');
 }
 
 // ── Node types to test (from CLAUDE.md typeVersion Reference) ───────────────
@@ -398,6 +413,48 @@ const COMMON_NODE_CONFIGS = [
   },
 ];
 
+// ── Debug printer ─────────────────────────────────────────────────────────────
+
+let _debugCallCount = 0;
+
+function debugPrint(method, path, payload, status, responseBody) {
+  _debugCallCount++;
+  const keyPreview = N8N_API_KEY
+    ? N8N_API_KEY.slice(0, 8) + '****'
+    : '(not set)';
+
+  console.log(`\n${'─'.repeat(70)}`);
+  console.log(`  [DEBUG #${_debugCallCount}] ${method} ${N8N_URL}${path}`);
+  console.log(`${'─'.repeat(70)}`);
+
+  // Request
+  console.log('  REQUEST HEADERS:');
+  console.log(`    X-N8N-API-KEY: ${keyPreview}`);
+  console.log(`    Content-Type: application/json`);
+  console.log(`    Accept: application/json`);
+
+  if (payload) {
+    const bodyStr = JSON.stringify(JSON.parse(payload), null, 2);
+    const preview = bodyStr.length > 1500
+      ? bodyStr.slice(0, 1500) + '\n    ... [truncated]'
+      : bodyStr;
+    console.log(`  REQUEST BODY:\n${preview.split('\n').map(l => '    ' + l).join('\n')}`);
+  } else {
+    console.log('  REQUEST BODY: (none)');
+  }
+
+  // Response
+  console.log(`\n  RESPONSE STATUS: ${status}`);
+  const respStr = typeof responseBody === 'string'
+    ? responseBody
+    : JSON.stringify(responseBody, null, 2);
+  const respPreview = respStr.length > 2000
+    ? respStr.slice(0, 2000) + '\n    ... [truncated]'
+    : respStr;
+  console.log(`  RESPONSE BODY:\n${respPreview.split('\n').map(l => '    ' + l).join('\n')}`);
+  console.log('');
+}
+
 // ── HTTP helper ───────────────────────────────────────────────────────────────
 
 function apiRequest(method, path, body = null) {
@@ -425,11 +482,10 @@ function apiRequest(method, path, body = null) {
       let data = '';
       res.on('data', chunk => data += chunk);
       res.on('end', () => {
-        try {
-          resolve({ status: res.statusCode, body: JSON.parse(data) });
-        } catch {
-          resolve({ status: res.statusCode, body: data });
-        }
+        let parsed;
+        try { parsed = JSON.parse(data); } catch { parsed = data; }
+        if (DEBUG) debugPrint(method, path, payload, res.statusCode, parsed);
+        resolve({ status: res.statusCode, body: parsed });
       });
     });
 
@@ -480,9 +536,18 @@ async function checkInstance() {
 // ── STEP 2: Check node types exist via workflow create + immediate delete ─────
 
 async function checkNodeTypes() {
+  const table = DEBUG_NODE
+    ? TYPE_VERSION_TABLE.filter(r => r.type === DEBUG_NODE)
+    : TYPE_VERSION_TABLE;
+
+  if (DEBUG_NODE && table.length === 0) {
+    console.log(`\n[1/3] --node filter "${DEBUG_NODE}" matched no entries in TYPE_VERSION_TABLE — skipping.\n`);
+    return;
+  }
+
   console.log('\n[1/3] Checking node type availability...\n');
 
-  for (const { type, expectedVersion } of TYPE_VERSION_TABLE) {
+  for (const { type, expectedVersion } of table) {
     const shortType = type.replace('n8n-nodes-base.', '').replace('@n8n/n8n-nodes-langchain.', 'langchain.');
     process.stdout.write(`  ${shortType.padEnd(45)}`);
 
@@ -529,9 +594,18 @@ async function checkNodeTypes() {
 // ── STEP 3: Validate common node configs ──────────────────────────────────────
 
 async function validateCommonConfigs() {
+  const configs = DEBUG_NODE
+    ? COMMON_NODE_CONFIGS.filter(c => c.node.type === DEBUG_NODE)
+    : COMMON_NODE_CONFIGS;
+
+  if (DEBUG_NODE && configs.length === 0) {
+    console.log(`\n[2/3] --node filter "${DEBUG_NODE}" matched no entries in COMMON_NODE_CONFIGS — skipping.\n`);
+    return;
+  }
+
   console.log('\n[2/3] Validating common node configs...\n');
 
-  for (const { label, node } of COMMON_NODE_CONFIGS) {
+  for (const { label, node } of configs) {
     process.stdout.write(`  ${label.padEnd(35)}`);
 
     const testWf = {

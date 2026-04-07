@@ -3,8 +3,10 @@ name: n8n-json-checker
 description: >
   Pre-flight validation of n8n workflow JSON BEFORE deploying to the instance.
   Trigger when user pastes workflow JSON, asks "check this n8n json", "does this
-  workflow look right", "validate this workflow", or "will this work?" with JSON
-  in context. Do NOT use for live MCP validator errors — use n8n-validation-expert.
+  workflow look right", "pre-flight review", "will this work?" with JSON in
+  context, or "check workflow JSON before deploying". Do NOT trigger on "validate
+  this workflow" alone without pasted JSON — use n8n-validation-expert for live
+  MCP validator errors after create/update.
 ---
 
 # n8n JSON Checker
@@ -122,38 +124,12 @@ Three valid modes:
 
 ---
 
-### 2.3a JavaScript Code Node Checks
+### 2.3a JavaScript / Python Code Node Checks
 
-> **Source of truth:** `n8n-code-javascript` skill. Update that skill first, then mirror error/warning entries here.
+For `n8n-nodes-base.code` nodes, this checker only verifies structural presence:
+- **Error** if `jsCode` or `pythonCode` key is missing from the node parameters entirely.
 
-For `n8n-nodes-base.code` nodes with `jsCode`:
-
-**Errors (will break execution):**
-- `import ` or `export ` keywords — not supported in Code node sandbox. Fix: use `require('module-name')` instead. Example: `import { parse } from 'json5'` → `const { parse } = require('json5')`.
-- `this.getCredentials(` — silently fails. Fix: use HTTP Request node with credentials.
-- `$itemIndex`, `$secrets`, `$version` inside `jsCode` — expression-only variables, not available in code context.
-
-**Warnings (likely runtime errors):**
-- `return` returning a plain object: `return { result }` → should be `return [{ json: { result } }]`
-- `json:` key followed by `[` — `json` must be an object, not array
-- No `return` statement at all
-- `.toDate()`, `.isEmail()`, `.toTitleCase()` — expression helpers that don't work in jsCode
-
----
-
-### 2.3b Python Code Node Checks
-
-For `n8n-nodes-base.code` nodes with `pythonCode`:
-
-**Errors:**
-- `import pandas`, `import numpy`, `import requests` — only standard library available. Fix: use HTTP Request node for HTTP calls.
-- Bare `return` with no value (just `return` on its own at module level) — use `return [{"json": {...}}]` or `return_value = [{"json": {...}}]` instead.
-
-> **Valid Python return patterns in n8n:** Both `return [{"json": {...}}]` and `return_value = [{"json": {...}}]` are correct. Do NOT flag `return [{"json": row} for row in data]` or any `return [...]` as an error — these are correct syntax.
-
-**Warnings:**
-- Using `datetime` without `from datetime import datetime`.
-- `json.loads` on `_input.first().json` — `.json` is already a dict in Python, not a string.
+For detailed code quality checks (return format, import restrictions, expression helpers, standard library limits), invoke the **`n8n-code-javascript`** or **`n8n-code-python`** skill — those are the source of truth for Code node validation.
 
 ---
 
