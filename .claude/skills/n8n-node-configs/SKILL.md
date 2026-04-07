@@ -39,17 +39,26 @@ Ready-to-use configs for workflow building. All pinned to n8n **v1.76**.
 | `n8n-nodes-base.wait` | `1.1` |
 | `n8n-nodes-base.errorTrigger` | `1` |
 | `n8n-nodes-base.executeCommand` | `1` |
+| `n8n-nodes-base.executeWorkflow` | `1.1` |
 | `n8n-nodes-base.stickyNote` | `1` |
 | `n8n-nodes-base.noOp` | `1` |
 | `n8n-nodes-base.slack` | `2.3` |
 | `n8n-nodes-base.gmail` | `2.1` |
 | `n8n-nodes-base.googleSheets` | `4.5` |
 | `n8n-nodes-base.googleDrive` | `3` |
+| `n8n-nodes-base.googleCalendar` | `1.2` |
+| `n8n-nodes-base.googleDocs` | `2` |
+| `n8n-nodes-base.airtable` | `2.1` |
+| `n8n-nodes-base.postgres` | `2.5` |
+| `n8n-nodes-base.supabase` | `1` |
 | `@n8n/n8n-nodes-langchain.agent` | `1.7` |
-| `@n8n/n8n-nodes-langchain.lmOpenAi` | `1.2` |
+| `@n8n/n8n-nodes-langchain.chatTrigger` | `1.1` |
+| `@n8n/n8n-nodes-langchain.lmChatOpenAi` | `1.2` |
 | `@n8n/n8n-nodes-langchain.memoryBufferWindow` | `1.3` |
 | `@n8n/n8n-nodes-langchain.calculatorTool` | `1` |
 | `@n8n/n8n-nodes-langchain.toolHttpRequest` | `1.1` |
+| `@n8n/n8n-nodes-langchain.toolSerpApi` | `1` |
+| `@n8n/n8n-nodes-langchain.toolWorkflow` | `1.2` |
 | `@n8n/n8n-nodes-langchain.outputParserStructured` | `1.2` |
 | `@n8n/n8n-nodes-langchain.textClassifier` | `1` |
 
@@ -495,7 +504,7 @@ Read: `operation: "read"` + `"filtersUI": { "values": [] }`. Update: `operation:
 ```json
 {
   "name": "OpenAI Chat Model",
-  "type": "@n8n/n8n-nodes-langchain.lmOpenAi",
+  "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
   "typeVersion": 1.2,
   "position": [500, 500],
   "parameters": {
@@ -507,7 +516,7 @@ Read: `operation: "read"` + `"filtersUI": { "values": [] }`. Update: `operation:
   }
 }
 ```
-Connect via `ai_languageModel`. Models: `"gpt-4o"`, `"gpt-4o-mini"`, `"gpt-4-turbo"`.
+Connect via `ai_languageModel`. Models: `"gpt-4o"`, `"gpt-4o-mini"`, `"gpt-4-turbo"`. Also works for DeepSeek/other OpenAI-compatible APIs — point to their API base URL in credentials.
 
 ### Window Buffer Memory (sub-node)
 ```json
@@ -577,6 +586,249 @@ Connect via `ai_tool`.
 }
 ```
 Connect via `ai_outputParser`.
+
+### Chat Trigger (AI workflows)
+```json
+{
+  "name": "When chat message received",
+  "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+  "typeVersion": 1.1,
+  "position": [250, 300],
+  "parameters": {
+    "options": {}
+  }
+}
+```
+No credentials needed. Connects via `main` to AI Agent. `options` supports `responseMode`, `allowedOrigins`, `loadPreviousSession`.
+
+### Google Calendar — Get Events
+```json
+{
+  "name": "Google Calendar",
+  "type": "n8n-nodes-base.googleCalendar",
+  "typeVersion": 1.2,
+  "position": [500, 300],
+  "parameters": {
+    "operation": "getAll",
+    "calendar": { "__rl": true, "value": "primary", "mode": "list", "cachedResultName": "primary" },
+    "options": {
+      "timeMin": "={{ $now.toUTC() }}",
+      "timeMax": "={{ $now.plus(7, 'days').toUTC() }}",
+      "singleEvents": true,
+      "orderBy": "startTime"
+    }
+  },
+  "credentials": {
+    "googleCalendarOAuth2Api": { "id": "1", "name": "Google Calendar account" }
+  }
+}
+```
+
+### Google Calendar — Create Event
+```json
+{
+  "name": "Create Calendar Event",
+  "type": "n8n-nodes-base.googleCalendar",
+  "typeVersion": 1.2,
+  "position": [700, 300],
+  "parameters": {
+    "calendar": { "__rl": true, "value": "primary", "mode": "list", "cachedResultName": "primary" },
+    "start": "={{ $json.startTime }}",
+    "end": "={{ $json.endTime }}",
+    "additionalFields": {
+      "summary": "={{ $json.title }}",
+      "description": "={{ $json.description }}",
+      "attendees": ["={{ $json.attendeeEmail }}"],
+      "conferenceDataUi": {
+        "conferenceDataValues": { "conferenceSolution": "hangoutsMeet" }
+      }
+    }
+  },
+  "credentials": {
+    "googleCalendarOAuth2Api": { "id": "1", "name": "Google Calendar account" }
+  }
+}
+```
+`start`/`end` must be ISO 8601 strings. `attendees` is an array of email strings.
+
+### Google Docs — Get Document
+```json
+{
+  "name": "Google Docs",
+  "type": "n8n-nodes-base.googleDocs",
+  "typeVersion": 2,
+  "position": [500, 300],
+  "parameters": {
+    "operation": "get",
+    "documentURL": "DOCUMENT_ID_OR_URL"
+  },
+  "credentials": {
+    "googleDocsOAuth2Api": { "id": "1", "name": "Google Docs account" }
+  }
+}
+```
+Returns document content as plain text in `$json.body`. Use `operation: "update"` + `actionsUi` to append/replace content.
+
+### Airtable — Create Record
+```json
+{
+  "name": "Airtable",
+  "type": "n8n-nodes-base.airtable",
+  "typeVersion": 2.1,
+  "position": [500, 300],
+  "parameters": {
+    "operation": "create",
+    "base": { "__rl": true, "value": "BASE_ID", "mode": "list", "cachedResultName": "My Base" },
+    "table": { "__rl": true, "value": "TABLE_ID", "mode": "list", "cachedResultName": "My Table" },
+    "columns": {
+      "mappingMode": "autoMapInputData",
+      "value": {},
+      "schema": []
+    }
+  },
+  "credentials": {
+    "airtableTokenApi": { "id": "1", "name": "Airtable account" }
+  }
+}
+```
+`operation`: `"create"`, `"read"`, `"update"`, `"delete"`. `base`/`table` require `__rl`. Field names in `columns.value` must exactly match Airtable column names.
+
+### PostgreSQL — Select
+```json
+{
+  "name": "Postgres",
+  "type": "n8n-nodes-base.postgres",
+  "typeVersion": 2.5,
+  "position": [500, 300],
+  "parameters": {
+    "operation": "select",
+    "schema": { "__rl": true, "value": "public", "mode": "list", "cachedResultName": "public" },
+    "table": { "__rl": true, "value": "my_table", "mode": "list", "cachedResultName": "my_table" },
+    "where": {
+      "values": [{ "column": "id", "value": "={{ $json.id }}" }]
+    },
+    "options": {}
+  },
+  "credentials": {
+    "postgres": { "id": "1", "name": "Postgres account" }
+  }
+}
+```
+
+### PostgreSQL — Insert
+```json
+{
+  "name": "Postgres Insert",
+  "type": "n8n-nodes-base.postgres",
+  "typeVersion": 2.5,
+  "position": [700, 300],
+  "parameters": {
+    "operation": "insert",
+    "schema": { "__rl": true, "value": "public", "mode": "list", "cachedResultName": "public" },
+    "table": { "__rl": true, "value": "my_table", "mode": "list", "cachedResultName": "my_table" },
+    "columns": {
+      "mappingMode": "autoMapInputData",
+      "value": {},
+      "schema": []
+    },
+    "options": {}
+  },
+  "credentials": {
+    "postgres": { "id": "1", "name": "Postgres account" }
+  }
+}
+```
+`operation`: `"select"`, `"insert"`, `"update"`, `"delete"`, `"executeQuery"`. Both `schema` and `table` require `__rl`.
+
+### Supabase — Get All Rows
+```json
+{
+  "name": "Supabase",
+  "type": "n8n-nodes-base.supabase",
+  "typeVersion": 1,
+  "position": [500, 300],
+  "parameters": {
+    "tableId": "my_table",
+    "operation": "getAll"
+  },
+  "credentials": {
+    "supabaseApi": { "id": "1", "name": "Supabase account" }
+  }
+}
+```
+
+### Supabase — Create Row
+```json
+{
+  "name": "Supabase Create",
+  "type": "n8n-nodes-base.supabase",
+  "typeVersion": 1,
+  "position": [700, 300],
+  "parameters": {
+    "tableId": "my_table",
+    "fieldsUi": {
+      "fieldValues": [
+        { "fieldId": "field1", "fieldValue": "={{ $json.field1 }}" },
+        { "fieldId": "field2", "fieldValue": "={{ $json.field2 }}" }
+      ]
+    }
+  },
+  "credentials": {
+    "supabaseApi": { "id": "1", "name": "Supabase account" }
+  }
+}
+```
+`operation`: `"create"`, `"getAll"`, `"get"`, `"update"`, `"delete"`. `fieldId` must match exact Supabase column names.
+
+### SerpAPI Tool (sub-node)
+```json
+{
+  "name": "SerpAPI",
+  "type": "@n8n/n8n-nodes-langchain.toolSerpApi",
+  "typeVersion": 1,
+  "position": [500, 500],
+  "parameters": {
+    "options": {}
+  },
+  "credentials": {
+    "serpApi": { "id": "1", "name": "SerpAPI account" }
+  }
+}
+```
+Connect via `ai_tool`. Gives AI Agent live web search capability.
+
+### Workflow Tool (sub-node — call another workflow as a tool)
+```json
+{
+  "name": "Call Sub-Workflow",
+  "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+  "typeVersion": 1.2,
+  "position": [700, 500],
+  "parameters": {
+    "name": "tool_name",
+    "description": "Describe when and how the agent should use this tool.",
+    "workflowId": { "__rl": true, "value": "WORKFLOW_ID", "mode": "id" },
+    "fields": { "values": [] }
+  }
+}
+```
+Connect via `ai_tool`. `name` must be snake_case (no spaces). `fields.values` passes named inputs to the sub-workflow. Use `jsonSchemaExample` for complex input schemas.
+
+### Execute Workflow
+```json
+{
+  "name": "Execute Workflow",
+  "type": "n8n-nodes-base.executeWorkflow",
+  "typeVersion": 1.1,
+  "position": [700, 300],
+  "parameters": {
+    "workflowId": { "__rl": true, "value": "WORKFLOW_ID", "mode": "id" },
+    "mode": "each",
+    "options": {}
+  }
+}
+```
+`mode`: `"each"` (one execution per input item) or `"once"` (single execution, all items passed). Connects via `main`.
 
 ### Notion — Create Database Item
 ```json
@@ -654,10 +906,13 @@ Connect via `ai_outputParser`.
   "Trigger":              { "main":              [[{ "node": "AI Agent", "type": "main",              "index": 0 }]] },
   "OpenAI Chat Model":   { "ai_languageModel":  [[{ "node": "AI Agent", "type": "ai_languageModel", "index": 0 }]] },
   "Calculator":          { "ai_tool":           [[{ "node": "AI Agent", "type": "ai_tool",          "index": 0 }]] },
+  "SerpAPI":             { "ai_tool":           [[{ "node": "AI Agent", "type": "ai_tool",          "index": 0 }]] },
+  "Call Sub-Workflow":   { "ai_tool":           [[{ "node": "AI Agent", "type": "ai_tool",          "index": 0 }]] },
   "Window Buffer Memory":{ "ai_memory":         [[{ "node": "AI Agent", "type": "ai_memory",        "index": 0 }]] },
   "Structured Output Parser": { "ai_outputParser": [[{ "node": "AI Agent", "type": "ai_outputParser", "index": 0 }]] }
 }
 ```
+Multiple tools connect to the same `ai_tool` port — each uses `"index": 0`.
 
 ### Loop (Split In Batches)
 ```json
@@ -729,6 +984,8 @@ Credential IDs (`"id": "1"`) are placeholders — user maps real credentials in 
 | Google Docs | `googleDocsOAuth2Api` |
 | Notion | `notionApi` |
 | Airtable | `airtableTokenApi` |
+| Supabase | `supabaseApi` |
+| SerpAPI | `serpApi` |
 | OpenAI (LangChain) | `openAiApi` |
 | Anthropic / Claude | `anthropicApi` |
 | GitHub | `githubApi` |
