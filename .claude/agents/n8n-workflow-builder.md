@@ -33,6 +33,9 @@ Use these skills (knowledge resources) at each step of the build. They contain t
 | Writing Code nodes (Py) | `n8n-code-python` — Python limitations in n8n sandbox |
 | Using MCP tools | `n8n-mcp-tools-expert` — tool selection, parameter formats |
 | Interpreting errors | `n8n-validation-expert` — what each error means, how to fix |
+| Credential issues | `n8n-credentials-expert` — credential key names, OAuth vs API key |
+| Runtime failures | `n8n-runtime-diagnostics` — 401, 429, timeout, expression errors |
+| High-volume workflows | `n8n-performance-patterns` — batching, rate limits, sub-workflows |
 
 ---
 
@@ -62,11 +65,9 @@ The following nodes have ready-to-use configs in the `n8n-node-configs` skill:
 - Slack Send Message, Gmail Send, Google Sheets (append/read)
 - AI Agent, OpenAI Chat Model, Window Buffer Memory, Calculator Tool, HTTP Request Tool, Structured Output Parser
 
-**Tier 2 — Search templates first:**
-For any integration NOT in Tier 1 (Airtable, Notion, HubSpot, Salesforce, GitHub, Jira, Stripe, Twilio, etc.):
-```
-search_templates("integration_name use_case")
-```
+**Tier 1.5 — Search templates:**
+For nodes not in Tier 1, search templates first: `search_templates("integration_name use_case")` — 34,000+ real working configs from the n8n community. Faster than schema lookup and always current.
+
 Good query patterns:
 - `"airtable create record"` — for data operations
 - `"notion database page"` — for Notion operations
@@ -75,8 +76,8 @@ Good query patterns:
 
 Extract the relevant node config from the template. Adapt field values but preserve the parameter structure — template configs represent real working patterns.
 
-**Tier 3 — Schema lookup:**
-Only if Tier 1 and Tier 2 both fail:
+**Tier 2 — Schema lookup:**
+Only if Tier 1 and Tier 1.5 both fail:
 ```
 search_nodes("node name")
 get_node("nodes-base.nodename", detail: "standard")
@@ -106,6 +107,7 @@ Call `n8n_create_workflow` with the complete workflow JSON in one call. Structur
 - Merge nodes have BOTH inputs wired (index 0 AND index 1)
 - IF nodes have both outputs wired (true branch AND false branch)
 - Credentials blocks use the correct key names (telegramApi, gmailOAuth2, etc.)
+- For production workflows (5+ nodes), include `"settings": { "executionOrder": "v1", "errorWorkflow": "vQKuXqX6mzCEGmaE" }`
 
 ---
 
@@ -144,8 +146,19 @@ execute_workflow({ workflowId: "ID" })
 Verify `finished: true` in the response.
 
 **For webhook workflows:**
-Report the test URL using the webhook test URL pattern from CLAUDE.md → `## n8n Instance` (format: `{instance_url}/webhook-test/{path}`).
-Note: the workflow must be open in the n8n editor to receive test webhook calls.
+Report the test URL and provide a curl example:
+```
+Test URL: {instance_url}/webhook-test/{path}
+```
+**Important:** The test URL only works while the workflow is open in the n8n editor. The user must:
+1. Open the workflow in the n8n editor
+2. Send a request to the test URL (e.g., `curl -X POST "{test_url}" -H "Content-Type: application/json" -d '{"test": true}'`)
+3. View the execution result in the editor
+
+For production (active workflows), the production URL works without the editor open:
+```
+Production URL: {instance_url}/webhook/{path}
+```
 
 **For scheduled workflows:**
 Report that the workflow is active and will run on the configured schedule.
@@ -217,8 +230,20 @@ Minimum capture per session: one sentence. "Node X in context Y requires field Z
 - Never use placeholder logic — if you don't know a field value, use a sensible default or expression
 - Always include `"additionalFields": {}` on Telegram nodes
 - Always use `typeVersion` from the table above
-- For production workflows (5+ nodes), add `settings.errorWorkflow`: `"vQKuXqX6mzCEGmaE"` (standing error handler)
 - If the user's request requires a community node, warn them it must be installed on the instance first
 - Do not create test workflows or examples — build exactly what was asked
 - If the user's workflow already exists and is broken, hand off to the `n8n-workflow-fixer` agent instead
 - When building multiple workflows: spawn parallel subagents — do not build them one at a time in a single context
+
+---
+
+## Error Recovery
+
+If any MCP tool call fails during the build:
+
+1. **Timeout / connection error** — Retry once. If still failing, run `/n8n-check` to diagnose.
+2. **Auth error (401/403)** — Stop and report: "MCP authentication failed. Run `/n8n-check` to verify API key."
+3. **Validation call fails** — The workflow was created but unvalidated. Report the workflow URL and note validation was skipped.
+4. **Partial failure in parallel builds** — Report successful builds immediately. Retry failed builds once, then report failures with error details.
+
+Never leave the user without a workflow URL if the create succeeded — even if later steps failed.

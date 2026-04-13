@@ -233,3 +233,111 @@ email = _json.get("body", {}).get("email")
 - [COMMON_PATTERNS.md](COMMON_PATTERNS.md) — Python patterns for n8n
 - [ERROR_PATTERNS.md](ERROR_PATTERNS.md) — error guide
 - [STANDARD_LIBRARY.md](STANDARD_LIBRARY.md) — standard library reference
+
+---
+
+## Additional Notes
+
+### Common Use Cases
+
+**Use Case 1: Process Webhook Data**
+```python
+webhook = _input.first()["json"]
+body = webhook.get("body", {})
+
+return [{
+    "json": {
+        "name": body.get("name"),
+        "email": body.get("email"),
+        "processed": True
+    }
+}]
+```
+
+**Use Case 2: Filter and Transform**
+```python
+all_items = _input.all()
+
+active = [
+    {"json": {**item["json"], "filtered": True}}
+    for item in all_items
+    if item["json"].get("status") == "active"
+]
+
+return active
+```
+
+**Use Case 3: Aggregate Statistics**
+```python
+import statistics
+
+all_items = _input.all()
+amounts = [item["json"].get("amount", 0) for item in all_items]
+
+return [{
+    "json": {
+        "total": sum(amounts),
+        "average": statistics.mean(amounts) if amounts else 0,
+        "count": len(amounts)
+    }
+}]
+```
+
+**Use Case 4: Parse JSON String**
+```python
+import json
+
+data = _input.first()["json"]["body"]
+json_string = data.get("payload", "{}")
+
+try:
+    parsed = json.loads(json_string)
+    return [{"json": parsed}]
+except json.JSONDecodeError:
+    return [{"json": {"error": "Invalid JSON"}}]
+```
+
+### Limitations and Workarounds
+
+**No HTTP Requests Library**
+- Problem: No `requests` library
+- Workaround: Use HTTP Request node or switch to JavaScript
+
+**No Data Analysis Library**
+- Problem: No `pandas` or `numpy`
+- Workaround: Use list comprehensions and standard library (especially `statistics` module)
+
+**No Database Drivers**
+- Problem: No `psycopg2`, `pymongo`, etc.
+- Workaround: Use n8n database nodes (Postgres, MySQL, MongoDB)
+
+**No Web Scraping**
+- Problem: No `beautifulsoup4` or `selenium`
+- Workaround: Use HTML Extract node
+
+### Best Practices
+
+1. **Use JavaScript for most cases** (95% recommendation)
+2. **Use .get() for dictionaries** (avoid KeyError)
+3. **Check lengths before indexing** (avoid IndexError)
+4. **Always return proper format**: `[{"json": {...}}]`
+5. **Access webhook data via ["body"]**
+6. **Use standard library only** (no external imports)
+7. **Handle empty input** (check `if items:`)
+8. **Test both modes** (All Items and Each Item)
+
+### When Python is the Right Choice
+
+**Use Python when:**
+- Complex text processing (re module)
+- Mathematical calculations (math, statistics)
+- Date/time manipulation (datetime)
+- Cryptographic operations (hashlib)
+- You have existing Python logic to reuse
+- Team is more comfortable with Python
+
+**Use JavaScript instead when:**
+- Making HTTP requests
+- Working with dates (Luxon included)
+- Most data transformations
+- When in doubt

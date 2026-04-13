@@ -1,6 +1,6 @@
 ---
 name: n8n-learn
-description: Capture and persist learnings from this n8n session into CLAUDE.md and memory. Run after any build, fix, or audit where something new was discovered. Keeps the knowledge base growing.
+description: Capture new patterns, failure modes, credential types, or node configs discovered this session. Updates CLAUDE.md and project memory so future builds benefit. Use after sessions that revealed something non-obvious.
 ---
 
 Capture learnings from this n8n session. $ARGUMENTS
@@ -21,7 +21,7 @@ Use this command after any session where you encountered:
 
 If the user provides specific findings in `$ARGUMENTS`, pass them directly to the skill.
 
-If called with no arguments (just `/n8n-learn`), ask the user: "What did you discover this session that should be remembered?" Then pass their answer to the skill.
+If called with no arguments, review the current session for learnings worth capturing (validation errors, new node configs, credential patterns). If nothing is obvious, ask the user: "What did you discover this session?" Then pass to the skill.
 
 ### Output
 

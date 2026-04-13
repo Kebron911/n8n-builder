@@ -174,3 +174,74 @@ For n8n-specific node configs and edge cases in each pattern:
 - [database_operations.md](database_operations.md) — n8n DB node operations, batch sync wiring
 - [ai_agent_workflow.md](ai_agent_workflow.md) — AI connection types, memory types, tool config fields
 - [scheduled_tasks.md](scheduled_tasks.md) — cron config, timezone, error workflow linkage
+
+---
+
+## Additional Notes
+
+### Skill Activation Triggers
+
+This skill activates when you:
+- "build a workflow" or "design a workflow"
+- "what pattern should I use" or "how should I structure this"
+- "webhook processing", "API integration", "database sync"
+- "AI agent", "chatbot", "scheduled task"
+- Any request to plan a new workflow architecture
+
+**Use this BEFORE n8n-node-configuration** (specific node fields) and **BEFORE n8n-mcp-tools-expert** (how to call tools).
+
+### Pattern Coverage
+
+**The 5 Core Patterns with Real Template Counts:**
+
+1. **Webhook Processing** (Most Common - 813 searches)
+   - Receive HTTP requests → Process → Respond
+   - Response mode selection (onReceived vs lastNode)
+   - Authentication and validation
+
+2. **HTTP API Integration** (892 templates)
+   - Fetch from REST APIs → Transform → Store/Use
+   - Pagination, rate limiting, error handling
+   - Authentication patterns
+
+3. **Database Operations** (456 templates)
+   - Read/Write/Sync database data
+   - Batch processing, transactions
+   - Performance considerations
+
+4. **AI Agent Workflow** (234 templates, 270 AI nodes)
+   - AI agents with tool access and memory
+   - 8 AI connection types
+   - Dynamic session keys for isolation
+
+5. **Scheduled Tasks** (28% of all workflows)
+   - Recurring automation workflows
+   - Cron schedules, timezone handling
+   - Error handling and monitoring
+
+### Cross-Cutting Concerns
+
+**Error Handling Patterns:**
+- Per-node error routing (`onError: "continueErrorOutput"`)
+- Dedicated error handler workflows
+- Error Trigger in separate workflow, referenced via `settings.errorWorkflow`
+
+**Data Flow Patterns:**
+- Linear: Trigger → Process → Action
+- Branching: IF/Switch conditions for routing
+- Parallel: Multiple node paths
+- Loops: Batch processing, pagination loops
+
+**When NOT to Use These Patterns:**
+
+- Simple field mapping → Use Set node directly
+- One-off transformations → No pattern needed
+- Trivial filtering → Use Filter node
+
+### Integration with Other Skills
+
+This skill works with:
+- **n8n MCP Tools Expert** — Find and configure nodes for patterns
+- **n8n Expression Syntax** — Write expressions in pattern nodes
+- **n8n Node Configuration** — Configure pattern nodes
+- **n8n Validation Expert** — Validate pattern implementations

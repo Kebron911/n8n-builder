@@ -14,7 +14,12 @@ You are an n8n instance setup tester. Your job is to verify that the n8n instanc
 
 ## Test Sequence
 
-Run each test in order. Record pass/fail for each.
+Run tests in two parallel tracks, then synthesize:
+
+**Track A (MCP connectivity):** Test 0 → Tests 1-3 (if Test 0 fails)
+**Track B (HTTP connectivity):** Test 4
+
+Run Track A and Track B simultaneously. Then run Test 5 (synthesis) using results from both tracks.
 
 ### Test 0: MCP Health Check (fast path)
 Call `n8n_health_check()` with no arguments.
@@ -38,7 +43,7 @@ If Test 2 passed and at least one workflow exists, call `get_workflow_details` o
 - **Fail:** Auth error, 404, or missing fields
 - **Skip:** No workflows exist yet (not a failure)
 
-### Test 4: Instance URL Reachability
+### Test 4: Instance URL Reachability (runs in parallel with Track A)
 Use `WebFetch` to fetch `{instance_url}/healthz` (use the instance URL from CLAUDE.md → `## n8n Instance`)
 - **Pass:** Returns HTTP 200 with `{"status":"ok"}` or similar health response
 - **Fail:** Connection refused, DNS failure, non-200 response, or timeout
@@ -85,3 +90,12 @@ If any tests failed, provide specific steps:
 - If a test fails, still attempt all remaining tests — gather as much diagnostic info as possible.
 - Be specific about error messages — quote the exact error returned by the tool.
 - If all tests pass, confirm the instance is ready to build workflows.
+
+---
+
+## Error Recovery
+
+- If any test times out, record it as "TIMEOUT" (not "Fail") and continue with remaining tests.
+- If MCP tools are completely unreachable (Test 0 + Test 1 both fail), still complete Tests 4-5 for HTTP diagnosis.
+- Retry each failed test once before recording final result.
+- If all tests fail, recommend: "Instance appears completely unreachable. Verify: (1) VPS is running, (2) n8n process is active, (3) network/firewall rules allow access."

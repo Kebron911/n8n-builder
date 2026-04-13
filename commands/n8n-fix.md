@@ -1,6 +1,6 @@
 ---
 name: n8n-fix
-description: Fix errors in one or more existing n8n workflows. Pass a workflow ID, name, or list of IDs. Parallelizes when multiple workflows need fixing.
+description: Fix validation and runtime errors in existing n8n workflows. Pass workflow IDs, names, or a comma-separated list. Fixes in priority order: typeVersion → nodeType → __rl → missing fields → credentials → connections → code. Parallelizes for multiple workflows.
 ---
 
 Fix n8n workflow errors. Target: $ARGUMENTS
@@ -24,15 +24,6 @@ Merge all individual fix reports into a unified summary at the end.
 
 Invoke `n8n-workflow-fixer` directly with the workflow ID or name.
 
----
+The fixer handles the full fix lifecycle — see `n8n-workflow-fixer` agent for details.
 
-The fixer will:
-1. Fetch the workflow from the instance
-2. Run `n8n_validate_workflow` to collect all errors
-3. Fix errors in priority order: `__rl` fields → typeVersion → connections → credential keys → code syntax
-4. Re-validate after each fix round (max 3 attempts)
-5. Optionally activate when 0 errors remain (if user requested)
-6. Report every fix applied and any remaining manual-fix items
-7. Use `n8n-capture-learning` to record any new error patterns
-
-To review a workflow's JSON **before** it's on the instance, use the `n8n-json-checker` skill instead.
+To review workflow JSON **before** it's on the instance, use the `n8n-json-checker` skill instead.

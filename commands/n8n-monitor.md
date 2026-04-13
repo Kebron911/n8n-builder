@@ -1,6 +1,6 @@
 ---
 name: n8n-monitor
-description: Display a fast status dashboard of all n8n workflows — active/inactive, trigger types, credential gaps. Use for a quick overview or to drill into a specific workflow. For deep structural validation across all workflows, use /n8n-audit instead.
+description: Fast read-only dashboard of all n8n workflows. Shows active/inactive status, trigger types, credential gaps, and error handler configuration. Supports drill-down on a single workflow by name or ID. Does NOT run deep validation — use /n8n-audit for that.
 ---
 
 Show the n8n workflow monitoring dashboard. $ARGUMENTS

@@ -1,6 +1,6 @@
 ---
 name: n8n-check
-description: Test n8n instance connectivity and MCP tool health. Diagnoses connection issues, API key problems, and verifies the instance is ready to build workflows.
+description: Test n8n instance connectivity (HTTP + MCP) and API configuration. Runs diagnostic tests covering MCP health, tool access, workflow API, and instance reachability. Run this first when builds fail or MCP tools error.
 ---
 
 Run an n8n instance health check.

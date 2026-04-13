@@ -25,7 +25,7 @@ Then follow this sequence:
 1. **Identify nodes** — Determine trigger + action nodes from the request
 2. **Source node configs** using this decision tree:
    - **In `n8n-node-configs` skill?** → use directly, no MCP lookup needed (covers ~20 common nodes)
-   - **Need a real parameter example?** → `Grep` in `unique_node_configs.jsonl` (repo root) — 195 unique node types scraped from live workflows
+   - **Need a real parameter example?** → `search_templates("node-name use-case")` — 34,000+ real configs, always current
    - **Complex/unfamiliar integration?** → `search_templates` first — 34,000+ real configs
    - **Not found in templates?** → `search_nodes` → `get_node` (detail: `"standard"`)
 3. **Create** — `n8n_create_workflow` with full correct config in one call
@@ -68,7 +68,7 @@ Many node fields require the `__rl` object format — a plain string fails at ru
 { "__rl": true, "value": "gid=0", "mode": "list", "cachedResultName": "Sheet1" }
 ```
 
-**Full node/field list:** see `n8n-json-checker` skill (section 2.2) — 20 nodes covered.
+**For the complete `__rl` format table and all 20+ node/field combinations,** see `n8n-json-checker` skill (section 2.2).
 
 ---
 
@@ -89,6 +89,18 @@ If OpenAI Chat Model, memory, or tool nodes connect to an AI Agent via `main` in
 ---
 
 _Add new failure patterns via the `n8n-capture-learning` skill._
+
+---
+
+## Additional Skills
+
+These skills complement the build process for specific problem domains:
+
+| Skill | When to use |
+|-------|-------------|
+| `n8n-credentials-expert` | Credential key names, OAuth vs API key patterns, placeholder conventions, fixing credential validation errors |
+| `n8n-runtime-diagnostics` | Debugging runtime failures (401, 429, ECONNREFUSED, expression errors, timeouts). Use when `/n8n-test` or `/n8n-logs` shows execution errors. |
+| `n8n-performance-patterns` | Batching, rate limits, timeouts, sub-workflow orchestration. Use when building workflows that process 100+ items or call rate-limited APIs. |
 
 ---
 

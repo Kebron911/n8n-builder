@@ -131,3 +131,77 @@ Fix everything in `errors`. Review `warnings` only if they indicate a real misco
 - **n8n MCP Tools Expert** — correct tool names and parameter formats
 - **n8n Expression Syntax** — fix `invalid_expression` errors
 - **n8n Node Configuration** — find required fields for `missing_required` errors
+
+---
+
+## Additional Notes
+
+### Understanding Validation as an Iterative Process
+
+Validation is not a one-shot affair — it's iterative:
+
+**Key Metrics from Real Workflows:**
+- 79% of validation runs lead to feedback loops (errors requiring fixes)
+- Average 2-3 iterations to achieve valid configuration
+- 7,841 validate → fix cycles observed in practice
+- Average timing: 23 seconds thinking + 58 seconds fixing per cycle
+
+### Error Severity Levels
+
+**Errors (must fix)** - Block execution
+- missing_required
+- invalid_value
+- type_mismatch
+- invalid_expression
+- invalid_reference
+
+**Warnings (should fix)** - Don't block but indicate issues
+- Performance concerns
+- Best practice violations
+- Configuration inefficiencies
+- 40% of warnings are acceptable in context
+
+**Suggestions (optional)** - Nice-to-have improvements
+- Code optimization hints
+- Documentation suggestions
+- Refactoring recommendations
+
+### The Validation Loop Pattern
+
+```
+Configure → Validate → Read errors → Fix → Validate again
+```
+
+**Average per iteration:**
+1. Configure node(s): 30 seconds
+2. Validate: 5 seconds
+3. Read error message: 10 seconds
+4. Identify fix: 8 seconds
+5. Apply fix: 15 seconds
+6. Subtotal per iteration: ~68 seconds
+
+**Total for typical 5-node workflow:** 2-3 iterations = 2-3 minutes
+
+### False Positives and ai-friendly Profile
+
+**When to use ai-friendly profile:**
+- AI-generated configurations (often contain minor non-critical issues)
+- Reduces false positives by 60%
+- Still validates all critical errors
+- Useful when testing untested configurations
+
+**Acceptable warnings (don't require fixing):**
+- Missing optional fields (nice-to-have)
+- Performance suggestions on small workflows
+- Documentation recommendations
+- Style/consistency hints
+
+### Recovery Strategies
+
+When stuck in validation loop (3+ iterations):
+
+1. **Check node connections** — Use `cleanStaleConnections` operation
+2. **Validate simpler version first** — Remove optional features temporarily
+3. **Use minimal profile** — Narrow down to just required fields
+4. **Preview autofix** — Use `n8n_autofix_workflow` with `applyFixes: false` first
+5. **Escalate to strict profile** — Find edge cases missed by runtime profile

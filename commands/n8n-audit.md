@@ -1,6 +1,6 @@
 ---
 name: n8n-audit
-description: Audit all workflows on the n8n instance. Produces a structured health report with errors, warnings, credential gaps, and action items. Automatically parallelizes across large workflow sets.
+description: Deep structural audit of all workflows. Validates every workflow for errors, wiring issues, missing triggers, and credential gaps. Produces prioritized report with action items. Parallelizes in batches of 5 for 11+ workflows.
 ---
 
 Audit all n8n workflows on the instance. $ARGUMENTS

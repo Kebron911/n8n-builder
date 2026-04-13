@@ -1,6 +1,6 @@
 ---
 name: n8n-test
-description: Execute an existing n8n workflow on-demand and inspect the output. Pass a workflow ID or name. Handles both manual-trigger and webhook workflows, pretty-prints node output, and surfaces runtime errors.
+description: Execute a manual-trigger workflow on-demand and inspect node output, or show test URL for webhook workflows. Does NOT execute schedule/timer triggers. Pass a workflow ID or name. Flags: --last (show last execution instead of re-running).
 ---
 
 Execute and inspect an existing n8n workflow. Target: $ARGUMENTS

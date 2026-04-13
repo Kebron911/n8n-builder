@@ -87,9 +87,45 @@ curl -X POST "[test_url]" \
   -d '{"key": "value"}'
 ```
 
+### Schedule / Timer trigger workflows
+
+Do not attempt to execute — schedule triggers fire on a timer, not on-demand. Instead:
+
+```
+## Test Instructions: [Workflow Name]
+**Trigger type:** Schedule / Cron
+**Active:** yes/no
+**Schedule:** [cron expression or interval from trigger node config]
+
+This workflow runs automatically on a schedule. To test it manually:
+1. Temporarily change the trigger to Manual Trigger in the n8n editor
+2. Execute from the editor
+3. Change the trigger back to Schedule when done
+
+**Last execution:** [fetch via executions API if available, or "No executions found"]
+```
+
+### Event-based trigger workflows (Telegram, email, etc.)
+
+Do not attempt to execute — these triggers wait for external events. Instead:
+
+```
+## Test Instructions: [Workflow Name]
+**Trigger type:** [Telegram / Email / etc.]
+
+This workflow starts when an external event occurs. To test:
+- **Telegram:** Send a message to the bot configured in the workflow
+- **Email:** Send an email to the monitored inbox
+- Alternatively, temporarily switch to Manual Trigger for a dry run
+
+**Last execution:** [fetch if available]
+```
+
 ### `--last` flag
 
 If the user passed `--last`, skip execution. Instead fetch the most recent execution via the executions API (see Logs Mode → API Call) and display its result using the same output format above.
+
+**Note:** `--last` is a convenience shortcut. For more control (specific execution ID, filtering by status), use `/n8n-logs [id] --exec [execution-id]` instead.
 
 ---
 
@@ -112,7 +148,13 @@ Authorization: Bearer {api_key}  ← use X-N8N-API-KEY header
 
 Include header: `X-N8N-API-KEY: [api key from MCP config]`
 
-If the MCP exposes an executions tool (check `tools_documentation`), prefer that over WebFetch.
+**Error handling:** If the WebFetch call fails:
+- **Connection refused / timeout** — Report: "Cannot reach n8n instance. Run `/n8n-check` to diagnose."
+- **401/403** — Report: "API authentication failed. Verify N8N_API_KEY in .mcp.json."
+- **404** — Report: "Executions endpoint not found. Check n8n version supports REST API v1."
+- **Empty response** — Report: "No execution data returned. The workflow may have zero executions."
+
+If the MCP exposes an executions-related tool (check `tools_documentation` first), prefer that over WebFetch — MCP tools handle auth automatically.
 
 ### Execution list output format
 
@@ -168,4 +210,13 @@ Never print the full API key in output — truncate to first 8 chars: `sk-n8n-ab
 - If `execute_workflow` returns an error about the workflow being inactive, offer to activate it first (ask before doing so).
 - If a workflow has 0 past executions, say so clearly rather than showing an empty table.
 - Truncate large output payloads — show first 500 chars per item, note if truncated.
-- If node output contains sensitive-looking keys (password, secret, token, key, auth), replace value with `[redacted]`.
+- Redact sensitive data in output: scan for keys containing `password`, `secret`, `token`, `key`, `auth`, `apiKey`, `accessToken`, `bearer`, `credential`, `private` (case-insensitive). Also redact values that look like tokens (long base64 strings, strings starting with `sk-`, `Bearer `, `Basic `). Replace with `[redacted]`.
+
+---
+
+## Error Recovery
+
+1. **execute_workflow timeout** — The workflow may still be running on the instance. Report: "Execution timed out after [N]s. The workflow may still be running — check the n8n editor for status."
+2. **WebFetch fails in logs mode** — See error handling notes in Logs Mode section. Do not silently return empty results.
+3. **Workflow not found** — If search returns no matches, suggest: "No workflow found matching '[query]'. Run `/n8n-monitor` to see all workflows."
+4. **execute_workflow returns inactive error** — Offer: "Workflow is inactive. Would you like me to activate it first?"

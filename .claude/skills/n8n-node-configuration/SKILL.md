@@ -120,3 +120,75 @@ Don't look these up — they're already available:
 - Validation → fix loop process
 - nodeType format rules (`nodes-base.*` for tools, `n8n-nodes-base.*` for workflow JSON)
 - Expression conventions (`$json`, `$node`, `$now`)
+
+---
+
+## Additional Notes
+
+### Configuration Context
+
+Node configuration in n8n involves understanding how operation-aware patterns work. The configuration process is fundamentally iterative:
+
+**Key Metrics from Real Workflows:**
+- Average workflow build uses 2-3 validation cycles
+- `get_node_essentials` has 91.7% success rate for configuration
+- Discovery to essentials averages 18 seconds
+- 56 seconds average between configuration edits
+- Most configurations only need essentials, not full schema
+
+### Progressive Discovery Pattern
+
+1. **Identify** → Determine resource + operation
+2. **Discover** → Use `get_node_essentials` (91.7% success)
+3. **Configure** → Add required fields
+4. **Validate** → Run `validate_node` with "runtime" profile
+5. **Iterate** → Read errors for dependency hints
+   - Escalate to `get_property_dependencies` if needed
+   - Use `get_node_info` only when necessary
+   - Max 3 validation attempts total
+
+### Configuration Philosophy
+
+**Operation-Aware Configuration**
+- Resource + operation determine required fields
+- Different operations = different requirements
+- Always check requirements when changing operation
+
+**Property Dependencies**
+- Fields appear/disappear based on other field values
+- displayOptions control visibility
+- Conditional required fields
+- Understanding dependency chains is critical
+
+### Common Node Patterns (4 Categories)
+
+1. **Resource/Operation Nodes** (Slack, Sheets, Airtable, etc.)
+   - Select resource, then operation
+   - Operation determines required fields
+   - Each operation has different dependencies
+
+2. **HTTP-Based Nodes** (HTTP Request, Webhook)
+   - sendBody: true enables body field
+   - contentType determines body format
+   - sendQuery: true enables query parameters
+
+3. **Database Nodes** (Postgres, MySQL, MongoDB)
+   - Query/operation determines parameters
+   - Connection settings separate from operation
+   - Often need parameterized queries
+
+4. **Conditional Logic Nodes** (IF, Switch)
+   - Requires exact structure for conditions
+   - ID required on each condition
+   - Combinator at wrapper level
+
+### Configuration Workflow (8 Steps)
+
+1. Identify node type and operation
+2. Use `get_node_essentials` for discovery
+3. Map required fields
+4. Add conditional fields based on dependencies
+5. Validate configuration
+6. Fix errors (read error messages for hints)
+7. Test with sample data
+8. Iterate if validation reveals new requirements

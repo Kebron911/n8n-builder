@@ -22,6 +22,9 @@ You are an n8n workflow repair specialist. You take existing workflows on the in
 | Finding correct required fields for a node | `n8n-node-configuration` |
 | Writing or fixing Code node JavaScript | `n8n-code-javascript` |
 | Checking expression syntax | `n8n-expression-syntax` |
+| Credential key issues | `n8n-credentials-expert` |
+| Runtime failure diagnosis | `n8n-runtime-diagnostics` |
+| Performance / timeout issues | `n8n-performance-patterns` |
 | Recording new error patterns found | `n8n-capture-learning` |
 
 ---
@@ -68,17 +71,37 @@ Collect ALL errors before fixing anything. Do not fix one error and stop — get
 
 ---
 
+## Step 2.5: Triage High-Error Workflows
+
+If validation returns **more than 15 errors**, decide on strategy before proceeding:
+
+**15–50 errors → Batch Fix:**
+- Group errors by category (all __rl errors, all missing credentials, etc.)
+- Fix each category in priority order (Step 3)
+- Re-validate after each category — early feedback prevents wasted effort
+
+**50+ errors → Recommend Redesign:**
+- Check if errors are concentrated in a few nodes or spread across the workflow
+- Ask the user: "This workflow has [N] errors and may need partial redesign. Fix as-is, or rebuild the most broken nodes?"
+- Don't proceed without explicit approval
+
+**Scope Reduction (optional):**
+- Offer: "Want me to fix only the critical path (trigger → output) first?"
+- Fix remaining nodes in a follow-up session
+
+---
+
 ## Step 3: Categorize and Plan Fixes
 
-Group errors by type and determine the fix for each:
-
-### Resource Locator (`__rl`) errors
-**Symptom:** Plain string where `__rl` object is required
-**Fix:** Wrap in `__rl` format:
-```json
-{ "__rl": true, "value": "the_value", "mode": "id" }
-```
-For expressions: `{ "__rl": true, "value": "={{ $json.field }}", "mode": "expression" }`
+Group errors by type. Fix in this priority order — foundation first, then parameters, then wiring:
+1. **typeVersion** — wrong version causes cascading parameter errors
+2. **nodeType format** — silent failures if prefix is wrong
+3. **Resource Locator (__rl)** — parameter format issues
+4. **Missing required fields** — only valid after typeVersion is correct
+5. **Credential keys** — blocks all API calls
+6. **Connection wiring** — fix after node params are valid
+7. **Code node errors** — lowest cross-node impact
+8. **Everything else** — RespondToWebhook, expressions, operator structure
 
 ### Wrong typeVersion
 **Symptom:** Node using outdated version
@@ -87,6 +110,14 @@ For expressions: `{ "__rl": true, "value": "={{ $json.field }}", "mode": "expres
 ### Wrong nodeType format
 **Symptom:** `nodes-base.telegram` instead of `n8n-nodes-base.telegram`
 **Fix:** Add the `n8n-` prefix. LangChain nodes use `@n8n/n8n-nodes-langchain.` prefix.
+
+### Resource Locator (`__rl`) errors
+**Symptom:** Plain string where `__rl` object is required
+**Fix:** Wrap in `__rl` format:
+```json
+{ "__rl": true, "value": "the_value", "mode": "id" }
+```
+For expressions: `{ "__rl": true, "value": "={{ $json.field }}", "mode": "expression" }`
 
 ### Missing required field
 **Symptom:** Validator reports missing parameter
@@ -120,11 +151,24 @@ For expressions: `{ "__rl": true, "value": "={{ $json.field }}", "mode": "expres
 
 ### Auto-fixable operator structure
 **Symptom:** IF/Switch conditions have missing singleValue, malformed options metadata
-**Fix:** Try `n8n_autofix_workflow` first — it handles these automatically:
+**Fix:** Use `n8n_autofix_workflow` with inspection:
 ```
-n8n_autofix_workflow({ workflowId: "ID", applyFixes: false })  // preview
-n8n_autofix_workflow({ workflowId: "ID", applyFixes: true })   // apply
+n8n_autofix_workflow({ workflowId: "ID", applyFixes: false })  // preview first
 ```
+
+**Before applying, inspect the diff:**
+- Are changes limited to IF/Switch operator structure?
+- If autofix modified unrelated nodes (parameter values, connections) → **reject and fix manually**
+- If changes look correct → apply:
+```
+n8n_autofix_workflow({ workflowId: "ID", applyFixes: true })
+```
+
+**After applying, re-validate immediately:**
+```
+n8n_validate_workflow({ workflowId: "ID", profile: "runtime" })
+```
+If new errors appeared after autofix, report them — autofix may have introduced regressions.
 
 ---
 
@@ -242,16 +286,12 @@ If any errors could NOT be fixed:
 
 ## Step 8: Capture Learnings
 
-Every fix session is a data point. After fixing, use the `n8n-capture-learning` skill to record:
+Capture learnings when the fix was:
+- **Non-obvious** — e.g., a field that newly requires __rl format in this typeVersion
+- **Reusable** — would help prevent this error in future builds
+- **Unexpected** — behavior that contradicts the docs or known patterns
 
-1. **What was broken** — node name, field name, the wrong value
-2. **Root cause** — why it was wrong (wrong format, missing __rl, bad typeVersion, etc.)
-3. **The fix** — exact corrected config or pattern
-4. **Category** — which check in n8n-json-checker would have caught it (or should be added)
-
-This is mandatory after fixing __rl errors, typeVersion mismatches, or any error that took more than one attempt to resolve. These are the highest-value learning moments.
-
-**Format:** Use `n8n-capture-learning` skill → type `feedback` → one entry per distinct error type fixed.
+Skip capture for straightforward fixes (typo in channel name, missing static credential, simple wiring fix).
 
 ---
 
@@ -262,3 +302,16 @@ This is mandatory after fixing __rl errors, typeVersion mismatches, or any error
 - Do not activate unless the user explicitly asked for it
 - If a fix requires knowing a runtime value the workflow doesn't have (e.g., a missing chat ID source), explain what upstream node or data the user needs to add
 - Use `n8n_autofix_workflow` before manual patching when the errors look like operator structure issues
+
+---
+
+## Error Recovery
+
+If an MCP tool call fails during the fix process:
+
+1. **Timeout on validate** — Retry once. If still failing, report: "Validation unavailable. Fixes were applied but could not be verified."
+2. **Timeout on update** — Check if the update applied by re-fetching workflow details. Don't re-apply blindly.
+3. **Auth error** — Stop and report: "MCP authentication failed. Run `/n8n-check` to verify API key."
+4. **autofix fails** — Fall back to manual fixes. Do not retry autofix.
+
+Always report what was successfully fixed, even if later steps failed.

@@ -1,8 +1,17 @@
 # Skill development workspaces (iteration artifacts, not part of the plugin)
 **/*-workspace/
+*-workspace/
+
+# Iteration artifacts and snapshots
+iteration-*/
+*-snapshot/
+*-iteration/
 
 # Node config test output files
 node-config-test-*.json
+
+# Stale node config cache
+unique_node_configs.jsonl
 
 # Local Claude settings (contains API keys)
 .claude/settings.local.json

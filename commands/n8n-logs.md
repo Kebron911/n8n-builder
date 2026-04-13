@@ -1,6 +1,6 @@
 ---
 name: n8n-logs
-description: View execution history and runtime logs for an n8n workflow. Shows last N executions with status, duration, error messages, and node-level output. Essential for debugging failed or misbehaving workflows.
+description: View execution history for any n8n workflow. Shows last N runs with status, duration, and error details. Drill into specific executions for node-by-node output. Flags: --limit N, --failed, --exec <id>.
 ---
 
 Show execution logs for an n8n workflow. Target: $ARGUMENTS
