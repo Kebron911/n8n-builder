@@ -1,0 +1,55 @@
+{
+  "skill_name": "n8n-credentials-expert",
+  "evals": [
+    {
+      "id": 1,
+      "eval_name": "gmail-vs-gmailapi-key-lookup",
+      "prompt": "I'm building an n8n workflow that sends an email through Gmail. I added the credentials block like this: \"credentials\": { \"gmailApi\": { \"id\": \"1\", \"name\": \"my gmail\" } } but when I validate the workflow I get 'Unknown credential type gmailApi'. What's the right credential key for the Gmail node, and what should the full block look like?",
+      "expected_output": "The correct key for the Gmail node is gmailOAuth2 (OAuth2 flow), NOT gmailApi. Show the corrected credentials block with id: \"1\" placeholder and a descriptive name. Explain that Gmail requires OAuth2 (user must click Authenticate in the UI) and cannot use a plain API key.",
+      "files": [],
+      "expectations": [
+        "The output identifies the correct credential key as gmailOAuth2 (not gmailApi, not googleGmail, not gmailOAuth2Api)",
+        "The output provides a corrected credentials block with \"id\": \"1\" placeholder",
+        "The output includes a descriptive name field (not 'cred' or 'auth' or empty)",
+        "The output explains Gmail uses OAuth2, not API key authentication",
+        "The output notes the user must click Authenticate in the n8n UI to complete the OAuth flow",
+        "The output mentions that \"id\": \"1\" is a placeholder that n8n maps to the real credential after UI selection",
+        "The output does NOT suggest using gmailApi or any non-OAuth key as a fallback"
+      ]
+    },
+    {
+      "id": 2,
+      "eval_name": "http-header-auth-bearer-token",
+      "prompt": "I need to call an external REST API from n8n using the HTTP Request node. The API requires a bearer token in the Authorization header. How do I configure the authentication and credentials block for the HTTP Request node?",
+      "expected_output": "For the HTTP Request node, set authentication: 'headerAuth' in parameters, and use httpHeaderAuth as the credential key. The user will enter Authorization as the header name and 'Bearer <token>' as the value in the credential form in the UI. Show the exact JSON for parameters + credentials.",
+      "files": [],
+      "expectations": [
+        "The output sets authentication to 'headerAuth' in the node parameters (not 'none', not 'basicAuth', not 'queryAuth')",
+        "The output uses httpHeaderAuth as the credentials key name",
+        "The output includes the \"id\": \"1\" placeholder convention",
+        "The output explains the user enters the header name (Authorization) and value (Bearer <token>) in the credential form in the UI",
+        "The output does NOT suggest hardcoding the token in the URL or body",
+        "The output does NOT recommend httpBasicAuth (which is for username:password, not bearer tokens)",
+        "The output provides a full working JSON example combining parameters + credentials blocks",
+        "The output uses a descriptive credential name (not 'credential1' or 'auth')"
+      ]
+    },
+    {
+      "id": 3,
+      "eval_name": "unknown-credential-lookup-process",
+      "prompt": "I'm adding a HubSpot node to my workflow but I don't remember what the credential key is called in n8n's workflow JSON. How should I figure it out? What's the process for finding credential keys for nodes that aren't in common reference tables?",
+      "expected_output": "Walk through the lookup decision tree: (1) check the common credential table, (2) if not listed, use get_node('nodes-base.hubspot', detail: 'standard') via MCP — the response contains a credentials field listing the expected key names, (3) if that's unclear, use search_templates('hubspot') to see a real working example's credentials block, (4) last resort: n8n docs. Also mention that HubSpot specifically uses hubspotApi.",
+      "files": [],
+      "expectations": [
+        "The output describes a multi-step lookup process (not a single guess)",
+        "The output mentions using the get_node MCP tool with detail level 'standard'",
+        "The output notes the nodeType format 'nodes-base.hubspot' (for get_node, NOT 'n8n-nodes-base.hubspot')",
+        "The output mentions search_templates as a fallback to find real credential blocks from working templates",
+        "The output notes that the get_node response includes a credentials field listing expected key names",
+        "The output mentions checking a static reference table before making MCP calls (efficiency)",
+        "The output does NOT suggest guessing a key name based on conventions alone",
+        "The output does NOT invent a fake credential key like 'hubspotOAuth' without verifying"
+      ]
+    }
+  ]
+}

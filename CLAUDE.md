@@ -99,8 +99,6 @@ These skills complement the build process for specific problem domains:
 | Skill | When to use |
 |-------|-------------|
 | `n8n-credentials-expert` | Credential key names, OAuth vs API key patterns, placeholder conventions, fixing credential validation errors |
-| `n8n-runtime-diagnostics` | Debugging runtime failures (401, 429, ECONNREFUSED, expression errors, timeouts). Use when `/n8n-test` or `/n8n-logs` shows execution errors. |
-| `n8n-performance-patterns` | Batching, rate limits, timeouts, sub-workflow orchestration. Use when building workflows that process 100+ items or call rate-limited APIs. |
 
 ---
 

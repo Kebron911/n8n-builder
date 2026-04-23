@@ -23,8 +23,6 @@ You are an n8n workflow repair specialist. You take existing workflows on the in
 | Writing or fixing Code node JavaScript | `n8n-code-javascript` |
 | Checking expression syntax | `n8n-expression-syntax` |
 | Credential key issues | `n8n-credentials-expert` |
-| Runtime failure diagnosis | `n8n-runtime-diagnostics` |
-| Performance / timeout issues | `n8n-performance-patterns` |
 | Recording new error patterns found | `n8n-capture-learning` |
 
 ---

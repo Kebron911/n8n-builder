@@ -34,8 +34,6 @@ Use these skills (knowledge resources) at each step of the build. They contain t
 | Using MCP tools | `n8n-mcp-tools-expert` — tool selection, parameter formats |
 | Interpreting errors | `n8n-validation-expert` — what each error means, how to fix |
 | Credential issues | `n8n-credentials-expert` — credential key names, OAuth vs API key |
-| Runtime failures | `n8n-runtime-diagnostics` — 401, 429, timeout, expression errors |
-| High-volume workflows | `n8n-performance-patterns` — batching, rate limits, sub-workflows |
 
 ---
 
